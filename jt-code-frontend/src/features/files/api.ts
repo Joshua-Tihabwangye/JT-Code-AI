@@ -1,38 +1,57 @@
-import type { AxiosInstance } from 'axios';
-import type { Asset, CloudinarySignature, CloudinaryUploadResponse } from '@/features/files/types';
-import type { Paginated } from '@/lib/api/types';
+import { useApiClient } from '@/lib/api/client';
 
-export async function listAssets(client: AxiosInstance): Promise<Asset[]> {
-  const { data } = await client.get<Paginated<Asset> | Asset[]>('/files/');
-  return Array.isArray(data) ? data : data.results;
+export interface Asset {
+  id: string;
+  original_filename: string;
+  secure_url: string;
+  resource_type: string;
+  format?: string;
+  bytes: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export async function uploadAsset(client: AxiosInstance, file: File): Promise<Asset> {
-  const { data: signature } = await client.post<CloudinarySignature>('/files/signature/', {
-    originalFilename: file.name,
-    contentType: file.type || 'application/octet-stream',
-    bytes: file.size,
+export async function listAssets(client: ReturnType<typeof useApiClient>) {
+  const response = await client.get<{ results: Asset[] }>('/assets/');
+  return response.data;
+}
+
+export async function uploadAsset(client: ReturnType<typeof useApiClient>, file: File) {
+  // First get signed upload URL
+  const signResponse = await client.post<{ upload_url: string; fields: Record<string, string> }>('/assets/signature/', {
+    filename: file.name,
+    content_type: file.type,
   });
 
-  const form = new FormData();
-  form.append('file', file);
-  form.append('api_key', signature.apiKey);
-  form.append('timestamp', String(signature.timestamp));
-  form.append('signature', signature.signature);
-  form.append('folder', signature.folder);
+  const { upload_url, fields } = signResponse.data;
 
-  const uploadResponse = await fetch(signature.uploadUrl, { method: 'POST', body: form });
-  if (!uploadResponse.ok) throw new Error(`Cloudinary upload failed (${uploadResponse.status}).`);
-  const uploaded = await uploadResponse.json() as CloudinaryUploadResponse;
+  // Upload directly to Cloudinary
+  const formData = new FormData();
+  Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
+  formData.append('file', file);
 
-  const { data } = await client.post<Asset>('/files/complete/', {
-    publicId: uploaded.public_id,
-    secureUrl: uploaded.secure_url,
-    resourceType: uploaded.resource_type,
-    format: uploaded.format ?? '',
-    bytes: uploaded.bytes,
-    version: uploaded.version,
-    originalFilename: uploaded.original_filename || file.name,
-  }, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
-  return data;
+  await fetch(upload_url, {
+    method: 'POST',
+    body: formData,
+  });
+
+  // Complete the upload
+  const completeResponse = await client.post<Asset>('/assets/complete/', {
+    public_id: fields.key,
+  });
+
+  return completeResponse.data;
+}
+
+export async function signAssetUpload(client: ReturnType<typeof useApiClient>, file: File) {
+  const response = await client.post<{ upload_url: string; fields: Record<string, string> }>('/assets/signature/', {
+    filename: file.name,
+    content_type: file.type,
+  });
+  return response.data;
+}
+
+export async function deleteAsset(client: ReturnType<typeof useApiClient>, assetId: string) {
+  await client.delete(`/assets/${assetId}/`);
 }

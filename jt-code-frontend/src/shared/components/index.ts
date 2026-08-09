@@ -6,3 +6,8 @@ export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 export { Modal } from './Modal';
 export { Spinner } from './Spinner';
 export { Alert } from './Alert';
+export { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel } from './Dropdown';
+export { Avatar, AvatarImage, AvatarFallback } from './Avatar';
+export { Badge } from './Badge';
+export { Separator } from './Separator';
+export { ScrollArea } from './ScrollArea';

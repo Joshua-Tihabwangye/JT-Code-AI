@@ -1,56 +1,80 @@
-import type { AxiosInstance } from 'axios';
-import type { ChatRequest, ChatStreamEvent, Conversation } from '@/features/chat/types';
+import { useApiClient } from '@/lib/api/client';
 
-export async function createConversation(client: AxiosInstance, title = 'New conversation'): Promise<Conversation> {
-  const { data } = await client.post<Conversation>('/conversations/', { title });
-  return data;
+export interface Conversation {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export async function createChatRequest(client: AxiosInstance, payload: {
-  conversationId: string;
-  chatInput: string;
-  timezone: string;
-  locale: string;
-}): Promise<ChatRequest> {
-  const { data } = await client.post<ChatRequest>('/chat/requests/', payload, {
-    headers: { 'Idempotency-Key': crypto.randomUUID() },
-  });
-  return data;
+export interface Message {
+  id: string;
+  role: string;
+  content: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface ChatRequest {
+  id: string;
+  conversation_id: string;
+  status: string;
+  input_text: string;
+  output_text?: string;
+  error_code?: string;
+  trace_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getConversations(client: ReturnType<typeof useApiClient>) {
+  const response = await client.get<{ results: Conversation[] }>('/conversations/');
+  return response.data;
+}
+
+export async function createConversation(client: ReturnType<typeof useApiClient>) {
+  const response = await client.post<Conversation>('/conversations/', { title: 'New conversation' });
+  return response.data;
+}
+
+export async function createChatRequest(
+  client: ReturnType<typeof useApiClient>,
+  data: { conversationId: string; chatInput: string; timezone: string; locale: string }
+) {
+  const response = await client.post<ChatRequest>('/conversations/chat/', data);
+  return response.data;
 }
 
 export async function streamChatRequest(
-  client: AxiosInstance,
+  client: ReturnType<typeof useApiClient>,
   requestId: string,
-  onEvent: (event: ChatStreamEvent) => void,
-  signal?: AbortSignal,
-): Promise<void> {
-  const response = await client.get<ReadableStream<Uint8Array>>(`/chat/requests/${requestId}/stream/`, {
+  onEvent: (event: { type: string; data: unknown }) => void
+) {
+  const response = await client.get<ReadableStream>(`/conversations/chat/${requestId}/stream/`, {
     responseType: 'stream',
-    adapter: 'fetch',
-    signal,
   });
 
-  const stream = response.data;
-  if (!(stream instanceof ReadableStream)) throw new Error('Streaming is not supported by this browser.');
-
-  const reader = stream.getReader();
+  const reader = response.data.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
 
   while (true) {
-    const { value, done } = await reader.read();
+    const { done, value } = await reader.read();
     if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const frames = buffer.split('\n\n');
-    buffer = frames.pop() ?? '';
 
-    for (const frame of frames) {
-      const eventLine = frame.split('\n').find((line) => line.startsWith('event:'));
-      const dataLine = frame.split('\n').find((line) => line.startsWith('data:'));
-      if (!dataLine) continue;
-      const type = (eventLine?.slice(6).trim() ?? 'status') as ChatStreamEvent['type'];
-      const data = JSON.parse(dataLine.slice(5).trim()) as ChatStreamEvent['data'];
-      onEvent({ type, data });
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        try {
+          const event = JSON.parse(line.slice(6));
+          onEvent(event);
+        } catch {
+          // Ignore parse errors
+        }
+      }
     }
   }
 }

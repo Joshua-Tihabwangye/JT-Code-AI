@@ -6,11 +6,20 @@ export interface ModalProps extends HTMLAttributes<HTMLDivElement> {
   onClose: () => void;
   title?: string;
   description?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
 export const Modal = forwardRef<HTMLDivElement, ModalProps>(
-  ({ className, isOpen, onClose, title, description, children, ...props }, ref) => {
+  ({ className, isOpen, onClose, title, description, size = 'md', children, ...props }, ref) => {
     if (!isOpen) return null;
+
+    const sizes = {
+      sm: 'max-w-sm',
+      md: 'max-w-lg',
+      lg: 'max-w-2xl',
+      xl: 'max-w-4xl',
+      full: 'max-w-[90vw]',
+    };
 
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -23,7 +32,8 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
           <div
             ref={ref}
             className={clsx(
-              'relative w-full max-w-lg rounded-lg bg-background p-6 shadow-lg transition-all',
+              'relative w-full rounded-lg bg-background p-6 shadow-lg transition-all',
+              sizes[size],
               className
             )}
             {...props}

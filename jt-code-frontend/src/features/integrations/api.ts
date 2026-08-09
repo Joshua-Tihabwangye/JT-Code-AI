@@ -24,12 +24,12 @@ export interface ConnectorAccount {
 
 export async function listConnectors(client: ReturnType<typeof useApiClient>) {
   const response = await client.get<{ results: Connector[] }>('/integrations/connectors/');
-  return response.data;
+  return response.data.results;
 }
 
 export async function listConnectorAccounts(client: ReturnType<typeof useApiClient>) {
   const response = await client.get<{ results: ConnectorAccount[] }>('/integrations/accounts/');
-  return response.data;
+  return response.data.results;
 }
 
 export async function createConnectorAccount(

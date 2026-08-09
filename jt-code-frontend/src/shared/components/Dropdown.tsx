@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type HTMLAttributes } from 'react';
 import { clsx } from 'clsx';
 
-interface DropdownProps extends HTMLAttributes<HTMLDivElement> {
+interface DropdownProps extends Omit<HTMLAttributes<HTMLDivElement>, 'content'> {
   trigger: React.ReactNode;
   content: React.ReactNode;
   align?: 'left' | 'right';

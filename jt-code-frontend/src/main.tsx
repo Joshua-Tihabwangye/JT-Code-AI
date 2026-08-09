@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
-import { ClerkProvider } from '@clerk/clerk-react';
+import { ClerkProvider } from '@clerk/react';
 import { App } from '@/app/App';
 import { AppProviders } from '@/app/providers/AppProviders';
 import { initializeSentry } from '@/lib/sentry';

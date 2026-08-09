@@ -1,35 +1,14 @@
 import { useApiClient } from '@/lib/api/client';
+import type { Conversation, ChatRequest } from './types';
 
-export interface Conversation {
-  id: string;
-  title: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Message {
-  id: string;
-  role: string;
-  content: string;
-  metadata?: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface ChatRequest {
-  id: string;
-  conversation_id: string;
-  status: string;
-  input_text: string;
-  output_text?: string;
-  error_code?: string;
-  trace_id?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export async function getConversations(client: ReturnType<typeof useApiClient>) {
-  const response = await client.get<{ results: Conversation[] }>('/conversations/');
-  return response.data;
+export async function getConversations(client: ReturnType<typeof useApiClient>): Promise<Conversation[]> {
+  const response = await client.get<{ results: Array<{ id: string; title: string; created_at: string; updated_at: string }> }>('/conversations/');
+  return response.data.results.map(c => ({
+    id: c.id,
+    title: c.title,
+    createdAt: c.created_at,
+    updatedAt: c.updated_at,
+  }));
 }
 
 export async function createConversation(client: ReturnType<typeof useApiClient>) {

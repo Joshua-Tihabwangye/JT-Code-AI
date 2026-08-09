@@ -1,4 +1,4 @@
-import { ApiError, PaginatedResponse, SelectOption, LoadingState, BaseEntity, createUUID } from '../shared/types';
+import { ApiError, PaginatedResponse, SelectOption, LoadingState, BaseEntity, createUUID } from './index';
 
 describe('shared types', () => {
   describe('ApiError', () => {
@@ -38,8 +38,8 @@ describe('shared types', () => {
         { value: 'a', label: 'Option A' },
         { value: 'b', label: 'Option B', disabled: true },
       ];
-      expect(options[0].disabled).toBeUndefined();
-      expect(options[1].disabled).toBe(true);
+      expect(options[0]!.disabled).toBeUndefined();
+      expect(options[1]!.disabled).toBe(true);
     });
   });
 

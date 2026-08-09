@@ -1,4 +1,5 @@
-import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react';
+import { Button } from '@/shared/components';
 
 export function Header() {
   return (
@@ -6,16 +7,16 @@ export function Header() {
       <div className="flex items-center gap-4">
         <Show when="signed-out">
           <div className="flex items-center gap-2">
-            <SignInButton mode="modal" className="button ghost text-sm">
-              Sign In
+            <SignInButton mode="modal">
+              <Button variant="ghost" size="sm">Sign In</Button>
             </SignInButton>
-            <SignUpButton mode="modal" className="button primary text-sm">
-              Get Started
+            <SignUpButton mode="modal">
+              <Button variant="primary" size="sm">Get Started</Button>
             </SignUpButton>
           </div>
         </Show>
         <Show when="signed-in">
-          <UserButton showName afterSignOutUrl="/" />
+          <UserButton showName />
         </Show>
       </div>
     </header>

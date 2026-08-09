@@ -55,7 +55,7 @@ export async function updateOrganization(
 
 export async function getConsents(client: ReturnType<typeof useApiClient>) {
   const response = await client.get<{ results: ConsentRecord[] }>('/settings/consents/');
-  return response.data;
+  return response.data.results;
 }
 
 export async function updateConsent(

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react_query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { listDocuments, createDocument, renderDocument } from '@/features/documents/api';
-import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal, Tabs, TabsList, TabsTrigger, TabsContent, Dropdown, DropdownItem } from '@/shared/components';
+import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal, Tabs, TabsList, TabsTrigger, TabsContent, Dropdown, DropdownItem, DropdownSeparator } from '@/shared/components';
 import { formatDate } from '@/shared/utils';
 
 export function DocumentsPage() {

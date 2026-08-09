@@ -39,6 +39,7 @@ export function FilesPage() {
     try {
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
+        if (!file) continue;
         await uploadAsset(client, file);
         setUploadProgress(((i + 1) / selectedFiles.length) * 100);
       }

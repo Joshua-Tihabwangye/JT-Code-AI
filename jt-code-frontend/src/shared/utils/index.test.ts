@@ -1,4 +1,4 @@
-import { cn, formatDate, formatDateTime, truncate, generateId, sleep, classNames } from '../shared/utils';
+import { cn, formatDate, formatDateTime, truncate, generateId, sleep, classNames, formatBytes } from './index';
 
 describe('cn', () => {
   it('joins class names', () => {

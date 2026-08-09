@@ -3,9 +3,10 @@ import { useState, type FormEvent } from 'react';
 interface Props {
   disabled?: boolean;
   onSubmit: (text: string) => Promise<void>;
+  placeholder?: string;
 }
 
-export function ChatComposer({ disabled = false, onSubmit }: Props) {
+export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT-Code anything…' }: Props) {
   const [text, setText] = useState('');
 
   async function submit(event: FormEvent) {
@@ -23,7 +24,7 @@ export function ChatComposer({ disabled = false, onSubmit }: Props) {
         id="jt-code-prompt"
         value={text}
         onChange={(event) => setText(event.target.value)}
-        placeholder="Ask JT-Code anything…"
+        placeholder={placeholder}
         rows={3}
         disabled={disabled}
         onKeyDown={(event) => {

@@ -35,7 +35,7 @@ export interface Usage {
 
 export async function getPlans(client: ReturnType<typeof useApiClient>) {
   const response = await client.get<{ results: Plan[] }>('/billing/plans/');
-  return response.data;
+  return response.data.results;
 }
 
 export async function getSubscription(client: ReturnType<typeof useApiClient>) {

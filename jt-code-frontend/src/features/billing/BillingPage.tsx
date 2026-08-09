@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { getPlans, getSubscription, getWallet, getUsage, topupCredits } from '@/features/billing/api';
-import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Input } from '@/shared/components';
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Input, Modal } from '@/shared/components';
 import { formatDate, formatBytes, cn } from '@/shared/utils';
 
 export function BillingPage() {

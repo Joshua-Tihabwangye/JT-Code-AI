@@ -10,7 +10,7 @@ import {
   ROUTES,
   BREAKPOINTS,
   ANIMATION_DURATION,
-} from '../shared/constants';
+} from './index';
 
 describe('constants', () => {
   describe('APP_NAME & APP_VERSION', () => {

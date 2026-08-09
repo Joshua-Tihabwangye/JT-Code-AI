@@ -14,7 +14,7 @@ export interface Asset {
 
 export async function listAssets(client: ReturnType<typeof useApiClient>) {
   const response = await client.get<{ results: Asset[] }>('/assets/');
-  return response.data;
+  return response.data.results;
 }
 
 export async function uploadAsset(client: ReturnType<typeof useApiClient>, file: File) {

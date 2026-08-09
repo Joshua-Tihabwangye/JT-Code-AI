@@ -11,3 +11,5 @@ export { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 export { Badge } from './Badge';
 export { Separator } from './Separator';
 export { ScrollArea } from './ScrollArea';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
+export { Switch } from './Switch';

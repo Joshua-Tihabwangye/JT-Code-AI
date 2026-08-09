@@ -2,13 +2,14 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { clsx } from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'default';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  asChild?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, disabled, children, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', isLoading, disabled, children, asChild, ...props }, ref) => {
     const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
     
     const variants = {
@@ -17,6 +18,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
       ghost: 'hover:bg-accent hover:text-accent-foreground',
       destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+      default: 'bg-primary text-primary-foreground hover:bg-primary/90',
     };
     
     const sizes = {
@@ -25,8 +27,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       lg: 'h-11 px-8 text-lg',
     };
 
+    const Comp = asChild ? 'span' : 'button';
+
     return (
-      <button
+      <Comp
         ref={ref}
         className={clsx(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled || isLoading}
@@ -39,7 +43,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </svg>
         )}
         {children}
-      </button>
+      </Comp>
     );
   }
 );

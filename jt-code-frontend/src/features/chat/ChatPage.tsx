@@ -4,7 +4,7 @@ import { ChatComposer } from '@/features/chat/ChatComposer';
 import { createChatRequest, createConversation, streamChatRequest, getConversations } from '@/features/chat/api';
 import { Button, ScrollArea, Avatar, Badge, Dropdown, DropdownItem } from '@/shared/components';
 import type { ChatRequest, Conversation } from '@/features/chat/types';
-import { MessageRole, CHAT_REQUEST_STATUS } from '@/shared/constants';
+import { MESSAGE_ROLES, CHAT_REQUEST_STATUS } from '@/shared/constants';
 
 interface LocalMessage {
   id: string;
@@ -49,7 +49,7 @@ export function ChatPage() {
   async function loadConversations() {
     try {
       const data = await getConversations(client);
-      setConversations(data.results || []);
+      setConversations(data || []);
     } catch (error) {
       console.error('Failed to load conversations:', error);
     }
@@ -80,7 +80,8 @@ export function ChatPage() {
         setMessages((current) => current.map((message) => {
           if (message.id !== assistantId) return message;
           if (type === 'failed') {
-            return { ...message, content: data.message ?? 'The request failed.', status: 'error' };
+            const errorData = data as { message?: string };
+            return { ...message, content: errorData.message ?? 'The request failed.', status: 'error' };
           }
           const updated = data as Partial<ChatRequest>;
           return { ...message, content: updated.outputText || `Status: ${updated.status ?? 'running'}…`, status: 'streaming' };

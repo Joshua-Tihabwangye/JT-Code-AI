@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/react';
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 import * as Sentry from '@sentry/react';

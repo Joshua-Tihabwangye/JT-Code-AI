@@ -14,7 +14,7 @@ interface GeneratedImage {
 
 export function ImagePlaygroundPage() {
   const client = useApiClient();
-  const [activeTab, setActiveTab] = useState<'generate' | 'understand' | 'edit'>('generate');
+  const [activeTab, setActiveTab] = useState<string>('generate');
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [model, setModel] = useState('gpt-image-1');
@@ -379,8 +379,8 @@ export function ImagePlaygroundPage() {
                 <CardTitle>Edited Image</CardTitle>
               </CardHeader>
               <CardContent>
-                {generatedImages.length > 0 && generatedImages[0].prompt.startsWith('Edit:') ? (
-                  <img src={generatedImages[0].url} alt="Edited" className="w-full aspect-square object-cover rounded-lg" />
+                {generatedImages.length > 0 && generatedImages[0]?.prompt.startsWith('Edit:') ? (
+                  <img src={generatedImages[0]!.url} alt="Edited" className="w-full aspect-square object-cover rounded-lg" />
                 ) : (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>Upload an image, describe the edit, and click Edit</p>

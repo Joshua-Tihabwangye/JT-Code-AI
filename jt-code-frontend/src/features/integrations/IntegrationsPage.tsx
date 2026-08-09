@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react_query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { listConnectors, listConnectorAccounts, createConnectorAccount, testConnectorAccount } from '@/features/integrations/api';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal, Input } from '@/shared/components';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react_query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { getUserProfile, updateUserProfile, getOrganization, updateOrganization, getConsents, updateConsent } from '@/features/settings/api';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle, Alert, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Switch } from '@/shared/components';
@@ -8,7 +8,7 @@ import { formatDate } from '@/shared/utils';
 export function SettingsPage() {
   const client = useApiClient();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'profile' | 'organization' | 'billing' | 'integrations' | 'privacy'>('profile');
+  const [activeTab, setActiveTab] = useState<string>('profile');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 

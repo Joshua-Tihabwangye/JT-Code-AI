@@ -1,3 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #050b14;
+  --color-foreground: #edf5ff;
+  --color-card: #0a1422;
+  --color-card-foreground: #edf5ff;
+  --color-primary: #1687ff;
+  --color-primary-foreground: #03101f;
+  --color-secondary: #0e1c2e;
+  --color-secondary-foreground: #edf5ff;
+  --color-muted: #0a1422;
+  --color-muted-foreground: #9fb0c4;
+  --color-accent: #0e1c2e;
+  --color-accent-foreground: #edf5ff;
+  --color-destructive: #ff6b75;
+  --color-destructive-foreground: #03101f;
+  --color-border: #1f344c;
+  --color-input: #1f344c;
+  --color-ring: #1687ff;
+  --color-popover: #0a1422;
+  --color-popover-foreground: #edf5ff;
+}
+
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #edf5ff;
@@ -73,3 +97,216 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
   .composer { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+
+/* Clerk Auth Custom Styles */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  padding: 1.25rem clamp(1rem, 4vw, 4rem) 4rem;
+}
+
+.auth-root {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-card {
+  background: rgba(10, 20, 34, 0.92) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(22, 135, 255, 0.1) !important;
+  backdrop-filter: blur(16px);
+  padding: 2.5rem !important;
+}
+
+.auth-title {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  color: var(--text) !important;
+  margin-bottom: 0.5rem !important;
+  text-align: center;
+}
+
+.auth-subtitle {
+  color: var(--muted) !important;
+  font-size: 1rem !important;
+  text-align: center !important;
+  margin-bottom: 2rem !important;
+}
+
+.auth-button-primary {
+  background: var(--azure) !important;
+  color: #03101f !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  padding: 0.85rem 1.5rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  width: 100% !important;
+  transition: background 0.2s, transform 0.1s !important;
+}
+
+.auth-button-primary:hover {
+  background: #2a94ff !important;
+  transform: translateY(-1px);
+}
+
+.auth-button-primary:active {
+  transform: translateY(0);
+}
+
+.auth-button-primary:focus-visible {
+  outline: 3px solid #79baff !important;
+  outline-offset: 2px !important;
+}
+
+.auth-footer {
+  text-align: center !important;
+  margin-top: 1.5rem !important;
+  color: var(--muted) !important;
+}
+
+.auth-footer-link {
+  color: var(--azure) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.auth-footer-link:hover {
+  text-decoration: underline !important;
+}
+
+.auth-divider {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin: 1.5rem 0 !important;
+  color: var(--border) !important;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '' !important;
+  flex: 1 !important;
+  height: 1px !important;
+  background: var(--border) !important;
+}
+
+.auth-divider-label {
+  color: var(--muted) !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  font-weight: 700 !important;
+}
+
+.auth-social-block {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.auth-social-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.75rem !important;
+  background: var(--panel-2) !important;
+  color: var(--text) !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  transition: background 0.2s, border-color 0.2s !important;
+}
+
+.auth-social-button:hover {
+  background: rgba(22, 135, 255, 0.1) !important;
+  border-color: var(--azure) !important;
+}
+
+.auth-social-icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+.auth-social-text {
+  font-size: 0.95rem !important;
+}
+
+/* Input field overrides */
+.auth-card input[type="email"],
+.auth-card input[type="password"],
+.auth-card input[type="text"] {
+  background: var(--bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.75rem !important;
+  color: var(--text) !important;
+  padding: 0.85rem 1rem !important;
+  font-size: 1rem !important;
+  width: 100% !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.auth-card input[type="email"]:focus,
+.auth-card input[type="password"]:focus,
+.auth-card input[type="text"]:focus {
+  border-color: var(--azure) !important;
+  box-shadow: 0 0 0 3px rgba(22, 135, 255, 0.15) !important;
+  outline: none !important;
+}
+
+.auth-card input::placeholder {
+  color: var(--muted) !important;
+  opacity: 0.7 !important;
+}
+
+/* Label styles */
+.auth-card label {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+/* Error messages */
+.auth-card .cl-formFieldError {
+  color: var(--danger) !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.4rem !important;
+}
+
+/* Checkbox */
+.auth-card input[type="checkbox"] {
+  accent-color: var(--azure) !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+}
+
+/* Links inside card */
+.auth-card a {
+  color: var(--azure) !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+}
+
+.auth-card a:hover {
+  text-decoration: underline !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.5rem !important;
+  }
+  .auth-title {
+    font-size: 1.5rem !important;
+  }
+}

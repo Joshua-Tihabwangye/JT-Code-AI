@@ -4,6 +4,7 @@ import { useApiClient } from '@/lib/api/client';
 import { listDocuments, createDocument, renderDocument } from '@/features/documents/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal, Tabs, TabsList, TabsTrigger, TabsContent, Dropdown, DropdownItem, DropdownSeparator } from '@/shared/components';
 import { formatDate } from '@/shared/utils';
+import { Plus, FileText, MoreVertical, Download } from 'lucide-react';
 
 export function DocumentsPage() {
   const client = useApiClient();
@@ -46,11 +47,12 @@ export function DocumentsPage() {
     <section className="workspace">
       <header className="workspace-header">
         <div>
-          <p className="eyebrow">DOCUMENTS</p>
+          <p className="eyebrow">Documents</p>
           <h1>Documents</h1>
+          <p className="text-sm text-muted-foreground mt-1">Create, organize, and understand documents with JT-Code.</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
-          <span>➕</span> New Document
+          <Plus size={16} className="mr-2" /> New Document
         </Button>
       </header>
 
@@ -69,15 +71,20 @@ export function DocumentsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {documents.data?.results?.map((doc) => (
-            <Card key={doc.id}>
+            <Card key={doc.id} className="group hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle>{doc.title}</CardTitle>
-                    <Badge variant="outline" className="mt-1">{doc.template}</Badge>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-secondary text-secondary-foreground">
+                      <FileText size={18} />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">{doc.title}</CardTitle>
+                      <Badge variant="outline" className="mt-1 text-xs">{doc.template}</Badge>
+                    </div>
                   </div>
                   <Dropdown
-                    trigger={<Button variant="ghost" size="sm">⋮</Button>}
+                    trigger={<Button variant="ghost" size="sm"><MoreVertical size={16} /></Button>}
                     content={
                       <>
                         <DropdownItem onClick={() => setShowRenderDialog(doc.id)}>Render</DropdownItem>
@@ -91,21 +98,25 @@ export function DocumentsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{doc.content || 'No content'}</p>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Created: {formatDate(doc.created_at)}</span>
-                  <span className="text-muted-foreground">Updated: {formatDate(doc.updated_at)}</span>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{doc.content || 'No content'}</p>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Created: {formatDate(doc.created_at)}</span>
+                  <span>Updated: {formatDate(doc.updated_at)}</span>
                 </div>
               </CardContent>
             </Card>
           ))}
           {documents.data?.results?.length === 0 && (
             <Card className="col-span-full">
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="text-6xl mb-4">📄</div>
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="p-4 rounded-2xl bg-secondary text-secondary-foreground mb-4">
+                  <FileText size={40} />
+                </div>
                 <h3 className="text-lg font-semibold mb-2">No documents yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first document</p>
-                <Button onClick={() => setShowCreateDialog(true)}>New Document</Button>
+                <p className="text-muted-foreground mb-6 max-w-sm">Create your first document from a template and let JT-Code help you write, refine, or summarize it.</p>
+                <Button onClick={() => setShowCreateDialog(true)}>
+                  <Plus size={16} className="mr-2" /> New Document
+                </Button>
               </CardContent>
             </Card>
           )}

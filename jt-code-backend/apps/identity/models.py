@@ -9,6 +9,11 @@ class User(AbstractUser):
     email = models.EmailField(blank=True)
     display_name = models.CharField(max_length=255, blank=True)
     avatar_url = models.URLField(blank=True)
+    job_title = models.CharField(max_length=255, blank=True)
+    contact = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    timezone = models.CharField(max_length=100, blank=True)
+    bio = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

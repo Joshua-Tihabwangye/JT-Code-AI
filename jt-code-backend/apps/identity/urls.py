@@ -1,8 +1,9 @@
 from django.urls import path
-from apps.identity.views import MeView
+from apps.identity.views import MeView, SettingsProfileView
 from apps.identity.webhooks import clerk_webhook
 
 urlpatterns = [
     path('me/', MeView.as_view(), name='me'),
+    path('settings/profile/', SettingsProfileView.as_view(), name='settings-profile'),
     path('webhooks/clerk/', clerk_webhook, name='clerk-webhook'),
 ]

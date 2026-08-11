@@ -3,10 +3,16 @@ import { useApiClient } from '@/lib/api/client';
 export interface UserProfile {
   id: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
   email: string;
+  contact?: string;
+  country?: string;
   timezone: string;
   locale: string;
   avatar_url?: string;
+  job_title?: string;
+  bio?: string;
   clerk_user_id: string;
 }
 

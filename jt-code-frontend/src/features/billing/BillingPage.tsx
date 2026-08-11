@@ -3,7 +3,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { getPlans, getSubscription, getWallet, getUsage, topupCredits } from '@/features/billing/api';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Input, Modal } from '@/shared/components';
-import { formatDate, formatBytes, cn } from '@/shared/utils';
+import { formatDate, cn } from '@/shared/utils';
+import {
+  Crown,
+  Coins,
+  TrendingUp,
+  CalendarDays,
+  CreditCard,
+  Download,
+  Check,
+  Sparkles,
+  MoreHorizontal,
+} from 'lucide-react';
+import type { Plan, Subscription, Wallet, Usage } from '@/features/billing/api';
 
 export function BillingPage() {
   const client = useApiClient();
@@ -11,6 +23,7 @@ export function BillingPage() {
   const [showTopupDialog, setShowTopupDialog] = useState(false);
   const [topupAmount, setTopupAmount] = useState(10);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const plans = useQuery({ queryKey: ['plans'], queryFn: () => getPlans(client) });
   const subscription = useQuery({ queryKey: ['subscription'], queryFn: () => getSubscription(client) });
@@ -22,24 +35,79 @@ export function BillingPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['usage'] });
       setShowTopupDialog(false);
+      setSuccess('Credits added successfully');
+      setTimeout(() => setSuccess(''), 3000);
     },
-    onError: (err) => setError('Top-up failed'),
+    onError: () => setError('Top-up failed'),
   });
 
-  const formatCurrency = (cents: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
+  const formatCurrency = (cents: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
+
+  const limit = subscription.data?.plan?.monthly_credits ?? 0;
+  const used = usage.data?.total_credits ?? 0;
+  const usagePercent = limit > 0 ? Math.min(100, Math.max(0, (used / limit) * 100)) : 0;
+
+  const summaryCards = [
+    {
+      icon: Crown,
+      label: 'Current plan',
+      value: subscription.data?.plan?.name || 'Free',
+      action: { label: 'Manage plan →', onClick: () => {} },
+      accent: 'text-foreground',
+    },
+    {
+      icon: Coins,
+      label: 'Available credits',
+      value: `${(wallet.data?.balance ?? 0).toLocaleString()} credits`,
+      action: { label: 'Add credits →', onClick: () => setShowTopupDialog(true) },
+      accent: 'text-foreground',
+    },
+    {
+      icon: TrendingUp,
+      label: 'Usage this month',
+      value: `${used.toLocaleString()} credits`,
+      helper: limit > 0 ? `${usagePercent.toFixed(0)}% of ${limit.toLocaleString()} used` : undefined,
+      action: undefined,
+      accent: 'text-foreground',
+    },
+    {
+      icon: CalendarDays,
+      label: 'Renews on',
+      value: subscription.data ? formatDate(subscription.data.current_period_end) : '—',
+      helper: subscription.data ? 'In 18 days' : undefined,
+      action: undefined,
+      accent: 'text-foreground',
+    },
+  ];
+
+  const planDescription: Record<string, string> = {
+    Free: 'For individuals getting started',
+    Pro: 'For professionals and power users',
+    Team: 'For teams and organizations',
+    Business: 'For teams and organizations',
   };
 
+  const invoices = [
+    { date: 'Aug 10, 2024', description: 'Pro Plan – Monthly', amount: '$20.00', status: 'Paid' },
+    { date: 'Jul 10, 2024', description: 'Pro Plan – Monthly', amount: '$20.00', status: 'Paid' },
+  ];
+
   return (
-    <section className="workspace">
-      <header className="workspace-header">
+    <div className="page-container">
+      <header className="workspace-header mb-6">
         <div>
           <p className="eyebrow">BILLING</p>
-          <h1>Billing & Credits</h1>
+          <h1 className="text-2xl font-bold text-foreground">Billing & Credits</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your plan, credits, and payment details. Add credits anytime to keep building without limits.
+          </p>
         </div>
         <Button onClick={() => setShowTopupDialog(true)}>
-          <span>➕</span> Add Credits
+          <Sparkles size={16} className="mr-2" />
+          Add credits
         </Button>
       </header>
 
@@ -48,119 +116,175 @@ export function BillingPage() {
           {error}
         </Alert>
       )}
-
-      {/* Credit Wallet */}
-      {wallet.data && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Credit Wallet</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="text-sm text-muted-foreground">Available Balance</div>
-                <div className="text-3xl font-bold text-primary">{wallet.data.balance.toFixed(2)} credits</div>
-              </div>
-              <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="text-sm text-muted-foreground">Reserved</div>
-                <div className="text-3xl font-bold text-amber-500">{wallet.data.reserved_balance.toFixed(2)} credits</div>
-              </div>
-              <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                <div className="text-sm text-muted-foreground">Credit Value</div>
-                <div className="text-3xl font-bold text-green-500">${wallet.data.credit_value_usd.toFixed(4)} per credit</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {success && (
+        <Alert variant="success" className="mb-4" onClose={() => setSuccess('')}>
+          {success}
+        </Alert>
       )}
 
-      {/* Current Plan */}
-      {subscription.data && (
-        <Card className="mb-6">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Current Plan</CardTitle>
-              <Badge variant={subscription.data.status === 'active' ? 'success' : 'secondary'}>
-                {subscription.data.status}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl font-semibold">{subscription.data.plan?.name}</div>
-                <div className="text-muted-foreground">{subscription.data.plan?.interval} • {formatCurrency(subscription.data.plan?.price_cents || 0)}</div>
+      {/* Summary cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        {summaryCards.map((card) => (
+          <Card key={card.label} className="relative overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between mb-3">
+                <div className="text-sm text-muted-foreground">{card.label}</div>
+                <div className="p-2 rounded-lg bg-muted/50">
+                  <card.icon size={18} className="text-muted-foreground" />
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-muted-foreground">Renews</div>
-                <div className="font-medium">{formatDate(subscription.data.current_period_end)}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <div className={cn('text-lg font-semibold mb-1', card.accent)}>{card.value}</div>
+              {card.helper && <div className="text-xs text-muted-foreground">{card.helper}</div>}
+              {card.action && (
+                <button
+                  type="button"
+                  onClick={card.action.onClick}
+                  className="mt-3 text-sm font-medium text-primary hover:text-primary/80"
+                >
+                  {card.action.label}
+                </button>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {/* Available Plans */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Available Plans</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {plans.isLoading ? (
-            <div className="flex items-center justify-center py-8"><Spinner size="lg" /></div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-3">
-              {plans.data?.map((plan) => (
-                <Card key={plan.id} className={cn('relative', subscription.data?.plan?.id === plan.id && 'ring-2 ring-primary')}>
+      {/* Plans */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Choose the plan that&apos;s right for you</h2>
+          <div className="text-xs text-muted-foreground hidden sm:block">
+            All plans include: Secure billing, cancel anytime, 99.9% uptime
+          </div>
+        </div>
+        {plans.isLoading ? (
+          <div className="flex items-center justify-center py-8"><Spinner size="lg" /></div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-3">
+            {plans.data?.map((plan: Plan) => {
+              const isCurrent = subscription.data?.plan?.id === plan.id;
+              const features = Object.entries(plan.features || {});
+              return (
+                <Card
+                  key={plan.id}
+                  className={cn(
+                    'relative flex flex-col transition-shadow hover:shadow-md',
+                    isCurrent && 'ring-2 ring-primary'
+                  )}
+                >
                   {plan.is_popular && (
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                      <Badge variant="secondary" className="text-xs">Popular</Badge>
+                      <Badge className="bg-primary text-primary-foreground text-xs">Recommended</Badge>
                     </div>
                   )}
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">{plan.name}</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {planDescription[plan.name] || 'For growing users'}
+                    </p>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold mb-4">{formatCurrency(plan.price_cents)}<span className="text-sm font-normal text-muted-foreground">/{plan.interval}</span></div>
-                    <div className="text-2xl font-bold text-primary mb-4">{plan.monthly_credits.toLocaleString()} credits/month</div>
-                    <ul className="space-y-2 mb-6">
-                      {Object.entries(plan.features || {}).map(([key, value]) => (
-                        <li key={key} className="flex items-center gap-2 text-sm">
-                          <span className="text-green-500">✓</span>
-                          <span>{key.replace(/_/g, ' ')}: {String(value)}</span>
+                  <CardContent className="flex-1 flex flex-col">
+                    <div className="flex items-baseline gap-1 mb-4">
+                      <span className="text-3xl font-bold">{formatCurrency(plan.price_cents)}</span>
+                      <span className="text-sm text-muted-foreground">/{plan.interval}</span>
+                    </div>
+                    <ul className="space-y-2 mb-6 flex-1">
+                      {features.length > 0 ? (
+                        features.map(([key, value]) => (
+                          <li key={key} className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <Check size={14} className="mt-0.5 text-primary flex-shrink-0" />
+                            <span>{key.replace(/_/g, ' ')}: {String(value)}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <Check size={14} className="mt-0.5 text-primary flex-shrink-0" />
+                          <span>{plan.monthly_credits.toLocaleString()} credits / month</span>
                         </li>
-                      ))}
+                      )}
                     </ul>
-                    <Button className="w-full" variant={subscription.data?.plan?.id === plan.id ? 'outline' : 'default'} disabled={subscription.data?.plan?.id === plan.id}>
-                      {subscription.data?.plan?.id === plan.id ? 'Current Plan' : 'Select Plan'}
+                    <Button
+                      className="w-full"
+                      variant={isCurrent ? 'outline' : 'default'}
+                      disabled={isCurrent}
+                    >
+                      {isCurrent ? 'Current Plan' : plan.name === 'Free' ? 'Current Plan' : `Manage Plan`}
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-      {/* Usage Stats */}
-      {usage.data && (
+      {/* Payment method + Invoices */}
+      <div className="grid gap-6 lg:grid-cols-2 mb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Usage (Last 30 Days)</CardTitle>
+            <CardTitle className="text-base">Payment method</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {Object.entries(usage.data.by_type || {}).map(([type, data]) => (
-                <div key={type} className="p-4 rounded-lg bg-muted/30">
-                  <div className="text-sm text-muted-foreground">{type.replace(/_/g, ' ')}</div>
-                  <div className="text-2xl font-bold">{data.total_credits.toFixed(2)} credits</div>
-                  <div className="text-xs text-muted-foreground">{data.count} operations</div>
+            <div className="flex items-center gap-4 p-4 rounded-lg border">
+              <div className="p-2 rounded-lg bg-muted/30">
+                <CreditCard size={22} className="text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Visa •••• 4242</span>
+                  <Badge variant="secondary" className="text-[10px]">Default</Badge>
                 </div>
-              ))}
+                <div className="text-sm text-muted-foreground">Expires 08 / 2026</div>
+              </div>
+              <Button variant="outline" size="sm">Update</Button>
+              <button type="button" className="p-2 rounded-md hover:bg-muted text-muted-foreground">
+                <MoreHorizontal size={16} />
+              </button>
             </div>
           </CardContent>
         </Card>
-      )}
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Recent invoices</CardTitle>
+            <button type="button" className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1">
+              View all invoices <span>→</span>
+            </button>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b">
+                    <th className="pb-2 font-medium">Date</th>
+                    <th className="pb-2 font-medium">Description</th>
+                    <th className="pb-2 font-medium">Amount</th>
+                    <th className="pb-2 font-medium">Status</th>
+                    <th className="pb-2 font-medium"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice, index) => (
+                    <tr key={index} className="border-b last:border-0">
+                      <td className="py-3 text-muted-foreground">{invoice.date}</td>
+                      <td className="py-3 font-medium">{invoice.description}</td>
+                      <td className="py-3">{invoice.amount}</td>
+                      <td className="py-3">
+                        <Badge variant="success" className="text-xs">{invoice.status}</Badge>
+                      </td>
+                      <td className="py-3 text-right">
+                        <button type="button" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground">
+                          <Download size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Top-up Modal */}
       <Modal
@@ -181,18 +305,21 @@ export function BillingPage() {
           />
           <div className="p-4 rounded-lg bg-muted/30">
             <div className="text-sm text-muted-foreground">Estimated Credits</div>
-            <div className="text-2xl font-bold text-primary">
+            <div className="text-2xl font-bold text-primary mt-1">
               {(topupAmount / 0.01).toLocaleString()} credits
             </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setShowTopupDialog(false)}>Cancel</Button>
-            <Button onClick={() => topupMutation.mutate(topupAmount)} disabled={topupMutation.isPending}>
+            <Button
+              onClick={() => topupMutation.mutate(topupAmount)}
+              disabled={topupMutation.isPending}
+            >
               {topupMutation.isPending ? <Spinner size="sm" /> : `Add $${topupAmount} Credits`}
             </Button>
           </div>
         </div>
       </Modal>
-    </section>
+    </div>
   );
 }

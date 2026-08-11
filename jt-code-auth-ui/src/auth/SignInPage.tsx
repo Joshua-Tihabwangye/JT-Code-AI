@@ -2,11 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail } from 'lucide-react'
 import { useSignIn } from '@clerk/react'
-import AuthLayout from '@/auth/AuthLayout'
-import PasswordField from '@/auth/PasswordField'
-import EmailField from '@/auth/EmailField'
-import SocialButtons from '@/auth/SocialButtons'
-import { getClerkErrorMessage } from '@/auth/clerk-utils'
+import AuthLayout from './AuthLayout'
+import PasswordField from './PasswordField'
+import SocialButtons from './SocialButtons'
+import { getClerkErrorMessage } from './clerk-utils'
 
 type OAuthStrategy = 'oauth_google' | 'oauth_github'
 
@@ -89,24 +88,28 @@ export default function SignInPage() {
   return (
     <AuthLayout>
       <div className="auth-card auth-card--signin">
-{needsVerification ? (
+        {needsVerification ? (
           <>
             <div className="auth-card__heading">
-              <h2>Verify it's you</h2>
+              <h2>Verify it’s you</h2>
               <p>Enter the verification code Clerk sent to your email.</p>
             </div>
             <form onSubmit={verifyAdditionalStep} className="auth-form">
-              <EmailField
-                id="verification-code"
-                label="Verification code"
-                value={verificationCode}
-                onChange={setVerificationCode}
-                placeholder="Enter the 6-digit code"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                error={errors.fields.code?.message}
-              />
+              <div className="field-group">
+                <label htmlFor="verification-code">Verification code</label>
+                <div className="input-shell">
+                  <Mail size={18} className="input-shell__icon" />
+                  <input
+                    id="verification-code"
+                    value={verificationCode}
+                    onChange={(event) => setVerificationCode(event.target.value)}
+                    placeholder="Enter the 6-digit code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                  />
+                </div>
+              </div>
               {generalError && <div className="form-error">{generalError}</div>}
               <button className="primary-button" disabled={busy}>Verify</button>
               <button type="button" className="text-button" onClick={() => setNeedsVerification(false)}>
@@ -130,15 +133,22 @@ export default function SignInPage() {
             <div className="auth-divider"><span>or</span></div>
 
             <form onSubmit={handlePasswordSignIn} className="auth-form">
-              <EmailField
-                id="email"
-                label="Email address"
-                value={email}
-                onChange={setEmail}
-                placeholder="you@example.com"
-                autoComplete="email"
-                error={errors.fields.identifier?.message}
-              />
+              <div className="field-group">
+                <label htmlFor="email">Email address</label>
+                <div className={`input-shell ${errors.fields.identifier ? 'input-shell--error' : ''}`}>
+                  <Mail size={18} className="input-shell__icon" />
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+                {errors.fields.identifier && <p className="field-error">{errors.fields.identifier.message}</p>}
+              </div>
 
               <PasswordField
                 id="password"

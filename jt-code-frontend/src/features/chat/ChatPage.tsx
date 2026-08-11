@@ -1,11 +1,10 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
-import { ChatComposer } from '@/features/chat/ChatComposer';
-import { ChatBackground } from '@/features/chat/ChatBackground';
+import { useQuery } from '@tanstack/react-query';
+import { Plus, Send, Paperclip, Image as ImageIcon, FileText, X } from 'lucide-react';
 import { createChatRequest, createConversation, streamChatRequest, getConversations } from '@/features/chat/api';
-import { Button, ScrollArea, Avatar, Badge } from '@/shared/components';
+import { getSubscription } from '@/features/billing/api';
 import type { ChatRequest, Conversation } from '@/features/chat/types';
-import { Sparkles, Plus } from 'lucide-react';
 
 interface LocalMessage {
   id: string;
@@ -67,14 +66,24 @@ export function ChatPage() {
   const client = useApiClient();
   const conversationId = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<LocalMessage[]>([
-    { id: 'welcome', role: 'assistant', content: 'Hello! I am JT-Code. What are we building today?', status: 'complete' },
-  ]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [messages, setMessages] = useState<LocalMessage[]>([]);
+  const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [, setConversations] = useState<Conversation[]>([]);
-  const [showNewChat, setShowNewChat] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const documentInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const headline = useTypingText('What should we build today?', 160);
+  const subscription = useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => getSubscription(client),
+  });
+
+  const planLabel = subscription.data?.plan?.name
+    ? `${subscription.data.plan.name} plan`
+    : 'Free plan';
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -98,7 +107,9 @@ export function ChatPage() {
   }, [loadConversations]);
 
   async function send(text: string) {
+    if (!text.trim() || busy) return;
     setBusy(true);
+
     const userMessageId = crypto.randomUUID();
     setMessages((current) => [...current, { id: userMessageId, role: 'user', content: text, status: 'complete' }]);
 
@@ -120,167 +131,204 @@ export function ChatPage() {
       });
 
       await streamChatRequest(client, request.id, ({ type, data }) => {
-        setMessages((current) => current.map((message) => {
-          if (message.id !== assistantId) return message;
-          if (type === 'failed') {
-            const errorData = data as { message?: string };
-            return { ...message, content: errorData.message ?? 'The request failed.', status: 'error' };
-          }
-          const updated = data as Partial<ChatRequest>;
-          return { ...message, content: updated.outputText || `Status: ${updated.status ?? 'running'}…`, status: 'streaming' };
-        }));
+        setMessages((current) =>
+          current.map((message) => {
+            if (message.id !== assistantId) return message;
+            if (type === 'failed') {
+              const errorData = data as { message?: string };
+              return { ...message, content: errorData.message ?? 'The request failed.', status: 'error' };
+            }
+            const updated = data as Partial<ChatRequest>;
+            return {
+              ...message,
+              content: updated.outputText || (updated.status ? `Status: ${updated.status}…` : ''),
+              status: 'streaming',
+            };
+          })
+        );
       });
 
-      setMessages((current) => {
-        const updated: LocalMessage[] = current.map((message) =>
+      setMessages((current) =>
+        current.map((message) =>
           message.id === assistantId ? { ...message, status: 'complete' } : message
-        );
-        saveChatSession(updated, conversationId.current);
-        return updated;
-      });
+        )
+      );
     } catch (error) {
-      setMessages((current) => {
-        const updated: LocalMessage[] = current.map((message) =>
+      setMessages((current) =>
+        current.map((message) =>
           message.id === assistantId
             ? { ...message, content: apiErrorMessage(error), status: 'error' }
             : message
-        );
-        saveChatSession(updated, conversationId.current);
-        return updated;
-      });
+        )
+      );
     } finally {
       setBusy(false);
     }
   }
 
-  function handleNewChat() {
-    saveChatSession(messages, conversationId.current);
-    conversationId.current = null;
-    setMessages([
-      { id: 'welcome', role: 'assistant', content: 'Hello! I am JT-Code. What are we building today?', status: 'complete' },
-    ]);
-    setShowNewChat(false);
-  }
+  const handleSend = () => {
+    const value = input.trim();
+    if (!value || busy) return;
+    setInput('');
+    setAttachments([]);
+    send(value);
+  };
 
-  const isEmpty = messages.length <= 1;
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
-  return (
-    <section className="chat-workspace">
-      <ChatBackground />
+  const autoResize = () => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  };
 
-      {isEmpty ? (
-        <div className="chat-empty">
-          <div className="pointer-events-none absolute left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2 w-[520px] h-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_70%)] opacity-[0.08] dark:opacity-[0.18] blur-3xl" />
+  const handleAttach = (type: 'document' | 'image') => {
+    setShowAttachMenu(false);
+    if (type === 'document') {
+      documentInputRef.current?.click();
+    } else {
+      imageInputRef.current?.click();
+    }
+  };
 
-          <div className="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-sm text-secondary-foreground text-xs font-medium border border-border">
-            <Sparkles size={14} className="text-primary" />
-            AI-powered coding agent
-          </div>
+  const onFilesSelected = (files: FileList | null) => {
+    if (!files) return;
+    setAttachments((current) => [...current, ...Array.from(files)]);
+  };
 
-          <h1 className="chat-headline relative">
-            {headline.displayed}
-            {!headline.done && <span className="chat-cursor" />}
-          </h1>
+  const removeAttachment = (index: number) => {
+    setAttachments((current) => current.filter((_, i) => i !== index));
+  };
 
-          <p className="chat-subhead relative">
-            Ask JT-Code about code, architecture, research, documents, or anything else.
-          </p>
-
-          <div className="relative w-full max-w-[720px]">
-            <ChatComposer disabled={busy} onSubmit={send} placeholder="Message JT-Code…" />
-          </div>
-
-          <div className="relative flex flex-wrap items-center justify-center gap-2">
-            {['Refactor a function', 'Explain a codebase', 'Generate tests', 'Write documentation'].map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => void send(suggestion)}
-                className="px-3 py-1.5 text-xs rounded-full border border-border bg-card/80 backdrop-blur-sm hover:bg-secondary transition-colors text-muted-foreground"
-              >
-                {suggestion}
-              </button>
+  const composer = (
+    <div className="chat-input-container">
+      <div className="chat-input-wrapper">
+        {attachments.length > 0 && (
+          <div className="chat-attachments">
+            {attachments.map((file, index) => (
+              <span key={`${file.name}-${index}`} className="chat-attachment-chip">
+                {file.type.startsWith('image/') ? <ImageIcon size={12} /> : <FileText size={12} />}
+                <span className="truncate">{file.name}</span>
+                <button type="button" onClick={() => removeAttachment(index)} title="Remove">
+                  <X size={12} />
+                </button>
+              </span>
             ))}
           </div>
+        )}
+
+        <textarea
+          ref={textareaRef}
+          className="chat-input-field"
+          placeholder="Ask JT-Code..."
+          value={input}
+          onChange={(e) => {
+            setInput(e.target.value);
+            autoResize();
+          }}
+          onKeyDown={handleKeyDown}
+          disabled={busy}
+          rows={1}
+        />
+
+        <div className="chat-input-toolbar">
+          <div className="chat-input-toolbar-left">
+            <div className="chat-attach">
+              <button
+                type="button"
+                className="chat-input-icon"
+                title="Attach"
+                onClick={() => setShowAttachMenu((v) => !v)}
+              >
+                <Plus size={18} />
+              </button>
+              {showAttachMenu && (
+                <div className="chat-attach-menu">
+                  <button type="button" onClick={() => handleAttach('document')}>
+                    <Paperclip size={14} />
+                    Attach a document
+                  </button>
+                  <button type="button" onClick={() => handleAttach('image')}>
+                    <ImageIcon size={14} />
+                    Attach an image
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="chat-input-toolbar-center">
+            <span className="chat-plan-label">{planLabel}</span>
+          </div>
+
+          <div className="chat-input-toolbar-right">
+            <button
+              type="button"
+              className="chat-send-btn"
+              onClick={handleSend}
+              disabled={busy || !input.trim()}
+              title="Send message"
+            >
+              {busy ? '…' : <Send size={16} />}
+            </button>
+          </div>
         </div>
-      ) : (
+      </div>
+
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.txt,.md,.csv"
+        multiple
+        className="sr-only"
+        onChange={(e) => onFilesSelected(e.target.files)}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="sr-only"
+        onChange={(e) => onFilesSelected(e.target.files)}
+      />
+    </div>
+  );
+
+  return (
+    <div className="chat-page">
+      {messages.length > 0 ? (
         <>
-          <header className="relative z-10 flex items-center justify-between px-6 py-3 border-b border-border bg-card/70 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-foreground">
-                {conversationId.current ? 'Conversation' : 'New Chat'}
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">GPT-4o</Badge>
-              <Button variant="ghost" size="sm" onClick={() => setShowNewChat(true)}>
-                <Plus size={16} className="mr-1" /> New Chat
-              </Button>
-            </div>
-          </header>
-
-          <div className="chat-scroll">
-            <ScrollArea className="h-full">
-              <div className="message-list" aria-live="polite">
-                {messages.map((message) => (
-                  <article
-                    key={message.id}
-                    className={`message ${message.role} ${message.status ?? ''}`}
-                  >
-                    <div className="flex gap-3">
-                      <div className="relative flex-shrink-0">
-                        <Avatar
-                          size="sm"
-                          fallback={message.role === 'assistant' ? 'JT' : 'U'}
-                          className={message.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}
-                        />
-                        {message.role === 'assistant' && (
-                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_currentColor]" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="message-role">
-                            {message.role === 'assistant' ? 'JT-Code' : message.role === 'user' ? 'You' : message.role}
-                          </span>
-                          {message.status === 'streaming' && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                              Streaming...
-                            </span>
-                          )}
-                          {message.status === 'error' && (
-                            <Badge variant="destructive" className="text-xs">Error</Badge>
-                          )}
-                        </div>
-                        <p>{message.content}</p>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-                <div ref={messagesEndRef} />
+          <div className="chat-message-list">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`chat-message ${message.role} ${message.status}`}
+              >
+                {message.role === 'assistant' && <span className="role assistant">JT-Code</span>}
+                {message.role === 'user' && <span className="role user">You</span>}
+                <p>{message.content || '…'}</p>
               </div>
-            </ScrollArea>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
-
-          <div className="relative z-10 p-4 border-t border-border bg-card/70 backdrop-blur-sm">
-            <ChatComposer disabled={busy} onSubmit={send} placeholder={busy ? 'Processing...' : 'Message JT-Code...'} />
-          </div>
+          {composer}
         </>
-      )}
-
-      {showNewChat && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowNewChat(false)}>
-          <div className="w-full max-w-md rounded-xl bg-card text-card-foreground p-6 shadow-xl border border-border" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold mb-2">Start New Chat?</h2>
-            <p className="text-muted-foreground mb-6">Your current conversation will be saved. You can continue it later from the history.</p>
-            <div className="flex gap-3 justify-end">
-              <Button variant="ghost" onClick={() => setShowNewChat(false)}>Cancel</Button>
-              <Button onClick={handleNewChat}>New Chat</Button>
-            </div>
-          </div>
+      ) : (
+        <div className="chat-empty">
+          <h1 className="chat-headline">What should we build today?</h1>
+          <p className="chat-subhead">
+            Ask JT-Code about code, documents, research, or anything else.
+          </p>
+          {composer}
         </div>
       )}
-    </section>
+    </div>
   );
 }

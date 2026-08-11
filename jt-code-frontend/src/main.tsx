@@ -7,6 +7,7 @@ import { AppProviders } from '@/app/providers/AppProviders';
 import { initializeSentry } from '@/lib/sentry';
 import { config } from '@/lib/config';
 import '@/styles/global.css';
+import '@/auth/auth.css';
 
 initializeSentry();
 

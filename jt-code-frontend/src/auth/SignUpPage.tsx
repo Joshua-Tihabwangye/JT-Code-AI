@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Mail, UserRound } from 'lucide-react'
 import { useSignUp } from '@clerk/react'
-import AuthLayout from '@/auth/AuthLayout'
-import PasswordField from '@/auth/PasswordField'
-import EmailField from '@/auth/EmailField'
-import NameField from '@/auth/NameField'
-import VerificationCodeField from '@/auth/VerificationCodeField'
-import SocialButtons from '@/auth/SocialButtons'
-import { getClerkErrorMessage, splitFullName } from '@/auth/clerk-utils'
+import AuthLayout from './AuthLayout'
+import PasswordField from './PasswordField'
+import SocialButtons from './SocialButtons'
+import { getClerkErrorMessage, splitFullName } from './clerk-utils'
 
 type OAuthStrategy = 'oauth_google' | 'oauth_github'
 
@@ -126,15 +124,22 @@ export default function SignUpPage() {
               <p>Enter the verification code Clerk sent to {email}.</p>
             </div>
             <form onSubmit={verifyEmail} className="auth-form">
-              <VerificationCodeField
-                id="signup-code"
-                label="Verification code"
-                value={verificationCode}
-                onChange={setVerificationCode}
-                placeholder="Enter the 6-digit code"
-                autoComplete="one-time-code"
-                error={errors.fields.code?.message}
-              />
+              <div className="field-group">
+                <label htmlFor="signup-code">Verification code</label>
+                <div className="input-shell">
+                  <Mail size={18} className="input-shell__icon" />
+                  <input
+                    id="signup-code"
+                    value={verificationCode}
+                    onChange={(event) => setVerificationCode(event.target.value)}
+                    placeholder="Enter the 6-digit code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                  />
+                </div>
+                {errors.fields.code && <p className="field-error">{errors.fields.code.message}</p>}
+              </div>
               {generalError && <div className="form-error">{generalError}</div>}
               <button type="submit" className="primary-button" disabled={busy}>Verify email</button>
               <button
@@ -163,24 +168,37 @@ export default function SignUpPage() {
             <div className="auth-divider"><span>or</span></div>
 
             <form onSubmit={handleSignUp} className="auth-form auth-form--compact">
-              <NameField
-                id="full-name"
-                label="Full name"
-                value={fullName}
-                onChange={setFullName}
-                placeholder="Enter your full name"
-                autoComplete="name"
-              />
+              <div className="field-group">
+                <label htmlFor="full-name">Full name</label>
+                <div className="input-shell">
+                  <UserRound size={18} className="input-shell__icon" />
+                  <input
+                    id="full-name"
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    placeholder="Enter your full name"
+                    autoComplete="name"
+                    required
+                  />
+                </div>
+              </div>
 
-              <EmailField
-                id="signup-email"
-                label="Email address"
-                value={email}
-                onChange={setEmail}
-                placeholder="you@example.com"
-                autoComplete="email"
-                error={errors.fields.emailAddress?.message}
-              />
+              <div className="field-group">
+                <label htmlFor="signup-email">Email address</label>
+                <div className={`input-shell ${errors.fields.emailAddress ? 'input-shell--error' : ''}`}>
+                  <Mail size={18} className="input-shell__icon" />
+                  <input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+                {errors.fields.emailAddress && <p className="field-error">{errors.fields.emailAddress.message}</p>}
+              </div>
 
               <PasswordField
                 id="signup-password"

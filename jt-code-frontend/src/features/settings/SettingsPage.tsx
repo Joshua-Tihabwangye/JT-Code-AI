@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { useUser, useClerk } from '@clerk/react';
 import { useApiClient } from '@/lib/api/client';
 import { getUserProfile, updateUserProfile, getOrganization, updateOrganization, getConsents, updateConsent } from '@/features/settings/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Switch } from '@/shared/components';
@@ -24,6 +26,9 @@ import type { UserProfile, Organization, ConsentRecord } from '@/features/settin
 export function SettingsPage() {
   const client = useApiClient();
   const queryClient = useQueryClient();
+  const { resolvedTheme, setTheme } = useTheme();
+  const clerkUser = useUser();
+  const clerk = useClerk();
   const [activeTab, setActiveTab] = useState<string>('profile');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -59,7 +64,7 @@ export function SettingsPage() {
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<UserProfile>) => updateUserProfile(client, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       setSuccess('Profile updated successfully');
       setTimeout(() => setSuccess(''), 3000);
     },
@@ -373,10 +378,13 @@ export function SettingsPage() {
                       {updateOrgMutation.isPending ? 'Saving...' : 'Save Changes'}
                     </Button>
                   </div>
-                </form>
-              )}
-            </CardContent>
-          </Card>
+                  <div className="text-base font-semibold text-foreground">
+                    {clerkUser.user?.fullName || `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() || 'Your profile'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">{clerkUser.user?.primaryEmailAddress?.emailAddress}</div>
+                  <Badge variant="secondary" className="mt-2">{planName} plan</Badge>
+                </CardContent>
+              </Card>
 
           <Card className="mt-6">
             <CardHeader>
@@ -445,10 +453,18 @@ export function SettingsPage() {
                       </Button>
                     )}
                   </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                  <div className="flex items-center justify-between py-2 border-t border-border">
+                    <div className="flex items-center gap-3">
+                      <Trash2 size={18} className="text-destructive" />
+                      <div>
+                        <div className="font-medium text-sm text-destructive">Delete account</div>
+                        <div className="text-xs text-muted-foreground">Permanently delete your account and all data.</div>
+                      </div>
+                    </div>
+                    <Button variant="destructive" size="sm" onClick={() => { if (confirm('This will permanently delete your account and all data. Continue?')) alert('Account deletion request submitted.'); }}>Delete</Button>
+                  </div>
+                </CardContent>
+              </Card>
 
           <Card className="mt-6">
             <CardHeader>
@@ -474,11 +490,10 @@ export function SettingsPage() {
                       <div className="text-sm text-muted-foreground">Permanently delete your account and all data</div>
                     </div>
                   </div>
-                  <Button variant="destructive">Delete Account</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

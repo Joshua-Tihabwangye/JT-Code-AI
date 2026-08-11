@@ -21,6 +21,8 @@ export function BillingPage() {
   const client = useApiClient();
   const queryClient = useQueryClient();
   const [showTopupDialog, setShowTopupDialog] = useState(false);
+  const [showInvoicesDialog, setShowInvoicesDialog] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [topupAmount, setTopupAmount] = useState(10);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -286,7 +288,6 @@ export function BillingPage() {
         </Card>
       </div>
 
-      {/* Top-up Modal */}
       <Modal
         isOpen={showTopupDialog}
         onClose={() => setShowTopupDialog(false)}
@@ -303,7 +304,7 @@ export function BillingPage() {
             value={topupAmount}
             onChange={(e) => setTopupAmount(parseInt(e.target.value) || 0)}
           />
-          <div className="p-4 rounded-lg bg-muted/30">
+          <div className="p-4 rounded-lg bg-secondary">
             <div className="text-sm text-muted-foreground">Estimated Credits</div>
             <div className="text-2xl font-bold text-primary mt-1">
               {(topupAmount / 0.01).toLocaleString()} credits

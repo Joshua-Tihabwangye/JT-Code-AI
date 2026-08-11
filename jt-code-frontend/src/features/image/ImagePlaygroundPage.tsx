@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
 import { generateImage, understandImage, editImage } from '@/features/image/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Spinner, Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components';
@@ -55,7 +55,11 @@ export function ImagePlaygroundPage() {
       return;
     }
     setInputImage(file);
-    setInputImagePreview(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setInputImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
     setError('');
   }
 
@@ -69,10 +73,8 @@ export function ImagePlaygroundPage() {
       setError('Please enter a prompt');
       return;
     }
-
     setBusy(true);
     setError('');
-
     try {
       const result = await generateImage(client, {
         prompt,
@@ -89,8 +91,18 @@ export function ImagePlaygroundPage() {
         prompt,
         createdAt: new Date().toISOString(),
       }));
-
       setGeneratedImages((prev) => [...newImages, ...prev]);
+      const newHistoryItems: HistoryItem[] = newImages.map((img) => ({
+        id: img.id,
+        prompt,
+        imageUrl: img.url,
+        type: 'generate',
+        size,
+        style,
+        count: imageCount,
+        timestamp: Date.now(),
+      }));
+      setHistory((prev) => [...newHistoryItems, ...prev]);
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -103,13 +115,24 @@ export function ImagePlaygroundPage() {
       setError('Please upload an image first');
       return;
     }
-
     setBusy(true);
     setError('');
-
     try {
-      const result = await understandImage(client, inputImage, prompt || 'Describe this image in detail');
-      setUnderstandingResult(result.description || result.text || 'No result');
+      const question = prompt || 'Describe this image in detail';
+      const result = await understandImage(client, inputImage, question);
+      const description = result.description || result.text || 'No result';
+      setUnderstandingResult(description);
+      const historyItem: HistoryItem = {
+        id: crypto.randomUUID(),
+        prompt: question,
+        imageUrl: inputImagePreview || '',
+        type: 'understand',
+        size,
+        style,
+        count: 1,
+        timestamp: Date.now(),
+      };
+      setHistory((prev) => [historyItem, ...prev]);
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -122,10 +145,8 @@ export function ImagePlaygroundPage() {
       setError('Please upload an image and enter a prompt');
       return;
     }
-
     setBusy(true);
     setError('');
-
     try {
       const result = await editImage(client, inputImage, prompt, { model: 'auto', size, n: 1 });
       if (result.data?.[0]?.url) {
@@ -136,6 +157,17 @@ export function ImagePlaygroundPage() {
           createdAt: new Date().toISOString(),
         };
         setGeneratedImages((prev) => [newImage, ...prev]);
+        const historyItem: HistoryItem = {
+          id: newImage.id,
+          prompt,
+          imageUrl: newImage.url,
+          type: 'edit',
+          size,
+          style,
+          count: 1,
+          timestamp: Date.now(),
+        };
+        setHistory((prev) => [historyItem, ...prev]);
       }
     } catch (err) {
       setError(apiErrorMessage(err));

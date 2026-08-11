@@ -14,6 +14,54 @@ interface LocalMessage {
   metadata?: Record<string, unknown>;
 }
 
+const CHAT_HISTORY_KEY = 'jt-code-chat-history';
+
+function saveChatSession(messages: LocalMessage[], conversationId: string | null) {
+  if (!conversationId || messages.length <= 1) return;
+  const title = messages.find((m) => m.role === 'user')?.content.slice(0, 60) || 'New chat';
+  const lastAssistant = [...messages].reverse().find((m: LocalMessage) => m.role === 'assistant' && m.status === 'complete');
+  const preview = lastAssistant?.content.slice(0, 120) || '';
+  const item = {
+    id: conversationId,
+    title,
+    preview,
+    messages: messages.length,
+    updatedAt: new Date().toISOString(),
+  };
+  try {
+    const saved = JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY) || '[]') as unknown[];
+    const filtered = Array.isArray(saved) ? saved.filter((s: unknown) => {
+      const record = s as { id?: string };
+      return record.id !== item.id;
+    }) : [];
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify([item, ...filtered].slice(0, 50)));
+  } catch {
+    // ignore
+  }
+}
+
+function useTypingText(text: string, speed = 60) {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let i = 0;
+    setDisplayed('');
+    setDone(false);
+    const interval = setInterval(() => {
+      i += 1;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(interval);
+        setDone(true);
+      }
+    }, speed);
+    return () => clearInterval(interval);
+  }, [text, speed]);
+
+  return { displayed, done };
+}
+
 export function ChatPage() {
   const client = useApiClient();
   const conversationId = useRef<string | null>(null);
@@ -45,18 +93,18 @@ export function ChatPage() {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  async function loadConversations() {
+  const loadConversations = useCallback(async () => {
     try {
       const data = await getConversations(client);
       setConversations(data || []);
     } catch (error) {
       console.error('Failed to load conversations:', error);
     }
-  }
+  }, [client]);
+
+  useEffect(() => {
+    void loadConversations();
+  }, [loadConversations]);
 
   async function send(text: string) {
     if (!text.trim() || busy) return;
@@ -70,12 +118,13 @@ export function ChatPage() {
 
     try {
       if (!conversationId.current) {
-        conversationId.current = (await createConversation(client)).id;
-        loadConversations();
+        const conversation = await createConversation(client);
+        conversationId.current = conversation.id;
+        void loadConversations();
       }
 
       const request = await createChatRequest(client, {
-        conversationId: conversationId.current!,
+        conversationId: conversationId.current,
         chatInput: text,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         locale: navigator.language,

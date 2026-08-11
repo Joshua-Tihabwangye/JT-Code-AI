@@ -22,13 +22,15 @@ export function formatDateTime(date: Date | string, options?: Intl.DateTimeForma
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'UTC',
     ...options,
   });
 }
 
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
-  return str.slice(0, length) + '...';
+  const ellipsis = '...';
+  return str.slice(0, Math.max(0, length - ellipsis.length)) + ellipsis;
 }
 
 export function generateId(): string {

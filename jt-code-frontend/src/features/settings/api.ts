@@ -13,7 +13,7 @@ export interface UserProfile {
   avatar_url?: string;
   job_title?: string;
   bio?: string;
-  clerk_user_id: string;
+  supabase_user_id: string;
 }
 
 export interface Organization {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail } from 'lucide-react'
@@ -173,4 +174,117 @@ export default function SignInPage() {
       </div>
     </AuthLayout>
   )
+=======
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { Button, Input, Alert } from '@/shared/components';
+import { Mail, Lock } from 'lucide-react';
+
+export function SignInPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (authError) throw authError;
+      navigate('/app/chat');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email first.');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/sign-in',
+      });
+      if (resetError) throw resetError;
+      alert('Password reset instructions have been sent to your email.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset email.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-form-container">
+      <div className="auth-form">
+        <div className="auth-form-header">
+          <h1>Sign in to JT-Code</h1>
+          <p>Enter your credentials to access your workspace.</p>
+        </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-4" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSignIn} className="space-y-5">
+          <Input
+            label="Email address"
+            type="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftIcon={<Mail size={16} />}
+            required
+            autoComplete="email"
+          />
+          <Input
+            label="Password"
+            type="password"
+            placeholder="Your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            leftIcon={<Lock size={16} />}
+            required
+            autoComplete="current-password"
+          />
+          <Button type="submit" className="w-full" isLoading={isLoading} disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign in'}
+          </Button>
+        </form>
+
+        <div className="auth-form-footer">
+          <button
+            type="button"
+            className="link text-sm"
+            onClick={handleForgotPassword}
+            disabled={isLoading}
+          >
+            Forgot your password?
+          </button>
+          <p className="text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/sign-up" className="link font-medium">
+              Create an account
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+>>>>>>> 6b24cd4 (Modified backend)
 }

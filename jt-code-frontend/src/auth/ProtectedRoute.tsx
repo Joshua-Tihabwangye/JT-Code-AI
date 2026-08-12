@@ -1,18 +1,22 @@
-import { Show, RedirectToSignIn } from '@clerk/react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@/lib/supabase';
 
 export function ProtectedRoute() {
-  return (
-    <Show when="signed-in" fallback={<RedirectToSignIn />}>
-      <Outlet />
-    </Show>
-  );
+  const { isSignedIn, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  return isSignedIn ? <Outlet /> : <Navigate to="/sign-in" replace />;
 }
 
 export function PublicRoute() {
-  return (
-    <Show when="signed-out">
-      <Outlet />
-    </Show>
-  );
+  const { isSignedIn, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  return isSignedIn ? <Navigate to="/app/chat" replace /> : <Outlet />;
 }

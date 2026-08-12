@@ -1,77 +1,48 @@
-import { useEffect, useRef } from 'react'
-import { useClerk, useSignIn, useSignUp } from '@clerk/react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 export default function SsoCallbackPage() {
-  const clerk = useClerk()
-  const { signIn } = useSignIn()
-  const { signUp } = useSignUp()
-  const navigate = useNavigate()
-  const hasRun = useRef(false)
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (!clerk.loaded || hasRun.current) return
-    hasRun.current = true
+    const handleCallback = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-    const finalize = async () => {
-      const navigation = ({ session, decorateUrl }: { session?: { currentTask?: unknown } | null; decorateUrl: (url: string) => string }) => {
-        if (session?.currentTask) {
-          console.warn('Clerk session task requires handling:', session.currentTask)
-          return
+        if (error || !session) {
+          // Try exchanging the OAuth code if present
+          const params = new URLSearchParams(window.location.search);
+          const code = params.get('code');
+          if (code) {
+            const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            if (exchangeError) throw exchangeError;
+          }
         }
-        const url = decorateUrl('/app')
-        if (url.startsWith('http')) window.location.href = url
-        else navigate(url, { replace: true })
-      }
 
-      if ((signIn.status as string) === 'complete') {
-        await signIn.finalize({ navigate: navigation })
-        return
-      }
-
-      if (signUp.isTransferable) {
-        await signIn.create({ transfer: true })
-        if ((signIn.status as string) === 'complete') {
-          await signIn.finalize({ navigate: navigation })
-          return
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          navigate('/app/chat', { replace: true });
+        } else {
+          navigate('/sign-in', { replace: true });
         }
-        navigate('/sign-in', { replace: true })
-        return
+      } catch (err) {
+        setErrorMsg(err instanceof Error ? err.message : 'Authentication failed.');
+        setTimeout(() => navigate('/sign-in', { replace: true }), 3000);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (signIn.isTransferable) {
-        await signUp.create({ transfer: true })
-        if ((signUp.status as string) === 'complete') {
-          await signUp.finalize({ navigate: navigation })
-          return
-        }
-        navigate('/sign-up', { replace: true })
-        return
-      }
-
-      if ((signUp.status as string) === 'complete') {
-        await signUp.finalize({ navigate: navigation })
-        return
-      }
-
-      if (signIn.existingSession || signUp.existingSession) {
-        const sessionId = signIn.existingSession?.sessionId || signUp.existingSession?.sessionId
-        if (sessionId) {
-          await clerk.setActive({ session: sessionId, navigate: navigation })
-          return
-        }
-      }
-
-      navigate('/sign-in', { replace: true })
-    }
-
-    void finalize()
-  }, [clerk, navigate, signIn, signUp])
+    void handleCallback();
+  }, [navigate]);
 
   return (
     <div className="sso-loading">
       <div className="sso-loading__mark">JT</div>
-      <p>Finishing sign in…</p>
+      {errorMsg ? <p>{errorMsg}</p> : <p>{loading ? 'Finishing sign in…' : 'Redirecting…'}</p>}
     </div>
-  )
+  );
 }

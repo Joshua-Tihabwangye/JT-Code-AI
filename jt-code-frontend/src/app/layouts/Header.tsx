@@ -3,6 +3,27 @@ import { Button, Avatar, Dropdown, DropdownItem, DropdownSeparator, DropdownLabe
 import { useAuth, useUser, supabase } from '@/lib/supabase';
 import { LogOut, Settings } from 'lucide-react';
 
+const headerDropdownContent = (displayName: string, user: any, navigate: any, handleSignOut: any) => (
+  <>
+    <DropdownLabel>
+      <div className="px-2 py-1.5 text-sm">
+        <div className="font-medium">{displayName}</div>
+        <div className="text-muted-foreground">{user.email}</div>
+      </div>
+    </DropdownLabel>
+    <DropdownSeparator />
+    <DropdownItem onClick={() => navigate('/app/settings')}>
+      <Settings size={16} className="mr-2" />
+      Profile & Settings
+    </DropdownItem>
+    <DropdownSeparator />
+    <DropdownItem onClick={handleSignOut}>
+      <LogOut size={16} className="mr-2" />
+      Sign out
+    </DropdownItem>
+  </>
+);
+
 export function Header() {
   const { isSignedIn } = useAuth();
   const user = useUser();
@@ -30,24 +51,8 @@ export function Header() {
                 <span>{displayName}</span>
               </button>
             }
-          >
-            <DropdownLabel>
-              <div className="px-2 py-1.5 text-sm">
-                <div className="font-medium">{displayName}</div>
-                <div className="text-muted-foreground">{user.email}</div>
-              </div>
-            </DropdownLabel>
-            <DropdownSeparator />
-            <DropdownItem onClick={() => navigate('/app/settings')}>
-              <Settings size={16} className="mr-2" />
-              Profile & Settings
-            </DropdownItem>
-            <DropdownSeparator />
-            <DropdownItem onClick={handleSignOut}>
-              <LogOut size={16} className="mr-2" />
-              Sign out
-            </DropdownItem>
-          </Dropdown>
+            content={headerDropdownContent(displayName, user, navigate, handleSignOut)}
+          />
         </div>
       </header>
     );

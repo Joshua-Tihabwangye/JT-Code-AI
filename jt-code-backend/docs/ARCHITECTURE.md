@@ -2,12 +2,12 @@
 
 ## Source-of-truth boundary
 
-Django and Supabase-hosted PostgreSQL own users' local application profile mappings, conversations, job state, asset metadata, usage and audit references. Clerk owns authentication sessions and primary identity. Cloudinary owns asset bytes and transformations. Redis provides caching and Celery transport; it is not durable business state. Kafka carries integration/domain events; events are emitted through the PostgreSQL transactional outbox.
+Django and Supabase-hosted PostgreSQL own users' local application profile mappings, conversations, job state, asset metadata, usage and audit references. Supabase Auth owns authentication sessions and primary identity. Cloudinary owns asset bytes and transformations. Redis provides caching and Celery transport; it is not durable business state. Kafka carries integration/domain events; events are emitted through the PostgreSQL transactional outbox.
 
 ## Request path
 
-1. React or React Native gets a Clerk session token.
-2. Django verifies the JWT signature, issuer, expiry, audience when configured, and authorized party.
+1. React or React Native gets a Supabase session JWT.
+2. Django verifies the JWT signature, expiry, audience when configured, and authorized party.
 3. Django enforces ownership and policy against PostgreSQL.
 4. A mutating request writes canonical state and an outbox row in one transaction.
 5. Celery handles background execution through Redis.
@@ -20,4 +20,4 @@ The browser never receives the Cloudinary API secret. Django signs short-lived u
 
 ## Supabase PostgreSQL
 
-Use a direct or session-pooler connection for long-running Django services. Require TLS in hosted environments. Supabase Auth and Supabase Storage are intentionally not used in this architecture; Clerk and Cloudinary own those responsibilities.
+Use a direct or session-pooler connection for long-running Django services. Require TLS in hosted environments. Supabase Auth owns user identity and session management; Cloudinary owns asset bytes and transformations.

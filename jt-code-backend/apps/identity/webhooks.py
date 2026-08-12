@@ -1,43 +1,62 @@
 from __future__ import annotations
 
+import json
+import hmac
+import hashlib
+
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest, JsonResponse
-from svix.webhooks import Webhook, WebhookVerificationError
 from apps.identity.models import User
 
 @csrf_exempt
-def clerk_webhook(request: HttpRequest):
+def supabase_webhook(request: HttpRequest):
     if request.method != 'POST':
         return JsonResponse({'detail': 'Method not allowed.'}, status=405)
-    if not settings.CLERK_WEBHOOK_SIGNING_SECRET:
+    if not settings.SUPABASE_WEBHOOK_SIGNING_SECRET:
         return JsonResponse({'detail': 'Webhook is not configured.'}, status=503)
-    try:
-        event = Webhook(settings.CLERK_WEBHOOK_SIGNING_SECRET).verify(request.body, {
-            'svix-id': request.headers.get('svix-id', ''),
-            'svix-timestamp': request.headers.get('svix-timestamp', ''),
-            'svix-signature': request.headers.get('svix-signature', ''),
-        })
-    except WebhookVerificationError:
+
+    signature = request.headers.get('X-Supabase-Signature', '')
+    expected = hmac.new(
+        settings.SUPABASE_WEBHOOK_SIGNING_SECRET.encode(),
+        request.body,
+        hashlib.sha256,
+    ).hexdigest()
+    if not hmac.compare_digest(signature, expected):
         return JsonResponse({'detail': 'Invalid webhook signature.'}, status=400)
 
-    event_type = event.get('type')
-    data = event.get('data', {})
-    clerk_id = data.get('id')
-    if not clerk_id:
-        return JsonResponse({'detail': 'Missing Clerk user id.'}, status=400)
+    try:
+        payload = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'detail': 'Invalid JSON payload.'}, status=400)
 
-    if event_type in {'user.created', 'user.updated'}:
-        emails = data.get('email_addresses') or []
-        primary_id = data.get('primary_email_address_id')
-        email = next((item.get('email_address', '') for item in emails if item.get('id') == primary_id), '')
-        display_name = ' '.join(filter(None, [data.get('first_name'), data.get('last_name')])).strip()
-        User.objects.update_or_create(clerk_user_id=clerk_id, defaults={
+    event_type = payload.get('type', '')
+    record = payload.get('record', {})
+
+    if event_type == 'DELETE' and record:
+        supabase_id = record.get('id')
+        if supabase_id:
+            User.objects.filter(supabase_user_id=supabase_id).update(is_active=False)
+        return JsonResponse({'received': True})
+
+    if event_type in {'INSERT', 'UPDATE'} and record:
+        supabase_id = record.get('id')
+        if not supabase_id:
+            return JsonResponse({'detail': 'Missing Supabase user id.'}, status=400)
+
+        email = record.get('email', '')
+        user_metadata = record.get('user_metadata', {}) or {}
+        full_name = user_metadata.get('full_name', '') or user_metadata.get('name', '')
+        display_name = full_name or ''
+        avatar_url = user_metadata.get('avatar_url', '') or ''
+
+        User.objects.update_or_create(supabase_user_id=supabase_id, defaults={
             'email': email,
+            'full_name': full_name,
             'display_name': display_name,
-            'avatar_url': data.get('image_url') or '',
+            'avatar_url': avatar_url,
             'is_active': True,
         })
-    elif event_type == 'user.deleted':
-        User.objects.filter(clerk_user_id=clerk_id).update(is_active=False)
+        return JsonResponse({'received': True})
+
     return JsonResponse({'received': True})

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 const schema = z.object({
-  VITE_CLERK_PUBLISHABLE_KEY: z.string().min(1),
+  VITE_SUPABASE_URL: z.string().min(1),
+  VITE_SUPABASE_ANON_KEY: z.string().min(1),
   VITE_API_BASE_URL: z.string().default('/api/v1'),
   VITE_SENTRY_DSN: z.string().optional(),
   VITE_SENTRY_ENVIRONMENT: z.string().default('development'),
@@ -18,7 +19,8 @@ if (!parsed.success) {
 }
 
 export const config = {
-  clerkPublishableKey: parsed.data.VITE_CLERK_PUBLISHABLE_KEY,
+  supabaseUrl: parsed.data.VITE_SUPABASE_URL,
+  supabaseAnonKey: parsed.data.VITE_SUPABASE_ANON_KEY,
   apiBaseUrl: parsed.data.VITE_API_BASE_URL.replace(/\/$/, ''),
   sentryDsn: parsed.data.VITE_SENTRY_DSN || undefined,
   sentryEnvironment: parsed.data.VITE_SENTRY_ENVIRONMENT,

@@ -8,7 +8,6 @@ psycopg[binary]>=3.2,<4
 
 # Authentication & Security
 PyJWT[crypto]>=2.10,<3
-svix>=1.60,<2
 
 # Async & Background Tasks
 redis>=5.2,<7

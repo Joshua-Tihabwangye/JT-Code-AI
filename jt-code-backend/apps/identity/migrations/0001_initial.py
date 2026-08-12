@@ -1,7 +1,6 @@
 import uuid
 from django.db import migrations, models
 import django.contrib.auth.models
-import django.contrib.auth.validators
 import django.utils.timezone
 
 class Migration(migrations.Migration):
@@ -19,11 +18,17 @@ class Migration(migrations.Migration):
             ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active.', verbose_name='active')),
             ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
             ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-            ('clerk_user_id', models.CharField(db_index=True, max_length=255, unique=True)),
+            ('supabase_user_id', models.CharField(db_index=True, max_length=255, unique=True)),
             ('username', models.CharField(blank=True, max_length=150, null=True, unique=True)),
             ('email', models.EmailField(blank=True, max_length=254)),
+            ('full_name', models.CharField(blank=True, max_length=255)),
             ('display_name', models.CharField(blank=True, max_length=255)),
             ('avatar_url', models.URLField(blank=True)),
+            ('job_title', models.CharField(blank=True, max_length=255)),
+            ('contact', models.CharField(blank=True, max_length=255)),
+            ('country', models.CharField(blank=True, max_length=100)),
+            ('timezone', models.CharField(blank=True, max_length=100)),
+            ('bio', models.TextField(blank=True)),
             ('created_at', models.DateTimeField(auto_now_add=True)),
             ('updated_at', models.DateTimeField(auto_now=True)),
             ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),

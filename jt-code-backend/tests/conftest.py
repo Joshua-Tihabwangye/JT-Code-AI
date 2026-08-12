@@ -43,7 +43,7 @@ def api_client():
 
 @pytest.fixture
 def authenticated_client(api_client, user):
-    """Provide an authenticated API client."""
+    """Provide an authenticated API client using Supabase JWT."""
     from rest_framework_simplejwt.tokens import RefreshToken
     refresh = RefreshToken.for_user(user)
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
@@ -52,9 +52,9 @@ def authenticated_client(api_client, user):
 
 @pytest.fixture
 def user(django_user_model):
-    """Create a test user."""
+    """Create a test user with a Supabase user id."""
     return django_user_model.objects.create_user(
-        username="testuser",
+        supabase_user_id="test-supabase-user-id",
         email="test@example.com",
         password="testpass123"
     )
@@ -62,9 +62,9 @@ def user(django_user_model):
 
 @pytest.fixture
 def admin_user(django_user_model):
-    """Create an admin test user."""
+    """Create an admin test user with a Supabase user id."""
     return django_user_model.objects.create_superuser(
-        username="admin",
+        supabase_user_id="test-admin-supabase-user-id",
         email="admin@example.com",
         password="adminpass123"
     )

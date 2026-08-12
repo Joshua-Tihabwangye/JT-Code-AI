@@ -1,11 +1,31 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+<<<<<<< HEAD
 import { ChevronLeft, ChevronRight, MessageCircle, Image as ImageIcon, CreditCard, Settings as SettingsIcon } from 'lucide-react';
 import { UserButton } from '@clerk/react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/shared/components';
 import { useApiClient } from '@/lib/api/client';
 import { getWallet, getUsage, getSubscription } from '@/features/billing/api';
+=======
+import { Avatar, Dropdown, DropdownItem, DropdownSeparator, DropdownLabel, Button } from '@/shared/components';
+import { useAuth, useUser, supabase } from '@/lib/supabase';
+import {
+  MessageSquare,
+  Image as ImageIcon,
+  History,
+  CreditCard,
+  Settings,
+  Sun,
+  Moon,
+  PanelLeftClose,
+  PanelLeft,
+  LogOut,
+} from 'lucide-react';
+import { useAppStore } from '@/lib/appStore';
+import { useTheme } from '@/lib/theme';
+import { useNavigate } from 'react-router-dom';
+>>>>>>> 6b24cd4 (Modified backend)
 
 const navigation = [
   { name: 'Chat', href: '/app/chat', icon: MessageCircle },
@@ -15,6 +35,7 @@ const navigation = [
 ];
 
 export function AppShell() {
+<<<<<<< HEAD
   const client = useApiClient();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -27,6 +48,25 @@ export function AppShell() {
   const percentage = Math.min(100, Math.max(0, limit > 0 ? (used / limit) * 100 : 0));
   const displayUsed = used.toLocaleString(undefined, { maximumFractionDigits: 2 });
   const displayLimit = limit.toLocaleString();
+=======
+  const collapsed = useAppStore((s) => s.sidebarCollapsed);
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const { isSignedIn } = useAuth();
+  const user = useUser();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/sign-in');
+  };
+
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email ||
+    'Account';
+>>>>>>> 6b24cd4 (Modified backend)
 
   return (
     <div className={`app-shell ${collapsed ? 'collapsed' : ''}`}>
@@ -77,6 +117,7 @@ export function AppShell() {
           )}
         </div>
 
+<<<<<<< HEAD
         <div className="sidebar-footer">
           {!collapsed ? (
             <Button
@@ -98,6 +139,57 @@ export function AppShell() {
               <ChevronRight size={16} />
             </Button>
           )}
+=======
+          <NavLink
+            to="/app/settings"
+            title={collapsed ? 'Settings' : undefined}
+          >
+            <Settings size={18} />
+            {!collapsed && <span className="footer-label">Settings</span>}
+          </NavLink>
+
+          {!collapsed && isSignedIn && user && (
+            <Dropdown
+              trigger={
+                <button className="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium hover:bg-accent focus:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full">
+                  <Avatar src={user.user_metadata?.avatar_url} alt={displayName} size="sm" />
+                  <span className="truncate">{displayName}</span>
+                </button>
+              }
+            >
+              <DropdownLabel>
+                <div className="px-2 py-1.5 text-sm">
+                  <div className="font-medium">{displayName}</div>
+                  <div className="text-muted-foreground">{user.email}</div>
+                </div>
+              </DropdownLabel>
+              <DropdownSeparator />
+              <DropdownItem onClick={() => navigate('/app/settings')}>
+                <Settings size={16} className="mr-2" />
+                Settings
+              </DropdownItem>
+              <DropdownItem onClick={() => alert('Account management coming soon')}>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  Account
+                </Button>
+              </DropdownItem>
+              <DropdownSeparator />
+              <DropdownItem onClick={handleSignOut}>
+                <LogOut size={16} className="mr-2" />
+                Sign out
+              </DropdownItem>
+            </Dropdown>
+          )}
+
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+            {!collapsed && <span className="footer-label">Collapse</span>}
+          </button>
+>>>>>>> 6b24cd4 (Modified backend)
         </div>
       </aside>
 

@@ -1,4 +1,4 @@
-from apps.identity.authentication import ClerkJWTAuthentication
+from apps.identity.authentication import SupabaseJWTAuthentication
 
 def test_authenticate_header():
-    assert ClerkJWTAuthentication().authenticate_header(None) == 'Bearer'
+    assert SupabaseJWTAuthentication().authenticate_header(None) == 'Bearer'

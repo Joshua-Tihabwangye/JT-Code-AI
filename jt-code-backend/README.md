@@ -5,7 +5,7 @@ Production-oriented Django boilerplate for JT-Code. This is the backend reposito
 ## Stack
 
 - **Framework**: Django 5.2 + Django REST Framework + ASGI
-- **Authentication**: Clerk JWT verification and Clerk user webhook
+- **Authentication**: Supabase JWT verification and Supabase user webhook
 - **Database**: PostgreSQL (Supabase in shared environments)
 - **Storage**: Cloudinary signed uploads and verified asset registration
 - **Caching/Queue**: Redis for Django caching and Celery transport
@@ -68,7 +68,7 @@ jt-code backend/
 
 | App | Purpose | Key Models |
 |-----|---------|------------|
-| `identity` | User auth, Clerk integration | `User` |
+| `identity` | User auth, Supabase integration | `User` |
 | `conversations` | Chat conversations & messages | `Conversation`, `Message`, `ChatRequest` |
 | `assets` | File uploads via Cloudinary | `Asset` |
 | `events` | Kafka outbox pattern | `OutboxEvent` |
@@ -165,9 +165,9 @@ See `.env.example` for all available variables. Key variables:
 | `DJANGO_DEBUG` | Enable debug mode | No (default: false) |
 | `DJANGO_ALLOWED_HOSTS` | Comma-separated allowed hosts | Yes |
 | `DATABASE_URL` | PostgreSQL connection URL | Yes |
-| `CLERK_ISSUER` | Clerk issuer URL | Yes |
-| `CLERK_JWKS_URL` | Clerk JWKS URL | Yes |
-| `CLERK_WEBHOOK_SIGNING_SECRET` | Clerk webhook secret | Yes |
+| `SUPABASE_URL` | Supabase project URL | Yes |
+| `SUPABASE_JWT_SECRET` | Supabase JWT secret for token verification | Yes |
+| `SUPABASE_WEBHOOK_SIGNING_SECRET` | Supabase webhook signing secret | Yes |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | Yes |
 | `CLOUDINARY_API_KEY` | Cloudinary API key | Yes |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret | Yes |
@@ -180,9 +180,9 @@ See `.env.example` for all available variables. Key variables:
 
 ## Key Features
 
-### Authentication (Clerk)
-- JWT verification via `ClerkJWTAuthentication`
-- Webhook handler for user sync at `/api/v1/webhooks/clerk/`
+### Authentication (Supabase)
+- JWT verification via `SupabaseJWTAuthentication`
+- Webhook handler for user sync at `/api/v1/webhooks/supabase/`
 - Local user mapping created on first authenticated request
 
 ### File Uploads (Cloudinary)

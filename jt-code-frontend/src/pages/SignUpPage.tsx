@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSignUp } from '@clerk/react'
@@ -223,4 +224,130 @@ export default function SignUpPage() {
       </div>
     </AuthLayout>
   )
+=======
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { Button, Input, Alert } from '@/shared/components';
+import { Mail, Lock, User } from 'lucide-react';
+
+export function SignUpPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || !confirmPassword) return;
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            name: fullName,
+          },
+        },
+      });
+      if (authError) throw authError;
+      alert('Account created! Check your email to verify your account.');
+      navigate('/sign-in');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-form-container">
+      <div className="auth-form">
+        <div className="auth-form-header">
+          <h1>Create your JT-Code account</h1>
+          <p>Get started with your AI assistant workspace.</p>
+        </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-4" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSignUp} className="space-y-5">
+          <Input
+            label="Full name"
+            type="text"
+            placeholder="Jane Doe"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            leftIcon={<User size={16} />}
+            required
+            autoComplete="name"
+          />
+          <Input
+            label="Email address"
+            type="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            leftIcon={<Mail size={16} />}
+            required
+            autoComplete="email"
+          />
+          <Input
+            label="Password"
+            type="password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            leftIcon={<Lock size={16} />}
+            required
+            autoComplete="new-password"
+            minLength={8}
+          />
+          <Input
+            label="Confirm password"
+            type="password"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            leftIcon={<Lock size={16} />}
+            required
+            autoComplete="new-password"
+          />
+          <Button type="submit" className="w-full" isLoading={isLoading} disabled={isLoading}>
+            {isLoading ? 'Creating account...' : 'Create account'}
+          </Button>
+        </form>
+
+        <div className="auth-form-footer">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link to="/sign-in" className="link font-medium">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+>>>>>>> 6b24cd4 (Modified backend)
 }

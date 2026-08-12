@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import lru_cache
 from typing import Any
 
 import jwt
@@ -8,13 +7,7 @@ from django.conf import settings
 from rest_framework import authentication, exceptions
 from apps.identity.models import User
 
-@lru_cache(maxsize=1)
-def jwks_client() -> jwt.PyJWKClient:
-    if not settings.CLERK_JWKS_URL:
-        raise RuntimeError('CLERK_JWKS_URL is not configured.')
-    return jwt.PyJWKClient(settings.CLERK_JWKS_URL, cache_keys=True, lifespan=300)
-
-class ClerkJWTAuthentication(authentication.BaseAuthentication):
+class SupabaseJWTAuthentication(authentication.BaseAuthentication):
     keyword = 'Bearer'
 
     def authenticate(self, request):
@@ -25,31 +18,36 @@ class ClerkJWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('Invalid authorization header.')
         token = header[1].decode()
         try:
-            signing_key = jwks_client().get_signing_key_from_jwt(token)
-            options = {'verify_aud': bool(settings.CLERK_AUDIENCE)}
             claims: dict[str, Any] = jwt.decode(
                 token,
-                signing_key.key,
-                algorithms=['RS256'],
-                issuer=settings.CLERK_ISSUER or None,
-                audience=settings.CLERK_AUDIENCE or None,
-                options=options,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=['HS256'],
+                audience=settings.SUPABASE_JWT_AUDIENCE or None,
+                options={'verify_aud': bool(settings.SUPABASE_JWT_AUDIENCE)},
                 leeway=5,
             )
+        except jwt.ExpiredSignatureError:
+            raise exceptions.AuthenticationFailed('Supabase token has expired.')
         except Exception as exc:
-            raise exceptions.AuthenticationFailed('Invalid or expired Clerk session token.') from exc
+            raise exceptions.AuthenticationFailed('Invalid or expired Supabase session token.') from exc
 
-        authorized_parties = settings.CLERK_AUTHORIZED_PARTIES
-        if authorized_parties and claims.get('azp') not in authorized_parties:
-            raise exceptions.AuthenticationFailed('Token authorized party is not allowed.')
         subject = claims.get('sub')
         if not subject:
-            raise exceptions.AuthenticationFailed('Clerk token is missing subject.')
+            raise exceptions.AuthenticationFailed('Supabase token is missing subject.')
 
-        defaults = {'is_active': True}
+        defaults: dict[str, Any] = {'is_active': True}
         if isinstance(claims.get('email'), str):
             defaults['email'] = claims['email']
-        user, _ = User.objects.update_or_create(clerk_user_id=subject, defaults=defaults)
+        if isinstance(claims.get('user_metadata'), dict):
+            metadata = claims['user_metadata']
+            if isinstance(metadata.get('full_name'), str):
+                defaults['full_name'] = metadata['full_name']
+            if isinstance(metadata.get('name'), str):
+                defaults['display_name'] = metadata['name']
+            if isinstance(metadata.get('avatar_url'), str):
+                defaults['avatar_url'] = metadata['avatar_url']
+
+        user, _ = User.objects.update_or_create(supabase_user_id=subject, defaults=defaults)
         return user, claims
 
     def authenticate_header(self, request) -> str:

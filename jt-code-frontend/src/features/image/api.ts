@@ -1,4 +1,4 @@
-import { useApiClient } from '@/lib/api/client';
+import type { useApiClient } from '@/lib/api/client';
 
 export interface GeneratedImage {
   url: string;
@@ -71,6 +71,6 @@ export async function editImage(
 }
 
 export async function listModels(client: ReturnType<typeof useApiClient>) {
-  const response = await client.get('/ai/models/');
-  return response.data;
+  const response = await client.get<{ models: Array<Record<string, unknown>> }>('/available-models/');
+  return response.data.models;
 }

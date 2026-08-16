@@ -15,14 +15,12 @@ import {
   Sparkles,
   MoreHorizontal,
 } from 'lucide-react';
-import type { Plan, Subscription, Wallet, Usage } from '@/features/billing/api';
+import type { Plan } from '@/features/billing/api';
 
 export function BillingPage() {
   const client = useApiClient();
   const queryClient = useQueryClient();
   const [showTopupDialog, setShowTopupDialog] = useState(false);
-  const [showInvoicesDialog, setShowInvoicesDialog] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [topupAmount, setTopupAmount] = useState(10);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -35,9 +33,9 @@ export function BillingPage() {
   const topupMutation = useMutation({
     mutationFn: (amount: number) => topupCredits(client, amount),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['wallet'] });
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['usage'] });
+      void queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      void queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      void queryClient.invalidateQueries({ queryKey: ['usage'] });
       setShowTopupDialog(false);
       setSuccess('Credits added successfully');
       setTimeout(() => setSuccess(''), 3000);
@@ -48,7 +46,7 @@ export function BillingPage() {
   const formatCurrency = (cents: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
-  const limit = subscription.data?.plan?.monthly_credits ?? 0;
+  const limit = subscription.data ? (plans.data?.find((p) => p.slug === subscription.data?.plan_slug)?.monthly_credits ?? 0) : 0;
   const used = usage.data?.total_credits ?? 0;
   const usagePercent = limit > 0 ? Math.min(100, Math.max(0, (used / limit) * 100)) : 0;
 
@@ -56,7 +54,7 @@ export function BillingPage() {
     {
       icon: Crown,
       label: 'Current plan',
-      value: subscription.data?.plan?.name || 'Free',
+      value: subscription.data?.plan_name || 'Free',
       action: { label: 'Manage plan →', onClick: () => {} },
       accent: 'text-foreground',
     },
@@ -164,7 +162,7 @@ export function BillingPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-3">
             {plans.data?.map((plan: Plan) => {
-              const isCurrent = subscription.data?.plan?.id === plan.id;
+              const isCurrent = subscription.data?.plan_slug === plan.slug;
               const features = Object.entries(plan.features || {});
               return (
                 <Card
@@ -262,7 +260,7 @@ export function BillingPage() {
                     <th className="pb-2 font-medium">Description</th>
                     <th className="pb-2 font-medium">Amount</th>
                     <th className="pb-2 font-medium">Status</th>
-                    <th className="pb-2 font-medium"></th>
+                    <th className="pb-2 font-medium" />
                   </tr>
                 </thead>
                 <tbody>

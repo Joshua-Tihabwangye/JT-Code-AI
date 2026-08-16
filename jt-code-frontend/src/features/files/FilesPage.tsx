@@ -1,9 +1,9 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
-import { listAssets, uploadAsset, signAssetUpload } from '@/features/files/api';
-import { Button, Input, Card, CardContent, Badge, Spinner, Alert } from '@/shared/components';
-import { formatDate, formatDateTime, cn } from '@/shared/utils';
+import { listAssets, uploadAsset } from '@/features/files/api';
+import { Button, Card, CardContent, Badge, Spinner, Alert } from '@/shared/components';
+import { formatDate, cn } from '@/shared/utils';
 
 export function FilesPage() {
   const client = useApiClient();
@@ -21,7 +21,7 @@ export function FilesPage() {
     staleTime: 30000,
   });
 
-  async function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
+  function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
     setSelectedFiles(files);
@@ -52,12 +52,6 @@ export function FilesPage() {
       setUploading(false);
       setUploadProgress(0);
     }
-  }
-
-  async function handleSignedUpload(file: File) {
-    // This would use the signed upload flow with Cloudinary
-    // For now, use the regular upload
-    await uploadAsset(client, file);
   }
 
   const formatBytes = (bytes: number) => {
@@ -132,28 +126,28 @@ export function FilesPage() {
                 <div className="flex items-start gap-3">
                   <div className={cn(
                     'flex-shrink-0 flex items-center justify-center rounded-lg w-12 h-12',
-                    asset.resource_type === 'image' ? 'bg-green-500/10' :
-                    asset.resource_type === 'video' ? 'bg-blue-500/10' :
-                    asset.resource_type === 'raw' ? 'bg-amber-500/10' :
+                    asset.resourceType === 'image' ? 'bg-green-500/10' :
+                    asset.resourceType === 'video' ? 'bg-blue-500/10' :
+                    asset.resourceType === 'raw' ? 'bg-amber-500/10' :
                     'bg-gray-500/10'
                   )}>
-                    {asset.resource_type === 'image' && (
-                      <img src={asset.secure_url} alt={asset.original_filename} className="w-8 h-8 rounded object-cover" />
+                    {asset.resourceType === 'image' && (
+                      <img src={asset.secureUrl} alt={asset.originalFilename} className="w-8 h-8 rounded object-cover" />
                     )}
-                    {asset.resource_type !== 'image' && (
+                    {asset.resourceType !== 'image' && (
                       <span className="text-xl">
-                        {asset.resource_type === 'video' ? '🎬' : asset.resource_type === 'raw' ? '📄' : '📎'}
+                        {asset.resourceType === 'video' ? '🎬' : asset.resourceType === 'raw' ? '📄' : '📎'}
                       </span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate" title={asset.original_filename}>
-                      {asset.original_filename}
+                    <h4 className="font-medium truncate" title={asset.originalFilename}>
+                      {asset.originalFilename}
                     </h4>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                       <span>{formatBytes(asset.bytes)}</span>
                       <span>{asset.format || 'unknown'}</span>
-                      <span>{formatDate(asset.created_at)}</span>
+                      <span>{formatDate(asset.createdAt)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -161,7 +155,7 @@ export function FilesPage() {
                       {asset.status}
                     </Badge>
                     <Button variant="ghost" size="sm" asChild>
-                      <a href={asset.secure_url} target="_blank" rel="noopener noreferrer">
+                      <a href={asset.secureUrl} target="_blank" rel="noopener noreferrer">
                         <span className="text-lg">🔗</span>
                       </a>
                     </Button>
@@ -189,7 +183,7 @@ export function FilesPage() {
               </div>
               <div className="flex gap-3 justify-end">
                 <Button variant="ghost" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
-                <Button onClick={handleUpload} disabled={uploading}>
+                <Button onClick={() => void handleUpload()} disabled={uploading}>
                   {uploading ? <Spinner size="sm" /> : 'Upload'}
                 </Button>
               </div>

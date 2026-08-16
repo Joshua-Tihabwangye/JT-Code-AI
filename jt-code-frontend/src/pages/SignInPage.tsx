@@ -24,7 +24,7 @@ export default function SignInPage() {
       if (error) {
         setErrorMsg(error.message || 'Unable to sign in. Check your details and try again.');
       } else {
-        navigate('/app/chat');
+        void navigate('/app/chat');
       }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -60,7 +60,7 @@ export default function SignInPage() {
 
         <div className="auth-divider"><span>or</span></div>
 
-        <form onSubmit={handlePasswordSignIn} className="auth-form">
+        <form onSubmit={(event) => void handlePasswordSignIn(event)} className="auth-form">
           <EmailField
             id="email"
             label="Email address"

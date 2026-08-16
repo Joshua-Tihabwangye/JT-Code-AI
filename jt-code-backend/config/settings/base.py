@@ -4,6 +4,11 @@ import os
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BASE_DIR / '.env')
+
 import cloudinary
 import dj_database_url
 import sentry_sdk
@@ -11,8 +16,6 @@ from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
-
-BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 def env(name: str, default: str | None = None, *, required: bool = False) -> str:
@@ -90,7 +93,6 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=env('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/jtcode'),
         conn_max_age=int(env('DATABASE_CONN_MAX_AGE', '60')),
         conn_health_checks=True,
     )
@@ -168,6 +170,7 @@ CELERY_BEAT_SCHEDULE = {
 SUPABASE_URL = env('SUPABASE_URL')
 SUPABASE_JWT_SECRET = env('SUPABASE_JWT_SECRET')
 SUPABASE_JWT_AUDIENCE = env('SUPABASE_JWT_AUDIENCE')
+SUPABASE_JWT_ISSUER = env('SUPABASE_JWT_ISSUER')
 SUPABASE_WEBHOOK_SIGNING_SECRET = env('SUPABASE_WEBHOOK_SIGNING_SECRET')
 
 CLOUDINARY_CLOUD_NAME = env('CLOUDINARY_CLOUD_NAME')

@@ -18,6 +18,7 @@ export default function SignUpPage() {
   const [accepted, setAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [verifyEmail, setVerifyEmail] = useState('');
 
   const handleSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -34,7 +35,7 @@ export default function SignUpPage() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -46,9 +47,10 @@ export default function SignUpPage() {
       });
       if (error) {
         setErrorMsg(error.message || 'Unable to create your account.');
+      } else if (data.session) {
+        void navigate('/app/chat');
       } else {
-        alert('Account created! Check your email to verify your account.');
-        navigate('/sign-in');
+        setVerifyEmail(email);
       }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -74,7 +76,19 @@ export default function SignUpPage() {
 
   return (
     <AuthLayout>
-      <div className="auth-card auth-card--signup">
+      {verifyEmail ? (
+        <div className="auth-card auth-card--signup">
+          <div className="auth-card__heading auth-card__heading--signup">
+            <h2>Check your email</h2>
+            <p>
+              We've sent a verification link to <strong>{verifyEmail}</strong>. Click the link in the
+              email to activate your account, then sign in.
+            </p>
+          </div>
+          <Link to="/sign-in" className="primary-button primary-button--link">Go to sign in</Link>
+        </div>
+      ) : (
+        <div className="auth-card auth-card--signup">
         <div className="auth-card__heading auth-card__heading--signup">
           <h2>Create your account</h2>
           <p>Start your journey with JT-Code</p>
@@ -88,7 +102,7 @@ export default function SignUpPage() {
 
         <div className="auth-divider"><span>or</span></div>
 
-        <form onSubmit={handleSignUp} className="auth-form auth-form--compact">
+        <form onSubmit={(event) => void handleSignUp(event)} className="auth-form auth-form--compact">
           <NameField
             id="full-name"
             label="Full name"
@@ -140,7 +154,8 @@ export default function SignUpPage() {
         <p className="auth-card__switch auth-card__switch--signup">
           Already have an account? <Link to="/sign-in">Sign in</Link>
         </p>
-      </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }

@@ -6,15 +6,16 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import {
-  createClient,
-  type SupabaseClient,
-  type Session,
-  type User as SupabaseUser,
-} from '@supabase/supabase-js';
+import { createBrowserClient, type SupabaseClient } from '@supabase/ssr';
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { config } from '@/lib/config';
 
-export const supabase: SupabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
+export type { User as SupabaseUser } from '@supabase/supabase-js';
+
+export const supabase: SupabaseClient = createBrowserClient(
+  config.supabaseUrl,
+  config.supabaseAnonKey,
+);
 
 interface AuthState {
   user: SupabaseUser | null;
@@ -48,11 +49,11 @@ export function SupabaseProvider({ children }: PropsWithChildren) {
       setLoading(false);
       setInitialized(true);
     };
-    initialize();
+    void initialize();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setLoading(false);

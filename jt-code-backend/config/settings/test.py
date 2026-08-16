@@ -7,8 +7,10 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
 DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}}
 
-# Provide default Supabase settings so tests can authenticate
-SUPABASE_JWT_SECRET = env('SUPABASE_JWT_SECRET', 'test-jwt-secret')
-SUPABASE_JWT_AUDIENCE = env('SUPABASE_JWT_AUDIENCE', '')
-SUPABASE_URL = env('SUPABASE_URL', 'http://localhost:3000')
+# Provide default Supabase settings so tests can authenticate deterministically
+# (never inherit live project values from the environment during tests)
+SUPABASE_JWT_SECRET = 'test-jwt-secret'
+SUPABASE_JWT_AUDIENCE = 'authenticated'
+SUPABASE_JWT_ISSUER = ''
+SUPABASE_URL = ''
 SUPABASE_WEBHOOK_SIGNING_SECRET = env('SUPABASE_WEBHOOK_SIGNING_SECRET', '')

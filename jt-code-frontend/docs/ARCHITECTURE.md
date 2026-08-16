@@ -2,11 +2,11 @@
 
 ## Boundary
 
-This repository contains only the React + TypeScript web client. It never stores Cloudinary API secrets, Clerk secret keys, Supabase database credentials, Kafka credentials, or AI provider keys.
+This repository contains only the React + TypeScript web client. It never stores Cloudinary API secrets, Supabase database credentials, Supabase service_role keys, Kafka credentials, or AI provider keys.
 
 ## Authentication
 
-`ClerkProvider` owns the browser session. `ApiClientProvider` asks Clerk for a session token and adds `Authorization: Bearer <token>` to protected Django API calls. Django independently verifies the JWT against Clerk's JWKS; the frontend session is not treated as backend authorization by itself.
+`SupabaseProvider` owns the browser session using Supabase Auth. `ApiClientProvider` reads the Supabase access token and adds `Authorization: Bearer <token>` to protected Django API calls. Django independently verifies the JWT against the Supabase project JWKS; the frontend session is not treated as backend authorization by itself.
 
 ## Data and files
 

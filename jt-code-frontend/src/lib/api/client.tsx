@@ -1,4 +1,5 @@
-import axios, { AxiosError, type AxiosInstance } from 'axios';
+import type { AxiosError} from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import { createContext, useContext, useEffect, useMemo, type PropsWithChildren } from 'react';
 import * as Sentry from '@sentry/react';
 import { config } from '@/lib/config';
@@ -18,7 +19,7 @@ export function ApiClientProvider({ children }: PropsWithChildren) {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      instance.interceptors.request.use(async (request) => {
+      instance.interceptors.request.use((request) => {
         const token = session?.access_token;
         if (token) request.headers.Authorization = `Bearer ${token}`;
         request.headers['X-JT-Code-Client'] = `web/${config.appVersion}`;

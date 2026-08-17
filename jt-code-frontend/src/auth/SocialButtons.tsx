@@ -26,11 +26,11 @@ function GithubIcon() {
 export default function SocialButtons({ onGoogle, onGithub, disabled }: SocialButtonsProps) {
   return (
     <div className="social-stack">
-      <button type="button" className="social-button" onClick={onGoogle} disabled={disabled}>
+      <button type="button" className="social-button" onClick={() => void onGoogle()} disabled={disabled}>
         <GoogleIcon />
         <span>Continue with Google</span>
       </button>
-      <button type="button" className="social-button" onClick={onGithub} disabled={disabled}>
+      <button type="button" className="social-button" onClick={() => void onGithub()} disabled={disabled}>
         <GithubIcon />
         <span>Continue with GitHub</span>
       </button>

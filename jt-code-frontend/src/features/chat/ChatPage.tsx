@@ -2,9 +2,9 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Send, Paperclip, Image as ImageIcon, FileText, X } from 'lucide-react';
-import { createChatRequest, createConversation, streamChatRequest, getConversations } from '@/features/chat/api';
+import { createChatRequest, createConversation, streamChatRequest } from '@/features/chat/api';
 import { getSubscription } from '@/features/billing/api';
-import type { ChatRequest, Conversation } from '@/features/chat/types';
+import type { ChatRequest } from '@/features/chat/types';
 
 interface LocalMessage {
   id: string;
@@ -12,54 +12,6 @@ interface LocalMessage {
   content: string;
   status?: 'sending' | 'streaming' | 'complete' | 'error';
   metadata?: Record<string, unknown>;
-}
-
-const CHAT_HISTORY_KEY = 'jt-code-chat-history';
-
-function saveChatSession(messages: LocalMessage[], conversationId: string | null) {
-  if (!conversationId || messages.length <= 1) return;
-  const title = messages.find((m) => m.role === 'user')?.content.slice(0, 60) || 'New chat';
-  const lastAssistant = [...messages].reverse().find((m: LocalMessage) => m.role === 'assistant' && m.status === 'complete');
-  const preview = lastAssistant?.content.slice(0, 120) || '';
-  const item = {
-    id: conversationId,
-    title,
-    preview,
-    messages: messages.length,
-    updatedAt: new Date().toISOString(),
-  };
-  try {
-    const saved = JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY) || '[]') as unknown[];
-    const filtered = Array.isArray(saved) ? saved.filter((s: unknown) => {
-      const record = s as { id?: string };
-      return record.id !== item.id;
-    }) : [];
-    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify([item, ...filtered].slice(0, 50)));
-  } catch {
-    // ignore
-  }
-}
-
-function useTypingText(text: string, speed = 60) {
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    let i = 0;
-    setDisplayed('');
-    setDone(false);
-    const interval = setInterval(() => {
-      i += 1;
-      setDisplayed(text.slice(0, i));
-      if (i >= text.length) {
-        clearInterval(interval);
-        setDone(true);
-      }
-    }, speed);
-    return () => clearInterval(interval);
-  }, [text, speed]);
-
-  return { displayed, done };
 }
 
 export function ChatPage() {
@@ -70,7 +22,6 @@ export function ChatPage() {
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -81,8 +32,8 @@ export function ChatPage() {
     queryFn: () => getSubscription(client),
   });
 
-  const planLabel = subscription.data?.plan?.name
-    ? `${subscription.data.plan.name} plan`
+  const planLabel = subscription.data?.plan_name
+    ? `${subscription.data?.plan_name} plan`
     : 'Free plan';
 
   const scrollToBottom = useCallback(() => {
@@ -92,19 +43,6 @@ export function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
-
-  const loadConversations = useCallback(async () => {
-    try {
-      const data = await getConversations(client);
-      setConversations(data || []);
-    } catch (error) {
-      console.error('Failed to load conversations:', error);
-    }
-  }, [client]);
-
-  useEffect(() => {
-    void loadConversations();
-  }, [loadConversations]);
 
   async function send(text: string) {
     if (!text.trim() || busy) return;
@@ -120,7 +58,6 @@ export function ChatPage() {
       if (!conversationId.current) {
         const conversation = await createConversation(client);
         conversationId.current = conversation.id;
-        void loadConversations();
       }
 
       const request = await createChatRequest(client, {
@@ -171,7 +108,7 @@ export function ChatPage() {
     if (!value || busy) return;
     setInput('');
     setAttachments([]);
-    send(value);
+    void send(value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

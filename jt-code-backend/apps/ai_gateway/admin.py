@@ -1,5 +1,6 @@
 from django.contrib import admin
-from apps.ai_gateway.models import Provider, Model, ModelPolicy, ModelRun, Prompt, Evaluation
+
+from apps.ai_gateway.models import Evaluation, Model, ModelPolicy, ModelRun, Prompt, Provider
 
 
 @admin.register(Provider)
@@ -13,8 +14,14 @@ class ProviderAdmin(admin.ModelAdmin):
 
 @admin.register(Model)
 class ModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'display_name', 'provider', 'modality', 'status', 'context_window', 'max_output_tokens', 'input_price_per_token', 'output_price_per_token')
-    list_filter = ('modality', 'status', 'supports_tools', 'supports_streaming', 'supports_vision', 'provider')
+    list_display = (
+        'name', 'display_name', 'provider', 'modality', 'status', 'context_window',
+        'max_output_tokens', 'input_price_per_token', 'output_price_per_token',
+    )
+    list_filter = (
+        'modality', 'status', 'supports_tools', 'supports_streaming',
+        'supports_vision', 'provider',
+    )
     search_fields = ('name', 'display_name', 'provider__name')
     readonly_fields = ('id', 'created_at', 'updated_at')
     ordering = ('provider', 'name')
@@ -23,7 +30,10 @@ class ModelAdmin(admin.ModelAdmin):
 
 @admin.register(ModelPolicy)
 class ModelPolicyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'task_type', 'routing_strategy', 'primary_model', 'fallback_policy', 'is_default', 'is_active', 'version')
+    list_display = (
+        'name', 'slug', 'task_type', 'routing_strategy', 'primary_model',
+        'fallback_policy', 'is_default', 'is_active', 'version',
+    )
     list_filter = ('routing_strategy', 'fallback_policy', 'is_default', 'is_active', 'created_at')
     search_fields = ('name', 'slug', 'task_type')
     readonly_fields = ('id', 'created_at', 'updated_at')
@@ -34,7 +44,10 @@ class ModelPolicyAdmin(admin.ModelAdmin):
 
 @admin.register(ModelRun)
 class ModelRunAdmin(admin.ModelAdmin):
-    list_display = ('id', 'request_id', 'provider', 'model', 'status', 'input_tokens', 'output_tokens', 'provider_cost_usd', 'latency_ms', 'created_at')
+    list_display = (
+        'id', 'request_id', 'provider', 'model', 'status', 'input_tokens',
+        'output_tokens', 'provider_cost_usd', 'latency_ms', 'created_at',
+    )
     list_filter = ('status', 'provider', 'model', 'fallback_used', 'created_at')
     search_fields = ('request_id', 'job_id', 'trace_id', 'provider__name', 'model__name')
     readonly_fields = ('id', 'created_at', 'completed_at')

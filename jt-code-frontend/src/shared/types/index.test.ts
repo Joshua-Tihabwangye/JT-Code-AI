@@ -1,4 +1,5 @@
-import { ApiError, PaginatedResponse, SelectOption, LoadingState, BaseEntity, createUUID } from './index';
+import type { ApiError, PaginatedResponse, SelectOption, LoadingState, BaseEntity} from './index';
+import { createUUID } from './index';
 
 describe('shared types', () => {
   describe('ApiError', () => {

@@ -486,3 +486,48 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 3px sol
   cursor: pointer;
 }
 .link:hover { color: var(--primary); }
+
+/* ===== Dark theme tokens (soft navy / black surfaces, white content, azure accents) ===== */
+.dark {
+  color-scheme: dark;
+
+  /* Shared design tokens used across global.css + auth.css */
+  --bg: #070b14;
+  --panel: #0d1320;
+  --panel-2: #131b2c;
+  --border: #1d2636;
+  --text: #e8eef7;
+  --muted: #93a0b5;
+  --azure: #3b9bff;
+  --azure-2: #1f8bff;
+  --danger: #ff5d7a;
+  --background: #070b14;
+
+  /* Tailwind @theme color tokens */
+  --color-background: #070b14;
+  --color-foreground: #e8eef7;
+  --color-card: #0d1320;
+  --color-card-foreground: #e8eef7;
+  --color-popover: #0d1320;
+  --color-popover-foreground: #e8eef7;
+  --color-primary: #3b9bff;
+  --color-primary-foreground: #04101f;
+  --color-secondary: #131b2c;
+  --color-secondary-foreground: #e8eef7;
+  --color-muted: #131b2c;
+  --color-muted-foreground: #93a0b5;
+  --color-accent: #131b2c;
+  --color-accent-foreground: #e8eef7;
+  --color-destructive: #ff5d7a;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #1d2636;
+  --color-input: #1d2636;
+  --color-ring: #3b9bff;
+}
+
+/* Targeted overrides for hardcoded light surfaces */
+.dark .nav-link.active { background: rgba(59, 155, 255, 0.16); color: #cfe4ff; }
+.dark .chat-message.user { background: #11203a; border-color: #1e3a63; }
+.dark .credits-card { background: #0e1a30; border-color: #1e3a63; }
+.dark .credits-card .credits-progress { background: #1e3a63; }
+.dark .button.primary:hover { background: var(--azure-2); }

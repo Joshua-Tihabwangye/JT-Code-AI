@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { listConnectors, listConnectorAccounts, createConnectorAccount, testConnectorAccount } from '@/features/integrations/api';
-import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal, Input } from '@/shared/components';
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal } from '@/shared/components';
 import { cn } from '@/shared/utils';
 
 export function IntegrationsPage() {
@@ -18,7 +18,7 @@ export function IntegrationsPage() {
     mutationFn: ({ connectorId, config }: { connectorId: string; config: Record<string, unknown> }) =>
       createConnectorAccount(client, connectorId, config),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['connector-accounts'] });
+      void queryClient.invalidateQueries({ queryKey: ['connector-accounts'] });
       setShowConnectDialog(null);
     },
     onError: () => setError('Failed to connect account'),
@@ -63,7 +63,7 @@ export function IntegrationsPage() {
                 <div key={account.id} className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
                   <div className="flex items-center gap-4">
                     <div className="p-2 rounded-lg bg-primary/10">
-                      <span className="text-xl">{account.connector.icon || '🔗'}</span>
+                      <span className="text-xl">{account.connector.icon_url || '🔗'}</span>
                     </div>
                     <div>
                       <div className="font-medium">{account.name}</div>
@@ -103,7 +103,7 @@ export function IntegrationsPage() {
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <div className="p-3 rounded-xl bg-primary/10 text-primary text-2xl">
-                          {connector.icon || '🔗'}
+                          {connector.icon_url || '🔗'}
                         </div>
                         <div className="flex-1">
                           <h4 className="font-semibold">{connector.name}</h4>
@@ -144,7 +144,7 @@ export function IntegrationsPage() {
             </Alert>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setShowConnectDialog(null)}>Cancel</Button>
-              <Button onClick={() => connectMutation.mutate({ connectorId: showConnectDialog!, config: {} })} disabled={connectMutation.isPending}>
+              <Button onClick={() => connectMutation.mutate({ connectorId: showConnectDialog, config: {} })} disabled={connectMutation.isPending}>
                 {connectMutation.isPending ? <Spinner size="sm" /> : 'Connect'}
               </Button>
             </div>

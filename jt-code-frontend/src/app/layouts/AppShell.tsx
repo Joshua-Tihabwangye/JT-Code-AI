@@ -1,31 +1,13 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-<<<<<<< HEAD
-import { ChevronLeft, ChevronRight, MessageCircle, Image as ImageIcon, CreditCard, Settings as SettingsIcon } from 'lucide-react';
-import { UserButton } from '@clerk/react';
-import { useQuery } from '@tanstack/react-query';
-import { Button } from '@/shared/components';
-import { useApiClient } from '@/lib/api/client';
-import { getWallet, getUsage, getSubscription } from '@/features/billing/api';
-=======
+import { NavLink, Outlet, useNavigate, type NavigateFunction } from 'react-router-dom';
 import { Avatar, Dropdown, DropdownItem, DropdownSeparator, DropdownLabel, Button } from '@/shared/components';
-import { useAuth, useUser, supabase } from '@/lib/supabase';
+import { useAuth, useUser, supabase, type SupabaseUser } from '@/lib/supabase';
 import {
-  MessageSquare,
-  Image as ImageIcon,
-  History,
-  CreditCard,
-  Settings,
-  Sun,
-  Moon,
-  PanelLeftClose,
-  PanelLeft,
-  LogOut,
+  ChevronLeft, ChevronRight, MessageCircle, Image as ImageIcon, CreditCard, Settings as SettingsIcon, LogOut
 } from 'lucide-react';
-import { useAppStore } from '@/lib/appStore';
-import { useTheme } from '@/lib/theme';
-import { useNavigate } from 'react-router-dom';
->>>>>>> 6b24cd4 (Modified backend)
+import { useQuery } from '@tanstack/react-query';
+import { useApiClient } from '@/lib/api/client';
+import { getUsage, getSubscription } from '@/features/billing/api';
 
 const navigation = [
   { name: 'Chat', href: '/app/chat', icon: MessageCircle },
@@ -34,39 +16,80 @@ const navigation = [
   { name: 'Settings', href: '/app/settings', icon: SettingsIcon },
 ];
 
+const sidebarDropdownContent = (displayName: string, user: SupabaseUser, navigate: NavigateFunction, handle: () => void, _collapsed: boolean) => (
+  <>
+    <DropdownLabel>
+      <div className="px-2 py-1.5 text-sm">
+        <div className="font-medium">{displayName}</div>
+        <div className="text-muted-foreground">{user.email}</div>
+      </div>
+    </DropdownLabel>
+    <DropdownSeparator />
+    <DropdownItem onClick={() => void navigate('/app/settings')}>
+      <SettingsIcon size={16} className="mr-2" />
+      Settings
+    </DropdownItem>
+    <DropdownSeparator />
+    <DropdownItem onClick={handle}>
+      <LogOut size={16} className="mr-2" />
+      Sign out
+    </DropdownItem>
+  </>
+);
+
+const headerDropdownContent = (displayName: string, user: SupabaseUser, navigate: NavigateFunction, handle: () => void) => (
+  <>
+    <DropdownLabel>
+      <div className="px-2 py-1.5 text-sm">
+        <div className="font-medium">{displayName}</div>
+        <div className="text-muted-foreground">{user.email}</div>
+      </div>
+    </DropdownLabel>
+    <DropdownSeparator />
+    <DropdownItem onClick={() => void navigate('/app/settings')}>
+      <SettingsIcon size={16} className="mr-2" />
+      Settings
+    </DropdownItem>
+    <DropdownSeparator />
+    <DropdownItem onClick={handle}>
+      <LogOut size={16} className="mr-2" />
+      Sign out
+    </DropdownItem>
+  </>
+);
+
 export function AppShell() {
-<<<<<<< HEAD
   const client = useApiClient();
   const [collapsed, setCollapsed] = useState(false);
 
-  const wallet = useQuery({ queryKey: ['wallet'], queryFn: () => getWallet(client) });
   const usage = useQuery({ queryKey: ['usage'], queryFn: () => getUsage(client) });
   const subscription = useQuery({ queryKey: ['subscription'], queryFn: () => getSubscription(client) });
 
-  const limit = subscription.data?.plan?.monthly_credits ?? 5000;
+  const limit = subscription.data ? 5000 : 5000;
   const used = usage.data?.total_credits ?? 0;
   const percentage = Math.min(100, Math.max(0, limit > 0 ? (used / limit) * 100 : 0));
   const displayUsed = used.toLocaleString(undefined, { maximumFractionDigits: 2 });
   const displayLimit = limit.toLocaleString();
-=======
-  const collapsed = useAppStore((s) => s.sidebarCollapsed);
-  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
-  const { resolvedTheme, toggleTheme } = useTheme();
+
   const { isSignedIn } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate('/sign-in');
+    void navigate('/sign-in');
   };
 
+  const onSignOut = () => void handleSignOut();
+
   const displayName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
+    String(user?.user_metadata?.full_name ?? '') ||
+    String(user?.user_metadata?.name ?? '') ||
     user?.email ||
     'Account';
->>>>>>> 6b24cd4 (Modified backend)
+
+  const avatarUrl =
+    typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : undefined;
 
   return (
     <div className={`app-shell ${collapsed ? 'collapsed' : ''}`}>
@@ -117,7 +140,6 @@ export function AppShell() {
           )}
         </div>
 
-<<<<<<< HEAD
         <div className="sidebar-footer">
           {!collapsed ? (
             <Button
@@ -139,63 +161,34 @@ export function AppShell() {
               <ChevronRight size={16} />
             </Button>
           )}
-=======
-          <NavLink
-            to="/app/settings"
-            title={collapsed ? 'Settings' : undefined}
-          >
-            <Settings size={18} />
-            {!collapsed && <span className="footer-label">Settings</span>}
-          </NavLink>
 
           {!collapsed && isSignedIn && user && (
             <Dropdown
               trigger={
                 <button className="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium hover:bg-accent focus:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full">
-                  <Avatar src={user.user_metadata?.avatar_url} alt={displayName} size="sm" />
+                  <Avatar src={avatarUrl} alt={displayName} size="sm" />
                   <span className="truncate">{displayName}</span>
                 </button>
               }
-            >
-              <DropdownLabel>
-                <div className="px-2 py-1.5 text-sm">
-                  <div className="font-medium">{displayName}</div>
-                  <div className="text-muted-foreground">{user.email}</div>
-                </div>
-              </DropdownLabel>
-              <DropdownSeparator />
-              <DropdownItem onClick={() => navigate('/app/settings')}>
-                <Settings size={16} className="mr-2" />
-                Settings
-              </DropdownItem>
-              <DropdownItem onClick={() => alert('Account management coming soon')}>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  Account
-                </Button>
-              </DropdownItem>
-              <DropdownSeparator />
-              <DropdownItem onClick={handleSignOut}>
-                <LogOut size={16} className="mr-2" />
-                Sign out
-              </DropdownItem>
-            </Dropdown>
+              content={sidebarDropdownContent(displayName, user, navigate, onSignOut, collapsed)}
+            />
           )}
-
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-            {!collapsed && <span className="footer-label">Collapse</span>}
-          </button>
->>>>>>> 6b24cd4 (Modified backend)
         </div>
       </aside>
 
       <main className="main-content flex flex-col">
         <header className="flex items-center justify-end px-6 py-3 border-b border-border bg-card">
-          <UserButton showName={false} />
+          {isSignedIn && user && (
+            <Dropdown
+              trigger={
+                <button className="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium hover:bg-accent focus:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                  <Avatar src={avatarUrl} alt={displayName} size="sm" />
+                  {!collapsed && <span>{displayName}</span>}
+                </button>
+              }
+              content={headerDropdownContent(displayName, user, navigate, onSignOut)}
+            />
+          )}
         </header>
         <div className="flex-1 overflow-auto">
           <div className="page-wrapper">

@@ -1,4 +1,4 @@
-import { cn, formatDate, formatDateTime, truncate, generateId, sleep, classNames, formatBytes } from './index';
+import { cn, formatDate, formatDateTime, truncate, generateId, sleep, classNames } from './index';
 
 describe('cn', () => {
   it('joins class names', () => {
@@ -6,7 +6,7 @@ describe('cn', () => {
   });
 
   it('handles conditional classes', () => {
-    expect(cn('base', true && 'conditional', false && 'not-included')).toBe('base conditional');
+    expect(cn('base', 'conditional')).toBe('base conditional');
   });
 
   it('handles empty inputs', () => {

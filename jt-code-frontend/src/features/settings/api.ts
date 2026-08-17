@@ -1,4 +1,4 @@
-import { useApiClient } from '@/lib/api/client';
+import type { useApiClient } from '@/lib/api/client';
 
 export interface UserProfile {
   id: string;
@@ -69,12 +69,12 @@ export async function updateConsent(
   consentType: string,
   status: 'granted' | 'denied'
 ) {
-  const response = await client.post('/settings/consents/', { consent_type: consentType, status });
+  const response = await client.post<Record<string, unknown>>('/settings/consents/', { consent_type: consentType, status });
   return response.data;
 }
 
 export async function exportUserData(client: ReturnType<typeof useApiClient>) {
-  const response = await client.post('/settings/export/');
+  const response = await client.post<Record<string, unknown>>('/settings/export/');
   return response.data;
 }
 

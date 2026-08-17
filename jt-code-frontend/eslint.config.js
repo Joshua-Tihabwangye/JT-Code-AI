@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint';
 import reactPlugin from 'eslint-plugin-react';
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'node_modules', '.vite'] },
+  { ignores: ['dist', 'coverage', 'node_modules', '.vite', 'vite-env.d.ts'] },
   {
     extends: [
       js.configs.recommended,

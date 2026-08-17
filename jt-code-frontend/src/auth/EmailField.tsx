@@ -30,9 +30,9 @@ export default function EmailField({
 
   return (
     <div className="field-group">
+      <label htmlFor={id} className="field-label">{label}</label>
       <div className={`input-wrapper ${hasValue ? 'input-wrapper--has-value' : ''} ${error ? 'input-wrapper--error' : ''}`}>
         <Mail size={18} className="input-wrapper__icon" />
-        <span className="input-wrapper__label">{label}</span>
         <input
           id={id}
           type={type}
@@ -44,6 +44,7 @@ export default function EmailField({
           }}
           autoComplete={autoComplete}
           inputMode={inputMode}
+          aria-invalid={error ? true : undefined}
           required
         />
       </div>

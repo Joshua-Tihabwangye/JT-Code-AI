@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from apps.ai_gateway.models import Provider, Model, ModelPolicy, ModelRun, Prompt, Evaluation
+
+from apps.ai_gateway.models import Evaluation, Model, ModelPolicy, ModelRun, Prompt, Provider
 
 
 class ProviderSerializer(serializers.ModelSerializer):
@@ -122,7 +123,10 @@ class PromptSerializer(serializers.ModelSerializer):
 class PromptCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prompt
-        fields = ['name', 'slug', 'category', 'content', 'variables', 'description', 'model_constraints', 'tags']
+        fields = [
+            'name', 'slug', 'category', 'content', 'variables', 'description',
+            'model_constraints', 'tags',
+        ]
 
 
 class EvaluationSerializer(serializers.ModelSerializer):

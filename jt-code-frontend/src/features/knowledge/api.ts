@@ -1,4 +1,4 @@
-import { useApiClient } from '@/lib/api/client';
+import type { useApiClient } from '@/lib/api/client';
 
 export interface Collection {
   id: string;
@@ -25,31 +25,31 @@ export interface Source {
 }
 
 export async function listCollections(client: ReturnType<typeof useApiClient>) {
-  const response = await client.get<{ results: Collection[] }>('/knowledge/collections/');
+  const response = await client.get<{ results: Collection[] }>('/collections/');
   return response.data;
 }
 
 export async function createCollection(client: ReturnType<typeof useApiClient>, data: Partial<Collection>) {
-  const response = await client.post<Collection>('/knowledge/collections/', data);
+  const response = await client.post<Collection>('/collections/', data);
   return response.data;
 }
 
 export async function getCollection(client: ReturnType<typeof useApiClient>, id: string) {
-  const response = await client.get<Collection>(`/knowledge/collections/${id}/`);
+  const response = await client.get<Collection>(`/collections/${id}/`);
   return response.data;
 }
 
 export async function syncSource(client: ReturnType<typeof useApiClient>, sourceId: string) {
-  const response = await client.post(`/knowledge/sources/${sourceId}/sync/`);
+  const response = await client.post<Record<string, unknown>>(`/sources/${sourceId}/sync/`);
   return response.data;
 }
 
 export async function searchCollections(client: ReturnType<typeof useApiClient>, query: string, collectionIds: string[]) {
-  const response = await client.post('/knowledge/search/', { query, collection_ids: collectionIds });
+  const response = await client.post<Record<string, unknown>>('/search/', { query, collection_ids: collectionIds });
   return response.data;
 }
 
 export async function ragQuery(client: ReturnType<typeof useApiClient>, query: string, collectionIds: string[]) {
-  const response = await client.post('/knowledge/rag/', { query, collection_ids: collectionIds });
+  const response = await client.post<Record<string, unknown>>('/rag/query/', { query, collection_ids: collectionIds });
   return response.data;
 }

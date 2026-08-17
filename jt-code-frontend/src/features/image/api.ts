@@ -1,4 +1,4 @@
-import { useApiClient } from '@/lib/api/client';
+import type { useApiClient } from '@/lib/api/client';
 
 export interface GeneratedImage {
   url: string;
@@ -32,7 +32,7 @@ export async function generateImage(
     n: number;
   }
 ) {
-  const response = await client.post<ImageGenerationResult>('/ai/image/generate/', data);
+  const response = await client.post<ImageGenerationResult>('/images/generations/', data);
   return response.data;
 }
 
@@ -45,7 +45,7 @@ export async function understandImage(
   formData.append('file', file);
   formData.append('prompt', prompt);
 
-  const response = await client.post<ImageUnderstandingResult>('/ai/image/understand/', formData, {
+  const response = await client.post<ImageUnderstandingResult>('/images/understand/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
@@ -64,13 +64,13 @@ export async function editImage(
     if (value !== undefined) formData.append(key, String(value));
   });
 
-  const response = await client.post<ImageEditResult>('/ai/image/edit/', formData, {
+  const response = await client.post<ImageEditResult>('/images/edits/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 }
 
 export async function listModels(client: ReturnType<typeof useApiClient>) {
-  const response = await client.get('/ai/models/');
-  return response.data;
+  const response = await client.get<{ models: Array<Record<string, unknown>> }>('/available-models/');
+  return response.data.models;
 }

@@ -1,4 +1,5 @@
 import uuid
+
 from django.db import models
 
 
@@ -120,14 +121,18 @@ class ModelPolicy(models.Model):
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
     task_type = models.CharField(max_length=50)
-    routing_strategy = models.CharField(max_length=30, choices=RoutingStrategy.choices, default=RoutingStrategy.BALANCED)
+    routing_strategy = models.CharField(
+        max_length=30, choices=RoutingStrategy.choices, default=RoutingStrategy.BALANCED
+    )
     primary_model = models.ForeignKey(
         Model,
         on_delete=models.PROTECT,
         related_name='primary_policies'
     )
     fallback_models = models.ManyToManyField(Model, related_name='fallback_policies', blank=True)
-    fallback_policy = models.CharField(max_length=20, choices=FallbackPolicy.choices, default=FallbackPolicy.CHEAPER)
+    fallback_policy = models.CharField(
+        max_length=20, choices=FallbackPolicy.choices, default=FallbackPolicy.CHEAPER
+    )
     max_cost_usd = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     max_latency_ms = models.PositiveIntegerField(null=True, blank=True)
     min_quality_score = models.FloatField(default=0.0)
@@ -165,7 +170,9 @@ class ModelRun(models.Model):
     job_step_id = models.UUIDField(null=True, blank=True, db_index=True)
     provider = models.ForeignKey(Provider, on_delete=models.PROTECT, related_name='model_runs')
     model = models.ForeignKey(Model, on_delete=models.PROTECT, related_name='model_runs')
-    policy = models.ForeignKey(ModelPolicy, on_delete=models.SET_NULL, related_name='model_runs', null=True, blank=True)
+    policy = models.ForeignKey(
+        ModelPolicy, on_delete=models.SET_NULL, related_name='model_runs', null=True, blank=True
+    )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.QUEUED)
     input_tokens = models.PositiveBigIntegerField(default=0)
     output_tokens = models.PositiveBigIntegerField(default=0)

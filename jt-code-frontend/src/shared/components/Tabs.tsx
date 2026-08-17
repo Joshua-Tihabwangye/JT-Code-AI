@@ -46,7 +46,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
 );
 Tabs.displayName = 'Tabs';
 
-interface TabsListProps extends HTMLAttributes<HTMLDivElement> {}
+type TabsListProps = HTMLAttributes<HTMLDivElement>;
 
 export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
   ({ className, children, ...props }, ref) => (

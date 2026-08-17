@@ -1,11 +1,13 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from apps.jobs.views import (
-    JobViewSet,
-    JobStepViewSet,
-    WorkflowRunViewSet,
     CallbackViewSet,
     JobStatusCallbackView,
+    JobStepViewSet,
+    JobViewSet,
+    ResearchJobsView,
+    WorkflowRunViewSet,
 )
 
 router = DefaultRouter()
@@ -16,5 +18,6 @@ router.register(r'callbacks', CallbackViewSet, basename='callback')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('research/jobs/', ResearchJobsView.as_view(), name='research-jobs'),
     path('jobs/<uuid:job_id>/status/', JobStatusCallbackView.as_view(), name='job-status-callback'),
 ]

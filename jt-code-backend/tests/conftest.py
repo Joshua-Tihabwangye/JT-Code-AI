@@ -18,12 +18,6 @@ from django.test.utils import get_runner
 
 
 @pytest.fixture(scope="session")
-def django_db_setup():
-    """Override Django's default test database setup."""
-    pass
-
-
-@pytest.fixture(scope="session")
 def celery_config():
     """Configure Celery for testing."""
     return {
@@ -43,10 +37,25 @@ def api_client():
 
 @pytest.fixture
 def authenticated_client(api_client, user):
-    """Provide an authenticated API client using Supabase JWT."""
-    from rest_framework_simplejwt.tokens import RefreshToken
-    refresh = RefreshToken.for_user(user)
-    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
+    """Provide an authenticated API client using a Supabase-style JWT."""
+    import time
+    import uuid
+    import jwt as pyjwt
+
+    token = pyjwt.encode(
+        {
+            "sub": user.supabase_user_id,
+            "email": user.email,
+            "aud": "authenticated",
+            "role": "authenticated",
+            "iat": int(time.time()),
+            "exp": int(time.time()) + 3600,
+            "jti": str(uuid.uuid4()),
+        },
+        settings.SUPABASE_JWT_SECRET,
+        algorithm="HS256",
+    )
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
     return api_client
 
 
@@ -54,6 +63,7 @@ def authenticated_client(api_client, user):
 def user(django_user_model):
     """Create a test user with a Supabase user id."""
     return django_user_model.objects.create_user(
+        username="test-user",
         supabase_user_id="test-supabase-user-id",
         email="test@example.com",
         password="testpass123"
@@ -64,6 +74,7 @@ def user(django_user_model):
 def admin_user(django_user_model):
     """Create an admin test user with a Supabase user id."""
     return django_user_model.objects.create_superuser(
+        username="test-admin",
         supabase_user_id="test-admin-supabase-user-id",
         email="admin@example.com",
         password="adminpass123"

@@ -21,7 +21,7 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const subscription = useQuery({ queryKey: ['subscription'], queryFn: () => getSubscription(client) });
-  const planName = subscription.data?.plan?.name ?? 'Free';
+  const planName = subscription.data?.plan_name ?? 'Free';
 
   async function submit(event: FormEvent) {
     event.preventDefault();

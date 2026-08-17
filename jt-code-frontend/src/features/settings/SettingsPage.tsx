@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { useUser, useClerk } from '@clerk/react';
+import { useUser, supabase } from '@/lib/supabase';
 import { useApiClient } from '@/lib/api/client';
 import { getUserProfile, updateUserProfile, getOrganization, updateOrganization, getConsents, updateConsent } from '@/features/settings/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Switch } from '@/shared/components';
-import { formatDate } from '@/shared/utils';
+import { useTheme } from '@/lib/theme';
 import {
   User,
   Building2,
@@ -13,13 +13,14 @@ import {
   Shield,
   Bell,
   Moon,
-  Monitor,
   Download,
   Trash2,
-  Check,
   Pencil,
   Lock,
   ArrowRight,
+  Key,
+  Smartphone,
+  LogOut,
 } from 'lucide-react';
 import type { UserProfile, Organization, ConsentRecord } from '@/features/settings/api';
 
@@ -27,18 +28,11 @@ export function SettingsPage() {
   const client = useApiClient();
   const queryClient = useQueryClient();
   const { resolvedTheme, setTheme } = useTheme();
-  const clerkUser = useUser();
-  const clerk = useClerk();
+  const supabaseUser = useUser();
   const [activeTab, setActiveTab] = useState<string>('profile');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [localPrefs, setLocalPrefs] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    appearance: 'light' as 'light' | 'dark' | 'system',
-    usageSharing: false,
-    aiTrainingAllowed: false,
-  });
+  const [emailNotifications, setEmailNotifications] = useState(true);
 
   const user = useQuery({ queryKey: ['user-profile'], queryFn: () => getUserProfile(client) });
   const organization = useQuery({ queryKey: ['organization'], queryFn: () => getOrganization(client) });
@@ -47,19 +41,19 @@ export function SettingsPage() {
   const [profileForm, setProfileForm] = useState<Partial<UserProfile>>({});
 
   useEffect(() => {
-    if (user.data) {
-      setProfileForm({
-        first_name: user.data.first_name || '',
-        last_name: user.data.last_name || '',
-        contact: user.data.contact || '',
-        country: user.data.country || '',
-        email: user.data.email || '',
-        job_title: user.data.job_title || '',
-        timezone: user.data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-        bio: user.data.bio || '',
-      });
-    }
-  }, [user.data]);
+    const backend = user.data;
+    const supabaseMeta = supabaseUser?.user_metadata || {};
+    setProfileForm({
+      first_name: backend?.first_name || '',
+      last_name: backend?.last_name || '',
+      email: backend?.email || supabaseUser?.email || '',
+      job_title: backend?.job_title || String(supabaseMeta.job_title ?? ''),
+      contact: backend?.contact || '',
+      country: backend?.country || '',
+      timezone: backend?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      bio: backend?.bio || '',
+    });
+  }, [user.data, supabaseUser]);
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<UserProfile>) => updateUserProfile(client, data),
@@ -74,11 +68,11 @@ export function SettingsPage() {
   const updateOrgMutation = useMutation({
     mutationFn: (data: Partial<Organization>) => updateOrganization(client, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization'] });
-      setSuccess('Workspace updated');
+      void queryClient.invalidateQueries({ queryKey: ['organization'] });
+      setSuccess('Organization updated');
       setTimeout(() => setSuccess(''), 3000);
     },
-    onError: () => setError('Failed to update workspace'),
+    onError: () => setError('Failed to update organization'),
   });
 
   const updateConsentMutation = useMutation({
@@ -94,37 +88,45 @@ export function SettingsPage() {
     { id: 'privacy', label: 'Privacy', icon: Shield },
   ];
 
-  const handleProfileChange = (field: keyof UserProfile, value: string) => {
+  function handleProfileChange(field: keyof UserProfile, value: string) {
     setProfileForm((prev) => ({ ...prev, [field]: value }));
-  };
+  }
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  function handleProfileSubmit(e: React.FormEvent) {
     e.preventDefault();
-    updateProfileMutation.mutate(profileForm);
-  };
+    const payload = { ...profileForm };
+    delete payload.email;
+    updateProfileMutation.mutate(payload);
+  }
 
-  const handleProfileReset = () => {
-    if (!user.data) return;
+  function handleProfileReset() {
+    const backend = user.data;
+    const supabaseMeta = supabaseUser?.user_metadata || {};
     setProfileForm({
-      first_name: user.data.first_name || '',
-      last_name: user.data.last_name || '',
-      contact: user.data.contact || '',
-      country: user.data.country || '',
-      email: user.data.email || '',
-      job_title: user.data.job_title || '',
-      timezone: user.data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-      bio: user.data.bio || '',
+      first_name: backend?.first_name || '',
+      last_name: backend?.last_name || '',
+      email: backend?.email || supabaseUser?.email || '',
+      job_title: backend?.job_title || String(supabaseMeta.job_title ?? ''),
+      contact: backend?.contact || '',
+      country: backend?.country || '',
+      timezone: backend?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      bio: backend?.bio || '',
     });
-  };
+  }
 
-  const planName = 'Pro'; // Could be pulled from billing subscription if needed.
+  function handleSignOut() {
+    void supabase.auth.signOut();
+    window.location.href = '/sign-in';
+  }
+
+  const planName = 'Pro';
 
   return (
-    <div className="page-container">
-      <header className="workspace-header mb-6">
+    <section className="workspace">
+      <header className="workspace-header">
         <div>
-          <p className="eyebrow">SETTINGS</p>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <p className="eyebrow">Settings</p>
+          <h1>Settings</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage your profile, preferences, and workspace settings.</p>
         </div>
       </header>
@@ -141,7 +143,7 @@ export function SettingsPage() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="inline-flex h-auto w-auto p-1 bg-muted rounded-lg">
+        <TabsList className="inline-flex h-auto w-auto p-1 bg-secondary rounded-xl">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.id} value={tab.id} className="inline-flex items-center gap-2 px-4 py-2 text-sm">
               <tab.icon size={16} />
@@ -150,102 +152,148 @@ export function SettingsPage() {
           ))}
         </TabsList>
 
-        {/* ===== Profile Tab ===== */}
+        {/* Profile */}
         <TabsContent value="profile">
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <Card>
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+            <Card className="border-border/60">
               <CardHeader>
-                <CardTitle className="text-base">Profile information</CardTitle>
+                <CardTitle className="text-base text-foreground">Profile information</CardTitle>
                 <p className="text-sm text-muted-foreground">Update your personal details and how others see you.</p>
               </CardHeader>
               <CardContent>
-                {user.data && (
-                  <form onSubmit={handleProfileSubmit} className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-6 mb-6">
-                      <div className="relative">
-                        <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border">
-                          {user.data.avatar_url ? (
-                            <img src={user.data.avatar_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <User size={32} className="text-muted-foreground" />
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className="absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-                          title="Change avatar"
-                        >
-                          <Pencil size={12} />
-                        </button>
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground">{user.data.name || 'Your profile'}</div>
-                        <div className="text-xs text-muted-foreground">{planName} plan</div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Input
-                        label="First name"
-                        value={profileForm.first_name || ''}
-                        onChange={(e) => handleProfileChange('first_name', e.target.value)}
-                      />
-                      <Input
-                        label="Last name"
-                        value={profileForm.last_name || ''}
-                        onChange={(e) => handleProfileChange('last_name', e.target.value)}
-                      />
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Input
-                        label="Contact"
-                        value={profileForm.contact || ''}
-                        onChange={(e) => handleProfileChange('contact', e.target.value)}
-                        placeholder="+1 (555) 000-0000"
-                      />
-                      <Input
-                        label="Country"
-                        value={profileForm.country || ''}
-                        onChange={(e) => handleProfileChange('country', e.target.value)}
-                        placeholder="United States"
-                      />
-                    </div>
+                <form onSubmit={handleProfileSubmit} className="space-y-5">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Input label="First name" value={profileForm.first_name || ''} onChange={(e) => handleProfileChange('first_name', e.target.value)} />
+                    <Input label="Last name" value={profileForm.last_name || ''} onChange={(e) => handleProfileChange('last_name', e.target.value)} />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <Input
                       label="Email address"
                       type="email"
                       value={profileForm.email || ''}
-                      onChange={(e) => handleProfileChange('email', e.target.value)}
-                      required
+                      readOnly
+                      aria-readonly="true"
                     />
-                    <Input
-                      label="Job title"
-                      value={profileForm.job_title || ''}
-                      onChange={(e) => handleProfileChange('job_title', e.target.value)}
-                      placeholder="AI Engineer"
-                    />
-                    <Input
-                      label="Timezone"
-                      value={profileForm.timezone || ''}
-                      onChange={(e) => handleProfileChange('timezone', e.target.value)}
-                    />
-                    <Textarea
-                      label="Bio"
-                      value={profileForm.bio || ''}
-                      onChange={(e) => handleProfileChange('bio', e.target.value)}
-                      placeholder="Tell us about yourself..."
-                      rows={3}
-                    />
-                    <p className="text-xs text-muted-foreground">Briefly describe yourself. This will be shown to teammates.</p>
+                    <Input label="Job title" value={profileForm.job_title || ''} onChange={(e) => handleProfileChange('job_title', e.target.value)} placeholder="AI Engineer" />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Input label="Contact" value={profileForm.contact || ''} onChange={(e) => handleProfileChange('contact', e.target.value)} placeholder="+1 (555) 000-0000" />
+                    <Input label="Country" value={profileForm.country || ''} onChange={(e) => handleProfileChange('country', e.target.value)} placeholder="United States" />
+                  </div>
+                  <Input label="Timezone" value={profileForm.timezone || ''} onChange={(e) => handleProfileChange('timezone', e.target.value)} />
+                  <Textarea label="Bio" value={profileForm.bio || ''} onChange={(e) => handleProfileChange('bio', e.target.value)} placeholder="Tell us about yourself..." rows={3} />
+                  <p className="text-xs text-muted-foreground -mt-3">Briefly describe yourself. This will be shown to teammates.</p>
 
-                    <div className="flex items-center gap-3 pt-2">
-                      <Button
-                        type="submit"
-                        disabled={updateProfileMutation.isPending}
-                      >
-                        {updateProfileMutation.isPending ? 'Saving...' : 'Save changes'}
-                      </Button>
-                      <Button type="button" variant="outline" onClick={handleProfileReset}>
-                        Cancel
+                  <div className="flex items-center gap-3 pt-2">
+                    <Button type="submit" disabled={updateProfileMutation.isPending}>
+                      {updateProfileMutation.isPending ? 'Saving...' : 'Save changes'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={handleProfileReset}>Cancel</Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+              <Card className="border-border/60">
+                <CardContent className="p-6 flex flex-col items-center text-center relative">
+                  <div className="relative mb-4">
+                    <div className="w-28 h-28 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-border">
+                       {supabaseUser?.user_metadata?.avatar_url ? (
+                        <img src={String(supabaseUser.user_metadata.avatar_url)} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={40} className="text-muted-foreground" />
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="absolute bottom-1 right-1 h-8 w-8 rounded-full p-0"
+                      onClick={() => window.open('/app/settings', '_self')}
+                      title="Edit profile"
+                      aria-label="Edit profile"
+                    >
+                      <Pencil size={14} />
+                    </Button>
+                  </div>
+                  <div className="text-base font-semibold text-foreground">
+                    {supabaseUser?.user_metadata?.full_name || supabaseUser?.user_metadata?.name || `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() || 'Your profile'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">{supabaseUser?.email || profileForm.email}</div>
+                  <Badge variant="secondary" className="mt-2">{planName} plan</Badge>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle className="text-base text-foreground">Preferences</CardTitle>
+                  <p className="text-sm text-muted-foreground">Customize your experience.</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <Bell size={18} className="text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm text-foreground">Email notifications</div>
+                        <div className="text-xs text-muted-foreground">Receive email updates about your activity.</div>
+                      </div>
+                    </div>
+                    <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-t border-border">
+                    <div className="flex items-center gap-3">
+                      <Moon size={18} className="text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm text-foreground">Dark mode</div>
+                        <div className="text-xs text-muted-foreground">Switch between light and dark themes.</div>
+                      </div>
+                    </div>
+                    <Switch checked={resolvedTheme === 'dark'} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mt-6 flex items-start gap-3 p-4 rounded-xl border border-border bg-card/50">
+            <Lock size={18} className="text-muted-foreground mt-0.5" />
+            <div>
+              <div className="text-sm font-medium text-foreground">Your data is encrypted and secure.</div>
+              <div className="text-xs text-muted-foreground">
+                We never share your data with third parties. Learn more in our <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Workspace */}
+        <TabsContent value="workspace">
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base text-foreground">Organization</CardTitle>
+                <p className="text-sm text-muted-foreground">Manage your team workspace settings.</p>
+              </CardHeader>
+              <CardContent>
+                {organization.data && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      updateOrgMutation.mutate({
+                        name: formData.get('name') as string,
+                        slug: formData.get('slug') as string,
+                        timezone: formData.get('timezone') as string,
+                      });
+                    }}
+                    className="space-y-4 max-w-2xl"
+                  >
+                    <Input label="Organization Name" name="name" defaultValue={organization.data.name} required />
+                    <Input label="Slug" name="slug" defaultValue={organization.data.slug} helperText="Used in URLs and API paths" required />
+                    <Input label="Timezone" name="timezone" defaultValue={organization.data.timezone} />
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={updateOrgMutation.isPending}>
+                        {updateOrgMutation.isPending ? 'Saving...' : 'Save Changes'}
                       </Button>
                     </div>
                   </form>
@@ -254,163 +302,64 @@ export function SettingsPage() {
             </Card>
 
             <div className="space-y-6">
-              <Card>
+              <Card className="border-border/60">
                 <CardHeader>
-                  <CardTitle className="text-base">Preferences</CardTitle>
-                  <p className="text-sm text-muted-foreground">Customize your experience.</p>
+                  <CardTitle className="text-base text-foreground">API keys</CardTitle>
+                  <p className="text-sm text-muted-foreground">Manage access keys for external integrations.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
                     <div className="flex items-center gap-3">
-                      <Bell size={18} className="text-muted-foreground" />
+                      <Key size={18} className="text-primary" />
                       <div>
-                        <div className="font-medium text-sm">Email notifications</div>
-                        <div className="text-xs text-muted-foreground">Receive email updates about your activity.</div>
+                        <div className="text-sm font-medium text-foreground">Production API key</div>
+                        <div className="text-xs text-muted-foreground">Last used 2 hours ago</div>
                       </div>
                     </div>
-                    <Switch
-                      checked={localPrefs.emailNotifications}
-                      onCheckedChange={(checked) => setLocalPrefs({ ...localPrefs, emailNotifications: checked })}
-                    />
+                    <Button variant="outline" size="sm" onClick={() => alert('API key management coming soon')}>Manage</Button>
                   </div>
-                  <div className="flex items-center justify-between py-2 border-t">
-                    <div className="flex items-center gap-3">
-                      <Moon size={18} className="text-muted-foreground" />
-                      <div>
-                        <div className="font-medium text-sm">Dark mode</div>
-                        <div className="text-xs text-muted-foreground">Switch between light and dark themes.</div>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={localPrefs.appearance === 'dark'}
-                      onCheckedChange={(checked) => setLocalPrefs({ ...localPrefs, appearance: checked ? 'dark' : 'light' })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-t">
-                    <div className="flex items-center gap-3">
-                      <Monitor size={18} className="text-muted-foreground" />
-                      <div>
-                        <div className="font-medium text-sm">Improve JT-Code</div>
-                        <div className="text-xs text-muted-foreground">Help us improve by sharing anonymous usage data.</div>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={localPrefs.usageSharing}
-                      onCheckedChange={(checked) => setLocalPrefs({ ...localPrefs, usageSharing: checked })}
-                    />
-                  </div>
+                  <Button variant="outline" className="w-full" onClick={() => alert('Create new API key coming soon')}>Create new key</Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-border/60">
                 <CardHeader>
-                  <CardTitle className="text-base">Data & privacy</CardTitle>
+                  <CardTitle className="text-base text-foreground">Danger zone</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between py-2">
-                    <div className="flex items-center gap-3">
-                      <Download size={18} className="text-muted-foreground" />
-                      <div>
-                        <div className="font-medium text-sm">Export data</div>
-                        <div className="text-xs text-muted-foreground">Download all your data in a portable format.</div>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Export</Button>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-t">
                     <div className="flex items-center gap-3">
                       <Trash2 size={18} className="text-destructive" />
                       <div>
-                        <div className="font-medium text-sm text-destructive">Delete account</div>
-                        <div className="text-xs text-muted-foreground">Permanently delete your account and all data.</div>
+                        <div className="font-medium text-sm text-destructive">Delete organization</div>
+                        <div className="text-xs text-muted-foreground">Permanently delete workspace data.</div>
                       </div>
                     </div>
-                    <Button variant="destructive" size="sm">Delete</Button>
+                    <Button variant="destructive" size="sm" onClick={() => { if (confirm('This will permanently delete the organization. Continue?')) alert('Organization deletion request submitted.'); }}>Delete</Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
-
-          <div className="mt-6 flex items-start gap-3 p-4 rounded-lg border bg-muted/20">
-            <Lock size={18} className="text-muted-foreground mt-0.5" />
-            <div>
-              <div className="text-sm font-medium">Your data is encrypted and secure.</div>
-              <div className="text-xs text-muted-foreground">
-                We never share your data with third parties. Learn more in our <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
-              </div>
-            </div>
-          </div>
         </TabsContent>
 
-        {/* ===== Workspace Tab ===== */}
-        <TabsContent value="workspace">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Workspace</CardTitle>
-              <p className="text-sm text-muted-foreground">Manage your team workspace settings.</p>
-            </CardHeader>
-            <CardContent>
-              {organization.data && (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    updateOrgMutation.mutate({
-                      name: formData.get('name') as string,
-                      slug: formData.get('slug') as string,
-                      timezone: formData.get('timezone') as string,
-                    });
-                  }}
-                  className="space-y-4 max-w-2xl"
-                >
-                  <Input label="Workspace Name" name="name" defaultValue={organization.data.name} required />
-                  <Input
-                    label="Slug"
-                    name="slug"
-                    defaultValue={organization.data.slug}
-                    helperText="Used in URLs and API paths"
-                    required
-                  />
-                  <Input label="Timezone" name="timezone" defaultValue={organization.data.timezone} />
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={updateOrgMutation.isPending}>
-                      {updateOrgMutation.isPending ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                  </div>
-                  <div className="text-base font-semibold text-foreground">
-                    {clerkUser.user?.fullName || `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() || 'Your profile'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">{clerkUser.user?.primaryEmailAddress?.emailAddress}</div>
-                  <Badge variant="secondary" className="mt-2">{planName} plan</Badge>
-                </CardContent>
-              </Card>
-
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-base">Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground">Member management coming soon</div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* ===== Billing Tab ===== */}
+        {/* Billing */}
         <TabsContent value="billing">
-          <Card>
+          <Card className="border-border/60">
             <CardHeader>
-              <CardTitle className="text-base">Billing</CardTitle>
+              <CardTitle className="text-base text-foreground">Billing</CardTitle>
               <p className="text-sm text-muted-foreground">Manage your subscription and payment details.</p>
             </CardHeader>
             <CardContent className="space-y-4 max-w-2xl">
-              <div className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card/50">
                 <div>
-                  <div className="text-sm font-medium">Current plan</div>
+                  <div className="text-sm font-medium text-foreground">Current plan</div>
                   <div className="text-xs text-muted-foreground">{planName}</div>
                 </div>
                 <Button variant="outline" size="sm" asChild>
-                  <a href="/app/billing">Manage billing <ArrowRight size={14} className="ml-1" /></a>
+                  <Link to="/app/billing" className="inline-flex items-center">
+                    Manage billing <ArrowRight size={14} className="ml-1" />
+                  </Link>
                 </Button>
               </div>
               <Input label="Payment Method" defaultValue="Visa ending in 4242" disabled />
@@ -418,40 +367,60 @@ export function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* ===== Privacy Tab ===== */}
+        {/* Privacy */}
         <TabsContent value="privacy">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Privacy & Consent</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {consents.data?.map((consent: ConsentRecord) => (
-                <div key={consent.id} className="flex items-center justify-between py-3 border-b last:border-0">
-                  <div>
-                    <div className="font-medium">{consent.consent_type.replace(/_/g, ' ')}</div>
-                    <div className="text-sm text-muted-foreground">Version {consent.version}</div>
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base text-foreground">Privacy & Consent</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {consents.data?.map((consent: ConsentRecord) => (
+                  <div key={consent.id} className="flex items-center justify-between py-3 border-b last:border-0">
+                    <div>
+                      <div className="font-medium text-foreground">{consent.consent_type.replace(/_/g, ' ')}</div>
+                      <div className="text-sm text-muted-foreground">Version {consent.version}</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant={consent.status === 'granted' ? 'success' : 'secondary'}>{consent.status}</Badge>
+                      {consent.status === 'granted' ? (
+                        <Button variant="ghost" size="sm" onClick={() => updateConsentMutation.mutate({ consentType: consent.consent_type, status: 'denied' })}>
+                          Revoke
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" onClick={() => updateConsentMutation.mutate({ consentType: consent.consent_type, status: 'granted' })}>
+                          Grant
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant={consent.status === 'granted' ? 'success' : 'secondary'}>
-                      {consent.status}
-                    </Badge>
-                    {consent.status === 'granted' ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => updateConsentMutation.mutate({ consentType: consent.consent_type, status: 'denied' })}
-                      >
-                        Revoke
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => updateConsentMutation.mutate({ consentType: consent.consent_type, status: 'granted' })}
-                      >
-                        Grant
-                      </Button>
-                    )}
+                ))}
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle className="text-base text-foreground">Data & privacy</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <Download size={18} className="text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm text-foreground">Export data</div>
+                        <div className="text-xs text-muted-foreground">Download all your data in a portable format.</div>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), user: profileForm }, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'jt-code-data.json';
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}>Export</Button>
                   </div>
                   <div className="flex items-center justify-between py-2 border-t border-border">
                     <div className="flex items-center gap-3">
@@ -466,29 +435,52 @@ export function SettingsPage() {
                 </CardContent>
               </Card>
 
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-base">Data Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div className="flex items-center gap-3">
-                    <Download size={18} className="text-muted-foreground" />
-                    <div>
-                      <div className="font-medium">Export My Data</div>
-                      <div className="text-sm text-muted-foreground">Download all your data in a portable format</div>
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle className="text-base text-foreground">Security</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <Key size={18} className="text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm text-foreground">Password</div>
+                        <div className="text-xs text-muted-foreground">Managed through Supabase Auth</div>
+                      </div>
                     </div>
+                    <Button variant="outline" size="sm" onClick={() => window.open('https://supabase.com/dashboard', '_blank')}>
+                      Change
+                    </Button>
                   </div>
-                  <Button variant="outline">Export Data</Button>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
-                  <div className="flex items-center gap-3">
-                    <Trash2 size={18} className="text-destructive" />
-                    <div>
-                      <div className="font-medium text-destructive">Delete My Account</div>
-                      <div className="text-sm text-muted-foreground">Permanently delete your account and all data</div>
+                  <div className="flex items-center justify-between py-2 border-t border-border">
+                    <div className="flex items-center gap-3">
+                      <Smartphone size={18} className="text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm text-foreground">Two-factor auth</div>
+                        <div className="text-xs text-muted-foreground">Not enabled</div>
+                      </div>
                     </div>
+                    <Button variant="outline" size="sm" onClick={() => alert('Two-factor authentication setup coming soon')}>Enable</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle className="text-base text-foreground">Sign out</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <LogOut size={18} className="text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm text-foreground">Sign out of your account</div>
+                        <div className="text-xs text-muted-foreground">Sign out from all devices and sessions.</div>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleSignOut}>
+                      Sign out
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -496,6 +488,6 @@ export function SettingsPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </section>
   );
 }

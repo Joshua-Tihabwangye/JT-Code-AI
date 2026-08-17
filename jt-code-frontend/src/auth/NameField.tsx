@@ -24,9 +24,9 @@ export default function NameField({
 
   return (
     <div className="field-group">
+      <label htmlFor={id} className="field-label">{label}</label>
       <div className={`input-wrapper ${hasValue ? 'input-wrapper--has-value' : ''} ${error ? 'input-wrapper--error' : ''}`}>
         <UserRound size={18} className="input-wrapper__icon" />
-        <span className="input-wrapper__label">{label}</span>
         <input
           id={id}
           type="text"
@@ -37,6 +37,7 @@ export default function NameField({
             setHasValue(event.target.value.length > 0)
           }}
           autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
           required
         />
       </div>

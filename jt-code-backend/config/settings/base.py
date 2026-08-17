@@ -4,6 +4,11 @@ import os
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BASE_DIR / '.env')
+
 import cloudinary
 import dj_database_url
 import sentry_sdk
@@ -11,8 +16,6 @@ from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
-
-BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 def env(name: str, default: str | None = None, *, required: bool = False) -> str:
@@ -59,6 +62,8 @@ INSTALLED_APPS = [
     'apps.governance',
     'apps.integrations',
     'apps.ai_gateway',
+    'apps.documents',
+    'apps.conversions',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +95,6 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=env('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/jtcode'),
         conn_max_age=int(env('DATABASE_CONN_MAX_AGE', '60')),
         conn_health_checks=True,
     )
@@ -168,6 +172,7 @@ CELERY_BEAT_SCHEDULE = {
 SUPABASE_URL = env('SUPABASE_URL')
 SUPABASE_JWT_SECRET = env('SUPABASE_JWT_SECRET')
 SUPABASE_JWT_AUDIENCE = env('SUPABASE_JWT_AUDIENCE')
+SUPABASE_JWT_ISSUER = env('SUPABASE_JWT_ISSUER')
 SUPABASE_WEBHOOK_SIGNING_SECRET = env('SUPABASE_WEBHOOK_SIGNING_SECRET')
 
 CLOUDINARY_CLOUD_NAME = env('CLOUDINARY_CLOUD_NAME')
@@ -244,6 +249,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
     'EXCEPTION_HANDLER': 'apps.core.exceptions.api_exception_handler',
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'DEFAULT_THROTTLE_RATES': {
+        'chat': env('THROTTLE_CHAT', '60/hour'),
+        'images': env('THROTTLE_IMAGES', '30/hour'),
+        'embeddings': env('THROTTLE_EMBEDDINGS', '120/hour'),
+        'conversions': env('THROTTLE_CONVERSIONS', '20/hour'),
+        'research': env('THROTTLE_RESEARCH', '10/hour'),
+        'burst': env('THROTTLE_BURST', '30/minute'),
+    },
 }
 SPECTACULAR_SETTINGS = {
     'TITLE': 'JT-Code API',

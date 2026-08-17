@@ -5,7 +5,7 @@ Production-oriented React + TypeScript boilerplate for the JT-Code web applicati
 ## Tech Stack
 
 - **Framework**: React 19 + TypeScript + Vite 7
-- **Authentication**: Clerk
+- **Authentication**: Supabase Auth (JWT)
 - **State Management**: TanStack Query (React Query) + Zustand
 - **Routing**: React Router v7
 - **Styling**: CSS Modules + CSS Variables
@@ -89,8 +89,9 @@ npm install
 # Copy environment variables
 cp .env.example .env.local
 
-# Update .env.local with your Clerk publishable key
-# VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+# Update .env.local with your Supabase project URL and anon key
+# VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+# VITE_SUPABASE_ANON_KEY=sb_publishable_...
 
 # Start development server (with API proxy to localhost:8000)
 npm run dev
@@ -127,7 +128,8 @@ docker run -p 8080:80 jt-code-web
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key for authentication | Yes |
+| `VITE_SUPABASE_URL` | Supabase project URL for authentication | Yes |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon (publishable) key for authentication | Yes |
 | `VITE_API_BASE_URL` | Base URL for API requests (default: `/api/v1`) | No |
 | `VITE_SENTRY_DSN` | Sentry DSN for error tracking | No |
 | `VITE_SENTRY_ENVIRONMENT` | Sentry environment name (default: `development`) | No |
@@ -135,7 +137,7 @@ docker run -p 8080:80 jt-code-web
 | `VITE_APP_NAME` | Application display name (default: `JT-Code`) | No |
 | `VITE_APP_VERSION` | Application version (default: `0.1.0`) | No |
 
-**Note**: Only variables prefixed with `VITE_` are exposed to the client. Never expose secrets (Clerk secret keys, Cloudinary secrets, etc.) in frontend environment variables.
+**Note**: Only variables prefixed with `VITE_` are exposed to the client. Never expose secrets (Supabase service_role keys, Cloudinary secrets, etc.) in frontend environment variables.
 
 ## Testing
 
@@ -168,7 +170,8 @@ Run `npm run check` before committing to ensure all checks pass.
 ```bash
 # Build with build-time environment variables
 docker build \
-  --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_live_... \
+  --build-arg VITE_SUPABASE_URL=https://<project-ref>.supabase.co \
+  --build-arg VITE_SUPABASE_ANON_KEY=sb_publishable_... \
   --build-arg VITE_API_BASE_URL=https://api.example.com/api/v1 \
   -t jt-code-web .
 

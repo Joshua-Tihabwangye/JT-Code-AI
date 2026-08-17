@@ -25,6 +25,7 @@ export default function PasswordField({
 
   return (
     <div className="field-group">
+      <label htmlFor={id} className="field-label">{label}</label>
       <div className={`input-wrapper ${hasValue ? 'input-wrapper--has-value' : ''} ${error ? 'input-wrapper--error' : ''}`}>
         <LockKeyhole size={18} className="input-wrapper__icon" />
         <input
@@ -37,6 +38,7 @@ export default function PasswordField({
             setHasValue(event.target.value.length > 0)
           }}
           autoComplete={autoComplete}
+          aria-invalid={error ? true : undefined}
           required
         />
         <button

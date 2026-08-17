@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, Button } from '@/shared/components';
+import { Card, CardContent, Button } from '@/shared/components';
 import { MessageSquare, Trash2, Clock } from 'lucide-react';
 
 interface HistoryItem {
@@ -33,7 +33,7 @@ export function HistoryPage() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CHAT_HISTORY_KEY);
-      if (saved) setHistory(JSON.parse(saved));
+      if (saved) setHistory(JSON.parse(saved) as HistoryItem[]);
     } catch {
       // ignore
     }

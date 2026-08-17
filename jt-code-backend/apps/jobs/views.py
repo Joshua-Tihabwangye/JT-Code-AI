@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
-from django.db import transaction
+
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -10,18 +10,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.billing.services import CreditService
+from apps.core.throttling import BurstThrottle, ResearchThrottle
 from apps.core.views import APIView
-from apps.jobs.models import Job, JobStep, ProviderAttempt, WorkflowRun, Callback
+from apps.events.outbox import enqueue_outbox_event
+from apps.jobs.models import Callback, Job, JobStep, WorkflowRun
 from apps.jobs.serializers import (
-    JobSerializer,
+    CallbackSerializer,
     JobCreateSerializer,
+    JobSerializer,
     JobStatusUpdateSerializer,
     JobStepSerializer,
     WorkflowRunSerializer,
-    CallbackSerializer,
 )
-from apps.events.outbox import enqueue_outbox_event
-from apps.billing.services import CreditService
 
 
 class JobViewSet(viewsets.ModelViewSet):
@@ -159,7 +160,10 @@ class JobViewSet(viewsets.ModelViewSet):
         self._reserve_credits(new_job)
         self._enqueue_job(new_job)
 
-        return Response(JobSerializer(new_job, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        return Response(
+            JobSerializer(new_job, context={'request': request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=False, methods=['get'])
     def my_jobs(self, request: Request):
@@ -297,3 +301,97 @@ class JobStatusCallbackView(APIView):
         )
 
         return Response(JobSerializer(job).data)
+
+class ResearchJobsView(APIView):
+    """Start a deep research job with cost estimate, source policy and async execution."""
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ResearchThrottle, BurstThrottle]
+
+    def post(self, request: Request) -> Response:
+        query = (request.data.get('query') or '').strip()
+        if not query:
+            return Response({'detail': 'query is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(query) > 2000:
+            return Response(
+                {'detail': 'Query exceeds the 2000 character limit.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        collection_ids = request.data.get('collection_ids') or []
+        depth = request.data.get('depth', 'standard')
+        if depth not in {'standard', 'deep'}:
+            return Response(
+                {'detail': 'depth must be standard or deep.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user_orgs = request.user.organizations.values_list('id', flat=True)
+        collections = []
+        if collection_ids:
+            from apps.knowledge.models import Collection
+            collections = list(
+                Collection.objects.filter(
+                    id__in=collection_ids,
+                    organization_id__in=user_orgs,
+                    is_active=True,
+                ).values_list('id', flat=True)
+            )
+        if not collection_ids:
+            from apps.knowledge.models import Collection
+            collections = list(
+                Collection.objects.filter(
+                    organization_id__in=user_orgs,
+                    is_active=True,
+                ).values_list('id', flat=True)
+            )
+
+        estimated_credits = Decimal('150') if depth == 'deep' else Decimal('75')
+        request_id = uuid.uuid4()
+        try:
+            CreditService.reserve_credits(
+                user=request.user,
+                amount=estimated_credits,
+                request_id=request_id,
+                reason=f'Deep research: {depth}',
+            )
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+        job = Job.objects.create(
+            owner=request.user,
+            organization=request.user.organizations.first(),
+            task_type=Job.TaskType.SEARCH_RESEARCH,
+            idempotency_key=f'research:{request_id}',
+            input_payload={
+                'query': query,
+                'collection_ids': [str(c) for c in collections],
+                'depth': depth,
+            },
+            reserved_credits=estimated_credits,
+            request_id=request_id,
+        )
+
+        enqueue_outbox_event(
+            topic='jobs.job.created',
+            event_key=str(job.request_id),
+            payload={
+                'job_id': str(job.id),
+                'request_id': str(job.request_id),
+                'task_type': job.task_type,
+                'query': query,
+                'depth': depth,
+                'collection_ids': [str(c) for c in collections],
+                'owner_id': str(job.owner_id),
+                'reserved_credits': str(estimated_credits),
+            },
+        )
+
+        return Response({
+            'job_id': str(job.id),
+            'request_id': str(job.request_id),
+            'status': 'queued',
+            'estimated_credits': str(estimated_credits),
+            'query': query,
+            'depth': depth,
+            'collections': [str(c) for c in collections],
+        }, status=status.HTTP_202_ACCEPTED)

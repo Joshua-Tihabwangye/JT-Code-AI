@@ -49,7 +49,7 @@ export function DocumentsPage() {
     mutationFn: (data: { title: string; template: string; content: string }) =>
       createDocument(client, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      void queryClient.invalidateQueries({ queryKey: ['documents'] });
       setShowCreateDialog(false);
       setDocTitle('');
       setSelectedTemplate(templates[0]?.id ?? 'report');

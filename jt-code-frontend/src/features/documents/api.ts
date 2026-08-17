@@ -1,4 +1,4 @@
-import { useApiClient } from '@/lib/api/client';
+import type { useApiClient } from '@/lib/api/client';
 
 export interface Document {
   id: string;

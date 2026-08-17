@@ -1,25 +1,25 @@
 from __future__ import annotations
 
-from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.core.throttling import BurstThrottle, EmbeddingThrottle
 from apps.core.views import APIView
-from apps.knowledge.models import Collection, Source, Document, Chunk, SyncRun, Citation
-from apps.knowledge.serializers import (
-    CollectionSerializer,
-    CollectionCreateSerializer,
-    SourceSerializer,
-    SourceCreateSerializer,
-    DocumentSerializer,
-    ChunkSerializer,
-    SyncRunSerializer,
-    CitationSerializer,
-)
 from apps.events.outbox import enqueue_outbox_event
+from apps.knowledge.models import Chunk, Citation, Collection, Document, Source, SyncRun
+from apps.knowledge.serializers import (
+    ChunkSerializer,
+    CitationSerializer,
+    CollectionCreateSerializer,
+    CollectionSerializer,
+    DocumentSerializer,
+    SourceCreateSerializer,
+    SourceSerializer,
+    SyncRunSerializer,
+)
 
 
 class CollectionViewSet(viewsets.ModelViewSet):
@@ -29,7 +29,9 @@ class CollectionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user_orgs = self.request.user.organizations.values_list('id', flat=True)
-        return Collection.objects.filter(organization_id__in=user_orgs).select_related('organization', 'created_by')
+        return Collection.objects.filter(organization_id__in=user_orgs).select_related(
+            'organization', 'created_by'
+        )
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -142,16 +144,41 @@ class ChunkViewSet(viewsets.ReadOnlyModelViewSet):
         ).select_related('document', 'collection')
 
 
+class SyncRunViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SyncRunSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        user_orgs = self.request.user.organizations.values_list('id', flat=True)
+        return SyncRun.objects.filter(
+            source__collection__organization_id__in=user_orgs
+        ).select_related('source', 'source__collection')
+
+
+class CitationViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CitationSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        user_orgs = self.request.user.organizations.values_list('id', flat=True)
+        return Citation.objects.filter(
+            job__organization_id__in=user_orgs
+        ).select_related('job', 'document', 'chunk')
+
+
 class SearchView(APIView):
     """Semantic search across collections"""
     permission_classes = [IsAuthenticated]
+    throttle_classes = [EmbeddingThrottle, BurstThrottle]
 
     def post(self, request: Request):
         query = request.data.get('query')
         collection_ids = request.data.get('collection_ids', [])
-        top_k = request.data.get('top_k', 10)
-        rerank = request.data.get('rerank', True)
-        filters = request.data.get('filters', {})
+        request.data.get('top_k', 10)
+        request.data.get('rerank', True)
+        request.data.get('filters', {})
 
         if not query:
             return Response({'detail': 'query is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,6 +210,7 @@ class SearchView(APIView):
 class RAGQueryView(APIView):
     """RAG query with grounded generation"""
     permission_classes = [IsAuthenticated]
+    throttle_classes = [EmbeddingThrottle, BurstThrottle]
 
     def post(self, request: Request):
         query = request.data.get('query')

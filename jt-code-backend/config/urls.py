@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/v1/', include('apps.conversations.urls')),
     path('api/v1/', include('apps.assets.urls')),
     path('api/v1/', include('apps.documents.urls')),
+    path('api/v1/', include('apps.conversions.urls')),
     path('api/v1/', include('apps.jobs.urls')),
     path('api/v1/', include('apps.knowledge.urls')),
     path('api/v1/', include('apps.billing.urls')),

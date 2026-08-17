@@ -1,25 +1,26 @@
 from __future__ import annotations
 
-from django.db.models import Q, Avg, Count
+from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.core.views import APIView
-from apps.ai_gateway.models import Provider, Model, ModelPolicy, ModelRun, Prompt, Evaluation
+from apps.ai_gateway.models import Evaluation, Model, ModelPolicy, ModelRun, Prompt, Provider
 from apps.ai_gateway.serializers import (
-    ProviderSerializer,
-    ModelSerializer,
+    EvaluationCreateSerializer,
+    EvaluationSerializer,
     ModelListSerializer,
     ModelPolicySerializer,
     ModelRunSerializer,
-    PromptSerializer,
+    ModelSerializer,
     PromptCreateSerializer,
-    EvaluationSerializer,
-    EvaluationCreateSerializer,
+    PromptSerializer,
+    ProviderSerializer,
 )
+from apps.core.throttling import BurstThrottle, EmbeddingThrottle
+from apps.core.views import APIView
 from apps.events.outbox import enqueue_outbox_event
 
 
@@ -76,7 +77,9 @@ class ModelPolicyViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
     def get_queryset(self):
-        return ModelPolicy.objects.filter(is_active=True).select_related('primary_model', 'primary_model__provider')
+        return ModelPolicy.objects.filter(is_active=True).select_related(
+            'primary_model', 'primary_model__provider'
+        )
 
     @action(detail=False, methods=['get'])
     def for_task(self, request: Request):
@@ -190,6 +193,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
 class CompletionView(APIView):
     """AI completion endpoint - routes to appropriate model based on policy"""
     permission_classes = [IsAuthenticated]
+    throttle_classes = [EmbeddingThrottle, BurstThrottle]
 
     def post(self, request: Request):
         task_type = request.data.get('task_type', 'GENERAL_QUESTION')
@@ -262,6 +266,7 @@ class CompletionView(APIView):
 class EmbeddingView(APIView):
     """Generate embeddings for text"""
     permission_classes = [IsAuthenticated]
+    throttle_classes = [EmbeddingThrottle, BurstThrottle]
 
     def post(self, request: Request):
         texts = request.data.get('texts', [])
@@ -283,7 +288,10 @@ class EmbeddingView(APIView):
             ).first()
 
         if not model:
-            return Response({'detail': 'No embedding model available'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return Response(
+            {'detail': 'No embedding model available'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
 
         # Create job for embedding
         from apps.jobs.models import Job

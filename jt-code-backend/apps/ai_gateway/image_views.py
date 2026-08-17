@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 
 from apps.ai_gateway.models import Model, Provider
 from apps.billing.services import CreditService
+from apps.core.throttling import BurstThrottle, ImageThrottle
 from apps.events.outbox import add_outbox_event
 from apps.governance.models import SafetyEvent
 
@@ -156,6 +157,7 @@ def _size_tuple(size: str) -> tuple[int, int]:
 
 class ImageGenerationView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ImageThrottle, BurstThrottle]
 
     def post(self, request: Request) -> Response:
         prompt = (request.data.get('prompt') or '').strip()
@@ -209,6 +211,7 @@ class ImageGenerationView(APIView):
 
 class ImageEditView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ImageThrottle, BurstThrottle]
 
     def post(self, request: Request) -> Response:
         prompt = (request.data.get('prompt') or '').strip()
@@ -254,6 +257,7 @@ class ImageEditView(APIView):
 
 class ImageUnderstandingView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ImageThrottle, BurstThrottle]
 
     def post(self, request: Request) -> Response:
         file = request.FILES.get('file')

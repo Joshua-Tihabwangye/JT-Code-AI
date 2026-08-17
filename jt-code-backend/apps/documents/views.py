@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.core.throttling import BurstThrottle, ConversionThrottle
 from apps.documents.models import Document
 from apps.documents.rendering import render_docx, render_pdf, upload_bytes_to_cloudinary
 from apps.documents.serializers import (
@@ -83,7 +84,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
         return f"{reverse('document-download', kwargs={'id': instance.id})}?fmt={fmt}"
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], throttle_classes=[ConversionThrottle, BurstThrottle])
     def render(self, request: Request, id=None):
         document = self.get_object()
         serializer = DocumentRenderSerializer(data=request.data)

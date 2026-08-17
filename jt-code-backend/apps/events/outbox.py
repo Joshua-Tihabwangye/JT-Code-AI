@@ -8,3 +8,8 @@ def add_outbox_event(event_name: str, event_key: str, payload: dict, headers: di
     return OutboxEvent.objects.create(
         topic=topic_name(event_name), event_key=event_key, payload=payload, headers=headers or {},
     )
+
+def enqueue_outbox_event(topic: str, event_key: str, payload: dict, headers: dict | None = None) -> OutboxEvent:
+    return OutboxEvent.objects.create(
+        topic=topic, event_key=event_key, payload=payload, headers=headers or {},
+    )

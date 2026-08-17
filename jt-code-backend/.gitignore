@@ -72,3 +72,5 @@ logs/
 # Local rendered artifacts
 rendered_documents/
 generated_images/
+
+converted_files/

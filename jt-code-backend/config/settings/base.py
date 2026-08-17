@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'apps.integrations',
     'apps.ai_gateway',
     'apps.documents',
+    'apps.conversions',
 ]
 
 MIDDLEWARE = [
@@ -248,6 +249,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
     'EXCEPTION_HANDLER': 'apps.core.exceptions.api_exception_handler',
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'DEFAULT_THROTTLE_RATES': {
+        'chat': env('THROTTLE_CHAT', '60/hour'),
+        'images': env('THROTTLE_IMAGES', '30/hour'),
+        'embeddings': env('THROTTLE_EMBEDDINGS', '120/hour'),
+        'conversions': env('THROTTLE_CONVERSIONS', '20/hour'),
+        'research': env('THROTTLE_RESEARCH', '10/hour'),
+        'burst': env('THROTTLE_BURST', '30/minute'),
+    },
 }
 SPECTACULAR_SETTINGS = {
     'TITLE': 'JT-Code API',

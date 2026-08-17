@@ -1,15 +1,22 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
+from apps.ai_gateway.image_views import (
+    ImageEditView,
+    ImageGenerationView,
+    ImageUnderstandingView,
+    generated_image_download,
+)
 from apps.ai_gateway.views import (
-    ProviderViewSet,
-    ModelViewSet,
-    ModelPolicyViewSet,
-    ModelRunViewSet,
-    PromptViewSet,
-    EvaluationViewSet,
+    AIModelsView,
     CompletionView,
     EmbeddingView,
-    AIModelsView,
+    EvaluationViewSet,
+    ModelPolicyViewSet,
+    ModelRunViewSet,
+    ModelViewSet,
+    PromptViewSet,
+    ProviderViewSet,
 )
 
 router = DefaultRouter()
@@ -25,4 +32,8 @@ urlpatterns = [
     path('completion/', CompletionView.as_view(), name='completion'),
     path('embeddings/', EmbeddingView.as_view(), name='embeddings'),
     path('available-models/', AIModelsView.as_view(), name='available-models'),
+    path('images/generations/', ImageGenerationView.as_view(), name='image-generation'),
+    path('images/edits/', ImageEditView.as_view(), name='image-edit'),
+    path('images/understand/', ImageUnderstandingView.as_view(), name='image-understand'),
+    path('images/<uuid:id>/download/', generated_image_download, name='generated-image-download'),
 ]

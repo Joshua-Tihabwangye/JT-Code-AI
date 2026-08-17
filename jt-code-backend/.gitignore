@@ -69,3 +69,6 @@ logs/
 *.pyd
 .cache/
 .ipynb_checkpoints
+# Local rendered artifacts
+rendered_documents/
+generated_images/

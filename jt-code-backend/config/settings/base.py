@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.governance',
     'apps.integrations',
     'apps.ai_gateway',
+    'apps.documents',
 ]
 
 MIDDLEWARE = [

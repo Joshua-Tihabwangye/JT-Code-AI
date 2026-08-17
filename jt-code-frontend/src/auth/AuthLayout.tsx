@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Code2, ShieldCheck, Zap } from 'lucide-react'
+import { MessageSquareText, Sparkles, ShieldCheck, Moon, Sun } from 'lucide-react'
+import { useTheme } from '@/lib/theme'
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -18,8 +19,21 @@ function Feature({ icon, title, text }: { icon: ReactNode; title: string; text: 
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
+  const { resolvedTheme, setTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+
   return (
     <div className="auth-page">
+      <button
+        type="button"
+        className="auth-theme-toggle"
+        onClick={() => setTheme(isDark ? 'light' : 'dark')}
+        aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+      >
+        {isDark ? <Sun size={16} /> : <Moon size={16} />}
+        {isDark ? 'Light' : 'Dark'}
+      </button>
+
       <main className="auth-grid">
         <section className="brand-panel" aria-label="JT-Code">
           <div className="brand-panel__inner">
@@ -29,33 +43,33 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             </div>
 
             <div className="brand-copy">
-              <h1>Your AI agent for<br />focused work</h1>
-              <p>JT-Code understands your codebase, helps you move faster, and keeps you in flow.</p>
+              <h1>One workspace for questions, files, research and creation.</h1>
+              <p>JT-Code is your general AI assistant — chat, upload files, and create across one calm interface.</p>
             </div>
 
             <div className="brand-illustration-wrap">
               <img
                 src="/auth-illustration.png"
                 className="brand-illustration"
-                alt="JT-Code assisting with code refactoring"
+                alt="The JT-Code assistant interface"
               />
             </div>
 
             <div className="auth-features">
               <Feature
-                icon={<Code2 size={22} strokeWidth={2.1} />}
-                title="Understand"
-                text="Your entire codebase"
+                icon={<MessageSquareText size={20} strokeWidth={2.1} />}
+                title="Chat & research"
+                text="Ask, draft, and reason across tasks"
               />
               <Feature
-                icon={<Zap size={22} strokeWidth={2.1} />}
-                title="Assist"
-                text="With intelligent suggestions"
+                icon={<Sparkles size={20} strokeWidth={2.1} />}
+                title="Create & edit"
+                text="Images, documents, and more"
               />
               <Feature
-                icon={<ShieldCheck size={22} strokeWidth={2.1} />}
-                title="Protect"
-                text="Your data and privacy"
+                icon={<ShieldCheck size={20} strokeWidth={2.1} />}
+                title="Private by design"
+                text="Your data stays yours"
               />
             </div>
           </div>

@@ -39,7 +39,7 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
         <div
           ref={scrollAreaRef}
           className="h-full w-full overflow-auto"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' as any }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {children}
         </div>

@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import AuthLayout from '@/auth/AuthLayout';
-import PasswordField from '@/auth/PasswordField';
+import EmailField from '@/auth/EmailField';
 import { supabase } from '@/lib/supabase';
 
 export default function ForgotPasswordPage() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [stage, setStage] = useState<'email' | 'sent'>('email');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,25 +41,16 @@ export default function ForgotPasswordPage() {
               <p>No worries. Enter your email address and we'll send you a link to reset your password.</p>
             </div>
 
-            <form onSubmit={sendResetLink} className="auth-form auth-form--forgot">
-              <div className="field-group">
-                <label htmlFor="reset-email">Email address</label>
-                <div className={`input-shell ${errorMsg ? 'input-shell--error' : ''}`}>
-                  <Mail size={18} className="input-shell__icon" />
-                  <input
-                    id="reset-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    required
-                  />
-                </div>
-                {errorMsg && <p className="field-error">{errorMsg}</p>}
-              </div>
-
-              {errorMsg && <div className="form-error">{errorMsg}</div>}
+            <form onSubmit={(event) => void sendResetLink(event)} className="auth-form auth-form--forgot">
+              <EmailField
+                id="reset-email"
+                label="Email address"
+                value={email}
+                onChange={setEmail}
+                placeholder="you@example.com"
+                autoComplete="email"
+                error={errorMsg}
+              />
 
               <button type="submit" className="primary-button" disabled={isLoading}>
                 {isLoading ? 'Sending…' : 'Send reset link'}
@@ -70,7 +60,6 @@ export default function ForgotPasswordPage() {
             </form>
 
             <div className="help-note">
-              <div className="help-note__icon"><Mail size={18} /></div>
               <p>Don't see the email? Check your spam folder or try again. If you still need help, <a href="/support">contact support</a>.</p>
             </div>
           </>

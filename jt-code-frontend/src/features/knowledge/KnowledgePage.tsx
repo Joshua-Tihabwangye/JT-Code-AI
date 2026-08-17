@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/lib/api/client';
 import { listCollections, createCollection, syncSource } from '@/features/knowledge/api';
-import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal, ScrollArea } from '@/shared/components';
-import { formatDate } from '@/shared/utils';
+import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Badge, Spinner, Alert, Modal } from '@/shared/components';
 
 export function KnowledgePage() {
   const client = useApiClient();
@@ -25,12 +24,12 @@ export function KnowledgePage() {
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
       setNewCollection({ name: '', description: '', embeddingProvider: 'openai', embeddingModel: 'text-embedding-3-small' });
       setShowCreateDialog(false);
-    } catch (err) {
+    } catch {
       setError('Failed to create collection');
     }
   }
 
-  async function handleSync(collectionId: string) {
+  function handleSync(collectionId: string) {
     setShowSyncDialog(collectionId);
   }
 
@@ -40,7 +39,7 @@ export function KnowledgePage() {
       await syncSource(client, showSyncDialog);
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
       setShowSyncDialog(null);
-    } catch (err) {
+    } catch {
       setError('Failed to sync source');
     }
   }
@@ -158,7 +157,7 @@ export function KnowledgePage() {
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="ghost" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-            <Button onClick={handleCreateCollection} disabled={!newCollection.name.trim()}>
+            <Button onClick={() => void handleCreateCollection()} disabled={!newCollection.name.trim()}>
               Create Collection
             </Button>
           </div>
@@ -175,7 +174,7 @@ export function KnowledgePage() {
         <p className="text-muted-foreground mb-4">Are you sure you want to sync this collection? This may take a few minutes.</p>
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setShowSyncDialog(null)}>Cancel</Button>
-          <Button onClick={confirmSync}>Sync Now</Button>
+          <Button onClick={() => void confirmSync()}>Sync Now</Button>
         </div>
       </Modal>
     </section>

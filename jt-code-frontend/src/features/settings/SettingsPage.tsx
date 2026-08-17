@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { useAuth, useUser, supabase } from '@/lib/supabase';
+import { useUser, supabase } from '@/lib/supabase';
 import { useApiClient } from '@/lib/api/client';
 import { getUserProfile, updateUserProfile, getOrganization, updateOrganization, getConsents, updateConsent } from '@/features/settings/api';
-import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Switch, Avatar } from '@/shared/components';
+import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Switch } from '@/shared/components';
 import { useTheme } from '@/lib/theme';
 import {
   User,
@@ -29,7 +29,6 @@ export function SettingsPage() {
   const queryClient = useQueryClient();
   const { resolvedTheme, setTheme } = useTheme();
   const supabaseUser = useUser();
-  const { isSignedIn } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('profile');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -44,12 +43,11 @@ export function SettingsPage() {
   useEffect(() => {
     const backend = user.data;
     const supabaseMeta = supabaseUser?.user_metadata || {};
-    const fullName = supabaseMeta.full_name || supabaseMeta.name || '';
     setProfileForm({
       first_name: backend?.first_name || '',
       last_name: backend?.last_name || '',
       email: backend?.email || supabaseUser?.email || '',
-      job_title: backend?.job_title || supabaseMeta.job_title?.toString() || '',
+      job_title: backend?.job_title || String(supabaseMeta.job_title ?? ''),
       contact: backend?.contact || '',
       country: backend?.country || '',
       timezone: backend?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -104,12 +102,11 @@ export function SettingsPage() {
   function handleProfileReset() {
     const backend = user.data;
     const supabaseMeta = supabaseUser?.user_metadata || {};
-    const fullName = supabaseMeta.full_name || supabaseMeta.name || '';
     setProfileForm({
       first_name: backend?.first_name || '',
       last_name: backend?.last_name || '',
       email: backend?.email || supabaseUser?.email || '',
-      job_title: backend?.job_title || supabaseMeta.job_title?.toString() || '',
+      job_title: backend?.job_title || String(supabaseMeta.job_title ?? ''),
       contact: backend?.contact || '',
       country: backend?.country || '',
       timezone: backend?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -202,8 +199,8 @@ export function SettingsPage() {
                 <CardContent className="p-6 flex flex-col items-center text-center relative">
                   <div className="relative mb-4">
                     <div className="w-28 h-28 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-border">
-                      {supabaseUser?.user_metadata?.avatar_url ? (
-                        <img src={supabaseUser.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
+                       {supabaseUser?.user_metadata?.avatar_url ? (
+                        <img src={String(supabaseUser.user_metadata.avatar_url)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <User size={40} className="text-muted-foreground" />
                       )}

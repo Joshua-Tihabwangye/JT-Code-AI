@@ -24,13 +24,13 @@ export default function SsoCallbackPage() {
 
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          navigate('/app/chat', { replace: true });
+          void navigate('/app/chat', { replace: true });
         } else {
-          navigate('/sign-in', { replace: true });
+          void navigate('/sign-in', { replace: true });
         }
       } catch (err) {
         setErrorMsg(err instanceof Error ? err.message : 'Authentication failed.');
-        setTimeout(() => navigate('/sign-in', { replace: true }), 3000);
+        setTimeout(() => { void navigate('/sign-in', { replace: true }); }, 3000);
       } finally {
         setLoading(false);
       }

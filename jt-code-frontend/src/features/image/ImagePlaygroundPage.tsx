@@ -1,4 +1,4 @@
-import { useState, useEffect, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
 import { generateImage, understandImage, editImage } from '@/features/image/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Spinner, Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components';
@@ -9,6 +9,17 @@ interface GeneratedImage {
   url: string;
   prompt: string;
   createdAt: string;
+}
+
+interface HistoryItem {
+  id: string;
+  prompt: string;
+  imageUrl: string;
+  type: 'generate' | 'understand' | 'edit';
+  size: string;
+  style: string;
+  count: number;
+  timestamp: number;
 }
 
 const templates = [
@@ -46,6 +57,7 @@ export function ImagePlaygroundPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -366,7 +378,7 @@ export function ImagePlaygroundPage() {
               </div>
 
               <Button
-                onClick={handleGenerate}
+                onClick={() => void handleGenerate()}
                 disabled={busy || !prompt.trim()}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 size="lg"
@@ -443,7 +455,7 @@ export function ImagePlaygroundPage() {
               </div>
 
               <Button
-                onClick={handleEdit}
+                onClick={() => void handleEdit()}
                 disabled={busy || !inputImage || !prompt.trim()}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 size="lg"
@@ -524,7 +536,7 @@ export function ImagePlaygroundPage() {
               />
 
               <Button
-                onClick={handleUnderstand}
+                onClick={() => void handleUnderstand()}
                 disabled={busy || !inputImage}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 size="lg"
@@ -574,6 +586,35 @@ export function ImagePlaygroundPage() {
           ))}
         </div>
       </div>
+
+      {history.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">Recent activity</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            {history.slice(0, 12).map((item) => (
+              <a
+                key={item.id}
+                href={item.imageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`${item.type}: ${item.prompt}`}
+                className="group relative aspect-square rounded-lg overflow-hidden border border-border bg-muted/30"
+              >
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.prompt} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground text-center px-2">
+                    {item.prompt}
+                  </div>
+                )}
+                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 truncate">
+                  {item.type}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

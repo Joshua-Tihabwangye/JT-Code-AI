@@ -6,16 +6,16 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { createBrowserClient, type SupabaseClient } from '@supabase/ssr';
-import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient, Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { config } from '@/lib/config';
 
 export type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export const supabase: SupabaseClient = createBrowserClient(
+export const supabase = createBrowserClient(
   config.supabaseUrl,
   config.supabaseAnonKey,
-);
+) as SupabaseClient;
 
 interface AuthState {
   user: SupabaseUser | null;

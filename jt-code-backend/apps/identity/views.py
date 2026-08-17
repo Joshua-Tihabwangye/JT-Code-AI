@@ -3,7 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from apps.identity.serializers import UserSerializer, UserProfileSerializer
+
+from apps.identity.serializers import UserProfileSerializer, UserSerializer
+
 
 class MeView(RetrieveAPIView):
     serializer_class = UserSerializer

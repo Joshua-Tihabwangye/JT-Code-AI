@@ -7,6 +7,7 @@ import httpx
 import jwt
 from django.conf import settings
 from rest_framework import authentication, exceptions
+
 from apps.identity.models import User
 
 _JWKS_CACHE: dict[str, Any] | None = None
@@ -85,14 +86,14 @@ class SupabaseJWTAuthentication(authentication.BaseAuthentication):
             try:
                 claims = _verify_with_jwks(token)
             except jwt.ExpiredSignatureError:
-                raise exceptions.AuthenticationFailed('Supabase token has expired.')
+                raise exceptions.AuthenticationFailed('Supabase token has expired.') from None
             except Exception as exc:
                 last_error = exc
         if claims is None and settings.SUPABASE_JWT_SECRET:
             try:
                 claims = _verify_with_secret(token)
             except jwt.ExpiredSignatureError:
-                raise exceptions.AuthenticationFailed('Supabase token has expired.')
+                raise exceptions.AuthenticationFailed('Supabase token has expired.') from None
             except Exception as exc:
                 last_error = exc
         if claims is None:

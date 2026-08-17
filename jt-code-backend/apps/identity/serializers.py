@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
-    avatar_url = serializers.URLField(source='avatar_url', required=False, allow_blank=True)
+    avatar_url = serializers.URLField(required=False, allow_blank=True)
 
     class Meta:
         model = User

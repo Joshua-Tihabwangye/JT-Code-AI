@@ -361,6 +361,7 @@ class ResearchJobsView(APIView):
             owner=request.user,
             organization=request.user.organizations.first(),
             task_type=Job.TaskType.SEARCH_RESEARCH,
+            idempotency_key=f'research:{request_id}',
             input_payload={
                 'query': query,
                 'collection_ids': [str(c) for c in collections],

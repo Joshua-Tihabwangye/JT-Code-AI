@@ -1,7 +1,7 @@
 import uuid
+
 from django.conf import settings
 from django.db import models
-from django.utils import timezone
 
 
 class Job(models.Model):
@@ -48,7 +48,7 @@ class Job(models.Model):
         blank=True
     )
     request_id = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
-    idempotency_key = models.CharField(max_length=255, db_index=True)
+    idempotency_key = models.CharField(max_length=255, db_index=True, default=uuid.uuid4)
     task_type = models.CharField(max_length=50, choices=TaskType.choices)
     status = models.CharField(max_length=30, choices=Status.choices, default=Status.QUEUED)
     input_payload = models.JSONField()

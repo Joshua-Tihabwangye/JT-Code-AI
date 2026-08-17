@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import json
-import hmac
 import hashlib
+import hmac
+import json
 
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpRequest, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from apps.identity.models import User
+
 
 @csrf_exempt
 def supabase_webhook(request: HttpRequest):

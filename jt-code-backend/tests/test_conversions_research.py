@@ -271,6 +271,32 @@ def test_research_job_insufficient_credits(authenticated_client, user, org):
     assert response.status_code == 402
 
 
+# --- Regression: settings/profile serialization ---
+
+@pytest.mark.django_db
+def test_settings_profile_serializes_avatar_url(authenticated_client, user):
+    response = authenticated_client.get('/api/v1/settings/profile/')
+    assert response.status_code == 200, response.content
+    assert 'avatar_url' in response.json()
+
+
+# --- Regression: job idempotency key uniqueness ---
+
+@pytest.mark.django_db
+def test_repeated_research_jobs_get_unique_idempotency_keys(
+    authenticated_client, user, org, credit_balance
+):
+    payload = {'query': 'Repeated identical research question?', 'depth': 'standard'}
+    first = authenticated_client.post('/api/v1/research/jobs/', payload)
+    assert first.status_code == 202, first.content
+    second = authenticated_client.post('/api/v1/research/jobs/', payload)
+    assert second.status_code == 202, second.content
+    assert first.json()['job_id'] != second.json()['job_id']
+    from apps.jobs.models import Job
+    jobs = Job.objects.filter(owner=user, task_type=Job.TaskType.SEARCH_RESEARCH)
+    assert len(set(job.idempotency_key for job in jobs)) == 2
+
+
 # --- Rate limits ---
 
 @pytest.mark.django_db

@@ -33,7 +33,10 @@ export function HistoryPage() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CHAT_HISTORY_KEY);
-      if (saved) setHistory(JSON.parse(saved) as HistoryItem[]);
+      if (saved) {
+        const parsed = JSON.parse(saved) as unknown;
+        setHistory(Array.isArray(parsed) ? (parsed as HistoryItem[]) : []);
+      }
     } catch {
       // ignore
     }

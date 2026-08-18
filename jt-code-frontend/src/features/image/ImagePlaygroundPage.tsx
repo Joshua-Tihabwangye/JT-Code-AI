@@ -1,21 +1,21 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
 import { generateImage, understandImage, editImage } from '@/features/image/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Spinner, Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components';
-import { Plus, Download, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Download, Upload, X, Image as ImageIcon, Wand2, ScanLine, PenTool, Trash2 } from 'lucide-react';
 
 interface GeneratedImage {
   id: string;
   url: string;
   prompt: string;
-  createdAt: string;
+  type: 'generate' | 'edit' | 'understand';
 }
 
 interface HistoryItem {
   id: string;
   prompt: string;
   imageUrl: string;
-  type: 'generate' | 'understand' | 'edit';
+  type: 'generate' | 'edit' | 'understand';
   size: string;
   style: string;
   count: number;
@@ -42,6 +42,8 @@ const styles = [
   { value: 'natural', label: 'Natural' },
 ];
 
+const HISTORY_KEY = 'jt-code-image-history';
+
 export function ImagePlaygroundPage() {
   const client = useApiClient();
   const [activeTab, setActiveTab] = useState<string>('generate');
@@ -58,6 +60,26 @@ export function ImagePlaygroundPage() {
   const [error, setError] = useState('');
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as HistoryItem[];
+        setHistory(Array.isArray(parsed) ? parsed : []);
+      }
+    } catch {
+      // ignore corrupted storage
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    } catch {
+      // ignore storage errors (e.g. quota exceeded)
+    }
+  }, [history]);
 
   function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -80,6 +102,36 @@ export function ImagePlaygroundPage() {
     setInputImagePreview(null);
   }
 
+  function deleteHistoryItem(id: string, event: React.MouseEvent) {
+    event.stopPropagation();
+    setHistory((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  function clearHistory() {
+    if (confirm('Are you sure you want to clear your image history?')) {
+      setHistory([]);
+    }
+  }
+
+  function restoreHistoryItem(item: HistoryItem) {
+    setPrompt(item.prompt);
+    if (item.type === 'generate') {
+      setSize(item.size);
+      setStyle(item.style);
+      setImageCount(item.count);
+      setActiveTab('generate');
+    }
+  }
+
+  function formatTimestamp(timestamp: number): string {
+    return new Date(timestamp).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
   async function handleGenerate() {
     if (!prompt.trim()) {
       setError('Please enter a prompt');
@@ -96,12 +148,11 @@ export function ImagePlaygroundPage() {
         quality: 'standard',
         n: imageCount,
       });
-
       const newImages: GeneratedImage[] = result.data.map((img) => ({
         id: crypto.randomUUID(),
         url: img.url || img.b64_json || '',
         prompt,
-        createdAt: new Date().toISOString(),
+        type: 'generate',
       }));
       setGeneratedImages((prev) => [...newImages, ...prev]);
       const newHistoryItems: HistoryItem[] = newImages.map((img) => ({
@@ -165,8 +216,8 @@ export function ImagePlaygroundPage() {
         const newImage: GeneratedImage = {
           id: crypto.randomUUID(),
           url: result.data[0].url,
-          prompt: `Edit: ${prompt}`,
-          createdAt: new Date().toISOString(),
+          prompt,
+          type: 'edit',
         };
         setGeneratedImages((prev) => [newImage, ...prev]);
         const historyItem: HistoryItem = {
@@ -200,36 +251,31 @@ export function ImagePlaygroundPage() {
       );
     }
 
-    if (generatedImages.length > 0 && (activeTab === 'generate' || (activeTab === 'edit' && generatedImages.some(img => img.prompt.startsWith('Edit:'))))) {
+    if (generatedImages.length > 0 && (activeTab === 'generate' || (activeTab === 'edit' && generatedImages.some((img) => img.type === 'edit')))) {
       const displayImages = activeTab === 'edit'
-        ? generatedImages.filter(img => img.prompt.startsWith('Edit:'))
+        ? generatedImages.filter((img) => img.type === 'edit')
         : generatedImages;
-
       if (displayImages.length > 0) {
         const firstImage = displayImages[0];
         return (
           <div className="space-y-4">
             <div className="image-preview-area">
-              {firstImage && (
-                <img
-                  src={firstImage.url}
-                  alt={firstImage.prompt}
-                  className="max-w-full max-h-[400px] rounded-lg object-contain"
-                />
-              )}
+              {firstImage && <img src={firstImage.url} alt={firstImage.prompt} className="max-w-full max-h-[400px] rounded-md object-contain" />}
             </div>
             {displayImages.length > 1 && (
               <div className="image-gallery">
                 {displayImages.slice(1).map((img) => (
                   <div key={img.id} className="image-thumb group">
                     <img src={img.url} alt={img.prompt} />
-                    <button
+                    <Button
                       type="button"
-                      className="download-btn absolute top-2 right-2 w-6 h-6 rounded-full bg-white border border-border opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      variant="outline"
+                      size="sm"
                       onClick={() => window.open(img.url, '_blank')}
+                      className="absolute top-2 right-2 w-7 h-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Download size={14} />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -248,7 +294,7 @@ export function ImagePlaygroundPage() {
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{understandingResult}</p>
             </div>
           ) : inputImagePreview ? (
-            <img src={inputImagePreview} alt="Preview" className="max-w-full max-h-[400px] rounded-lg object-contain" />
+            <img src={inputImagePreview} alt="Preview" className="max-w-full max-h-[400px] rounded-md object-contain" />
           ) : (
             <div className="flex flex-col items-center gap-3">
               <ImageIcon size={48} className="text-muted-foreground/40" />
@@ -272,13 +318,16 @@ export function ImagePlaygroundPage() {
     );
   }
 
+  const selectClass =
+    'w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all';
+
   return (
-    <div className="page-container">
-      <header className="workspace-header mb-6">
+    <section className="workspace">
+      <header className="workspace-header">
         <div>
-          <p className="eyebrow">IMAGE STUDIO</p>
-          <h1 className="text-2xl font-bold text-foreground">Image Studio</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create and edit images with the power of AI.</p>
+          <p className="eyebrow">Image Studio</p>
+          <h1>Image Studio</h1>
+          <p className="text-sm text-muted-foreground mt-1">Create, edit, and understand images with AI.</p>
         </div>
       </header>
 
@@ -289,332 +338,241 @@ export function ImagePlaygroundPage() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6 grid grid-cols-3 w-full max-w-md mx-auto">
-          <TabsTrigger value="generate" className="gap-2">
-            <Plus size={14} /> Generate
+        <TabsList className="inline-flex h-auto w-auto p-1 bg-secondary rounded-md mb-6">
+          <TabsTrigger value="generate" className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-sm">
+            <Wand2 size={16} /> Generate
           </TabsTrigger>
-          <TabsTrigger value="edit" className="gap-2">
-            <ImageIcon size={14} /> Edit
+          <TabsTrigger value="edit" className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-sm">
+            <PenTool size={16} /> Edit
           </TabsTrigger>
-          <TabsTrigger value="understand" className="gap-2">
-            <Download size={14} style={{ transform: 'rotate(180deg)' }} /> Understand
+          <TabsTrigger value="understand" className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-sm">
+            <ScanLine size={16} /> Understand
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="generate">
-          <div className="image-studio-grid">
-            {/* Left Panel */}
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <div className="space-y-4">
-              <Textarea
-                label="Prompt"
-                placeholder="A futuristic cityscape at sunset, neon lights, cyberpunk style..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={4}
-              />
-
-              <div className="space-y-3">
-                <Textarea
-                  label="Negative prompt (optional)"
-                  placeholder="Things to avoid: blurry, low quality, distorted..."
-                  value={negativePrompt}
-                  onChange={(e) => setNegativePrompt(e.target.value)}
-                  rows={2}
-                />
-
+              <Textarea label="Prompt" placeholder="A futuristic cityscape at sunset, neon lights, cyberpunk style..." value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={4} />
+              <Textarea label="Negative prompt (optional)" placeholder="Things to avoid: blurry, low quality, distorted..." value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} rows={2} />
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground">Size</label>
-                  <select
-                    value={size}
-                    onChange={(e) => setSize(e.target.value)}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {sizes.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
+                  <label className="block text-sm font-medium mb-1.5 text-foreground">Size</label>
+                  <select value={size} onChange={(e) => setSize(e.target.value)} className={selectClass}>
+                    {sizes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground">Style</label>
-                  <select
-                    value={style}
-                    onChange={(e) => setStyle(e.target.value)}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {styles.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
+                  <label className="block text-sm font-medium mb-1.5 text-foreground">Style</label>
+                  <select value={style} onChange={(e) => setStyle(e.target.value)} className={selectClass}>
+                    {styles.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground">Count</label>
-                  <select
-                    value={imageCount}
-                    onChange={(e) => setImageCount(parseInt(e.target.value))}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {[1, 2, 3, 4].map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
+                  <label className="block text-sm font-medium mb-1.5 text-foreground">Count</label>
+                  <select value={imageCount} onChange={(e) => setImageCount(parseInt(e.target.value))} className={selectClass}>
+                    {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowMoreOptions(!showMoreOptions)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                >
-                  <Plus size={14} style={{ transform: showMoreOptions ? 'rotate(45deg)' : 'none' }} />
-                  More options
-                </button>
-
-                {showMoreOptions && (
-                  <div className="space-y-3 pt-2">
-                    <Input label="Seed (optional)" placeholder="Leave blank for random" type="number" />
-                  </div>
-                )}
               </div>
-
-              <Button
-                onClick={() => void handleGenerate()}
-                disabled={busy || !prompt.trim()}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                size="lg"
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowMoreOptions(!showMoreOptions)} className="text-muted-foreground hover:text-foreground gap-1 px-0">
+                <Plus size={14} style={{ transform: showMoreOptions ? 'rotate(45deg)' : 'none' }} /> More options
+              </Button>
+              {showMoreOptions && <Input label="Seed (optional)" placeholder="Leave blank for random" type="number" />}
+              <Button onClick={() => void handleGenerate()} disabled={busy || !prompt.trim()} className="w-full" size="lg">
                 {busy ? <Spinner size="sm" /> : 'Generate Image'}
               </Button>
             </div>
-
-            {/* Right Panel */}
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Preview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {renderPreviewArea()}
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="border-border/60 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">Preview</CardTitle>
+              </CardHeader>
+              <CardContent>{renderPreviewArea()}</CardContent>
+            </Card>
           </div>
         </TabsContent>
 
         <TabsContent value="edit">
-          <div className="image-studio-grid">
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <div className="space-y-4">
               {!inputImagePreview ? (
-                <div
-                  className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer transition-colors hover:border-primary"
-                  onClick={() => document.getElementById('image-edit-upload')?.click()}
-                >
+                <div className="border-2 border-dashed border-border rounded-md p-8 text-center cursor-pointer transition-colors hover:border-primary hover:bg-secondary/30" onClick={() => document.getElementById('image-edit-upload')?.click()}>
                   <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Click to upload an image to edit</p>
                   <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WebP up to 10MB</p>
-                  <input
-                    id="image-edit-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+                  <input id="image-edit-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
               ) : (
-                <div className="relative">
-                  <img src={inputImagePreview} alt="Upload preview" className="w-full rounded-lg max-h-[200px] object-cover" />
-                  <button
+                <div className="relative rounded-md overflow-hidden border border-border">
+                  <img src={inputImagePreview} alt="Upload preview" className="w-full max-h-[200px] object-cover" />
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={clearImage}
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                    className="absolute top-2 right-2 w-7 h-7 p-0"
                   >
                     <X size={14} />
-                  </button>
+                  </Button>
                 </div>
               )}
-
-              <Textarea
-                label="Edit prompt"
-                placeholder="Change the background to a beach at sunset..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={3}
-              />
-
+              <Textarea label="Edit prompt" placeholder="Change the background to a beach at sunset..." value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
               <div>
-                <label className="block text-sm font-medium mb-1 text-foreground">Size</label>
-                <select
-                  value={size}
-                  onChange={(e) => setSize(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {sizes.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
+                <label className="block text-sm font-medium mb-1.5 text-foreground">Size</label>
+                <select value={size} onChange={(e) => setSize(e.target.value)} className={selectClass}>
+                  {sizes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
-
-              <Button
-                onClick={() => void handleEdit()}
-                disabled={busy || !inputImage || !prompt.trim()}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                size="lg"
-              >
+              <Button onClick={() => void handleEdit()} disabled={busy || !inputImage || !prompt.trim()} className="w-full" size="lg">
                 {busy ? <Spinner size="sm" /> : 'Edit Image'}
               </Button>
             </div>
-
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Edited Result</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {generatedImages.filter(img => img.prompt.startsWith('Edit:')).length > 0 ? (
-                    (() => {
-                      const edit = generatedImages.filter(img => img.prompt.startsWith('Edit:'))[0];
-                      return edit ? (
-                        <img
-                          src={edit.url}
-                          alt="Edited result"
-                          className="w-full rounded-lg object-contain max-h-[400px]"
-                        />
-                      ) : null;
-                    })()
-                  ) : (
-                    <div className="image-preview-area">
-                      <div className="flex flex-col items-center gap-3">
-                        <ImageIcon size={48} className="text-muted-foreground/40" />
-                        <p className="text-sm text-muted-foreground">Upload an image, describe the edit, and click Edit</p>
-                      </div>
+            <Card className="border-border/60 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">Edited Result</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {generatedImages.filter((img) => img.type === 'edit').length > 0 ? (
+                  (() => {
+                    const edit = generatedImages.filter((img) => img.type === 'edit')[0];
+                    return edit ? <img src={edit.url} alt="Edited result" className="w-full rounded-md object-contain max-h-[400px]" /> : null;
+                  })()
+                ) : (
+                  <div className="image-preview-area">
+                    <div className="flex flex-col items-center gap-3">
+                      <ImageIcon size={48} className="text-muted-foreground/40" />
+                      <p className="text-sm text-muted-foreground">Upload an image, describe the edit, and click Edit</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
         <TabsContent value="understand">
-          <div className="image-studio-grid">
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <div className="space-y-4">
               {!inputImagePreview ? (
-                <div
-                  className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer transition-colors hover:border-primary"
-                  onClick={() => document.getElementById('image-understand-upload')?.click()}
-                >
+                <div className="border-2 border-dashed border-border rounded-md p-8 text-center cursor-pointer transition-colors hover:border-primary hover:bg-secondary/30" onClick={() => document.getElementById('image-understand-upload')?.click()}>
                   <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Click to upload an image to analyze</p>
                   <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WebP up to 10MB</p>
-                  <input
-                    id="image-understand-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+                  <input id="image-understand-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
               ) : (
-                <div className="relative">
-                  <img src={inputImagePreview} alt="Upload preview" className="w-full rounded-lg max-h-[200px] object-cover" />
-                  <button
+                <div className="relative rounded-md overflow-hidden border border-border">
+                  <img src={inputImagePreview} alt="Upload preview" className="w-full max-h-[200px] object-cover" />
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={clearImage}
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                    className="absolute top-2 right-2 w-7 h-7 p-0"
                   >
                     <X size={14} />
-                  </button>
+                  </Button>
                 </div>
               )}
-
-              <Textarea
-                label="Question (optional)"
-                placeholder="What is in this image? Describe it in detail..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={3}
-              />
-
-              <Button
-                onClick={() => void handleUnderstand()}
-                disabled={busy || !inputImage}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                size="lg"
-              >
+              <Textarea label="Question (optional)" placeholder="What is in this image? Describe it in detail..." value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
+              <Button onClick={() => void handleUnderstand()} disabled={busy || !inputImage} className="w-full" size="lg">
                 {busy ? <Spinner size="sm" /> : 'Analyze Image'}
               </Button>
             </div>
-
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analysis Result</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {understandingResult ? (
-                    <div className="prose max-w-none text-sm whitespace-pre-wrap">
-                      {understandingResult}
+            <Card className="border-border/60 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">Analysis Result</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {understandingResult ? (
+                  <div className="prose max-w-none text-sm whitespace-pre-wrap text-foreground">{understandingResult}</div>
+                ) : (
+                  <div className="image-preview-area">
+                    <div className="flex flex-col items-center gap-3">
+                      <ImageIcon size={48} className="text-muted-foreground/40" />
+                      <p className="text-sm text-muted-foreground">Upload an image and click Analyze to see results here</p>
                     </div>
-                  ) : (
-                    <div className="image-preview-area">
-                      <div className="flex flex-col items-center gap-3">
-                        <ImageIcon size={48} className="text-muted-foreground/40" />
-                        <p className="text-sm text-muted-foreground">Upload an image and click Analyze to see results here</p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* Template Suggestions */}
-      <div className="mt-8">
+      <div className="mt-6">
         <h3 className="text-sm font-medium text-muted-foreground mb-3">Suggested templates</h3>
         <div className="flex flex-wrap gap-2">
           {templates.map((template) => (
-            <button
+            <Button
               key={template.id}
               type="button"
-              onClick={() => setPrompt(prev => prev + ` ${template.label.toLowerCase()}`)}
-              className="px-3 py-1.5 rounded-full border border-border bg-muted/30 text-sm text-muted-foreground hover:border-primary hover:text-primary hover:bg-muted/50 transition-colors"
+              variant="outline"
+              size="sm"
+              onClick={() => setPrompt((prev) => `${prev} ${template.label.toLowerCase()}`.trim())}
+              className="text-muted-foreground hover:text-primary hover:border-primary"
             >
               {template.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       {history.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Recent activity</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-            {history.slice(0, 12).map((item) => (
-              <a
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-medium text-foreground">History</h3>
+            <Button type="button" variant="ghost" size="sm" onClick={clearHistory}>
+              Clear history
+            </Button>
+          </div>
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {history.map((item) => (
+              <div
                 key={item.id}
-                href={item.imageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`${item.type}: ${item.prompt}`}
-                className="group relative aspect-square rounded-lg overflow-hidden border border-border bg-muted/30"
+                onClick={() => restoreHistoryItem(item)}
+                className="group relative rounded-md border border-border bg-card overflow-hidden cursor-pointer hover:border-primary hover:bg-secondary/30 transition-colors"
               >
-                {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.prompt} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground text-center px-2">
-                    {item.prompt}
+                <div className="aspect-square w-full bg-muted/50">
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.prompt} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <ImageIcon size={24} />
+                    </div>
+                  )}
+                </div>
+                <div className="p-3 space-y-2">
+                  <p className="text-xs text-foreground line-clamp-2 font-medium">{item.prompt}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide ${
+                        item.type === 'generate'
+                          ? 'bg-primary/10 text-primary'
+                          : item.type === 'edit'
+                            ? 'bg-secondary text-secondary-foreground'
+                            : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {item.type}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{formatTimestamp(item.timestamp)}</span>
                   </div>
-                )}
-                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 truncate">
-                  {item.type}
-                </span>
-              </a>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => deleteHistoryItem(item.id, e)}
+                  className="absolute top-2 right-2 w-7 h-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
             ))}
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

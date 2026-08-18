@@ -33,6 +33,7 @@ export function SettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const user = useQuery({ queryKey: ['user-profile'], queryFn: () => getUserProfile(client) });
   const organization = useQuery({ queryKey: ['organization'], queryFn: () => getOrganization(client) });
@@ -42,7 +43,8 @@ export function SettingsPage() {
 
   useEffect(() => {
     const backend = user.data;
-    const supabaseMeta = supabaseUser?.user_metadata || {};
+    const supabaseMeta = supabaseUser?.user_metadata as { avatar_url?: string; job_title?: string } || {};
+    const avatarFromMeta = supabaseMeta.avatar_url || '';
     setProfileForm({
       first_name: backend?.first_name || '',
       last_name: backend?.last_name || '',
@@ -53,6 +55,7 @@ export function SettingsPage() {
       timezone: backend?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       bio: backend?.bio || '',
     });
+    setAvatarUrl(avatarFromMeta);
   }, [user.data, supabaseUser]);
 
   const updateProfileMutation = useMutation({
@@ -96,7 +99,31 @@ export function SettingsPage() {
     e.preventDefault();
     const payload = { ...profileForm };
     delete payload.email;
+    if (avatarUrl) {
+      payload.avatar_url = avatarUrl;
+    }
     updateProfileMutation.mutate(payload);
+  }
+
+function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+supabase.storage
+      .from('avatars')
+      .upload(fileName, file, { cacheControl: 'public, max-age=31536000', upsert: true })
+      .then((result) => {
+        if (result?.error) throw new Error((result.error as unknown as string) || 'Upload failed');
+        const publicUrl = supabase.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
+        setAvatarUrl(publicUrl);
+      })
+      .catch((err) => {
+        console.error('Avatar upload error:', err);
+        setError('Failed to upload avatar');
+      });
   }
 
   function handleProfileReset() {
@@ -112,6 +139,7 @@ export function SettingsPage() {
       timezone: backend?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       bio: backend?.bio || '',
     });
+    setAvatarUrl(supabaseMeta.avatar_url as string | null);
   }
 
   function handleSignOut() {
@@ -190,6 +218,27 @@ export function SettingsPage() {
                     </Button>
                     <Button type="button" variant="outline" onClick={handleProfileReset}>Cancel</Button>
                   </div>
+
+                  <div className="mt-4">
+                    <label className="file-label">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          handleAvatarChange(e);
+                        }}
+                        className="hidden"
+                      />
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="Profile picture" className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <User size={20} className="text-muted-foreground" />
+                      )}
+                      <span>Update profile picture</span>
+                    </label>
+                  </div>
                 </form>
               </CardContent>
             </Card>
@@ -199,28 +248,28 @@ export function SettingsPage() {
                 <CardContent className="p-6 flex flex-col items-center text-center relative">
                   <div className="relative mb-4">
                     <div className="w-28 h-28 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-border">
-                       {supabaseUser?.user_metadata?.avatar_url ? (
-                        <img src={String(supabaseUser.user_metadata.avatar_url)} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <User size={40} className="text-muted-foreground" />
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="absolute bottom-1 right-1 h-8 w-8 rounded-full p-0"
-                      onClick={() => window.open('/app/settings', '_self')}
-                      title="Edit profile"
-                      aria-label="Edit profile"
-                    >
-                      <Pencil size={14} />
-                    </Button>
-                  </div>
-                  <div className="text-base font-semibold text-foreground">
-                    {supabaseUser?.user_metadata?.full_name || supabaseUser?.user_metadata?.name || `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() || 'Your profile'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">{supabaseUser?.email || profileForm.email}</div>
-                  <Badge variant="secondary" className="mt-2">{planName} plan</Badge>
+                       {avatarUrl ? (
+                         <img src={avatarUrl} alt="Profile picture" className="w-full h-full object-cover" />
+                       ) : (
+                         <User size={40} className="text-muted-foreground" />
+                       )}
+                     </div>
+                     <Button
+                       type="button"
+                       size="sm"
+                       className="absolute bottom-1 right-1 h-8 w-8 rounded-full p-0"
+                       onClick={() => window.open('/app/settings', '_self')}
+                       title="Edit profile"
+                       aria-label="Edit profile"
+                     >
+                       <Pencil size={14} />
+                     </Button>
+                   </div>
+                   <div className="text-base font-semibold text-foreground">
+                     {supabaseUser?.user_metadata?.full_name || supabaseUser?.user_metadata?.name || `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() || 'Your profile'}
+                   </div>
+                   <div className="text-sm text-muted-foreground">{supabaseUser?.email || profileForm.email}</div>
+                   <Badge variant="secondary" className="mt-2">{planName} plan</Badge>
                 </CardContent>
               </Card>
 

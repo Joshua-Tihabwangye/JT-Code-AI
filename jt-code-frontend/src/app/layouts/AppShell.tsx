@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import {
   MessageSquare,
   Image as ImageIcon,
@@ -9,8 +10,6 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeft,
-  FileText,
-  FolderOpen,
   LogOut,
 } from 'lucide-react';
 import { Avatar, Dropdown, DropdownItem, DropdownLabel, DropdownSeparator } from '@/shared/components';
@@ -22,8 +21,6 @@ const navigation = [
   { name: 'Chat', href: '/app/chat', icon: MessageSquare },
   { name: 'Image Playground', href: '/app/image', icon: ImageIcon },
   { name: 'History', href: '/app/history', icon: History },
-  { name: 'Files', href: '/app/files', icon: FolderOpen },
-  { name: 'Documents', href: '/app/documents', icon: FileText },
   { name: 'Billing', href: '/app/billing', icon: CreditCard },
 ];
 
@@ -34,6 +31,7 @@ export function AppShell() {
   const { isSignedIn } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const displayName =
     String(user?.user_metadata?.full_name ?? '') ||
@@ -53,12 +51,12 @@ export function AppShell() {
         <div className="flex items-center justify-between">
           <NavLink to="/app/chat" className="brand" aria-label="JT-Code home">
             <span className="brand-mark">JT</span>
-            {!collapsed && <span className="nav-label">JT-Code</span>}
+            {!collapsed && !dropdownOpen && <span className="nav-label">JT-Code</span>}
           </NavLink>
         </div>
 
         <nav className="nav-links compact">
-          {!collapsed && <span className="nav-section-label">Workspace</span>}
+          {!collapsed && !dropdownOpen && <span className="nav-section-label">Workspace</span>}
           {navigation.map((item) => (
             <NavLink
               key={item.name}
@@ -67,7 +65,7 @@ export function AppShell() {
               className={({ isActive }) => (isActive ? 'active' : '')}
             >
               <item.icon size={18} />
-              {!collapsed && <span className="nav-label">{item.name}</span>}
+              {!collapsed && !dropdownOpen && <span className="nav-label">{item.name}</span>}
             </NavLink>
           ))}
         </nav>
@@ -75,20 +73,20 @@ export function AppShell() {
         <div className="sidebar-footer compact">
           <button type="button" onClick={toggleTheme} title={collapsed ? 'Toggle theme' : undefined}>
             {resolvedTheme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-            {!collapsed && <span className="footer-label">Theme</span>}
+            {!collapsed && !dropdownOpen && <span className="footer-label">Theme</span>}
           </button>
 
           <NavLink to="/app/settings" title={collapsed ? 'Settings' : undefined}>
             <Settings size={18} />
-            {!collapsed && <span className="footer-label">Settings</span>}
+            {!collapsed && !dropdownOpen && <span className="footer-label">Settings</span>}
           </NavLink>
 
           {isSignedIn && user && (
             <Dropdown
               trigger={
-                <button type="button" className="account-row" title={collapsed ? displayName : undefined}>
+                <button type="button" className="account-row" title={collapsed ? displayName : undefined} onClick={() => setDropdownOpen((prev: boolean) => !prev)}>
                   <Avatar src={avatarUrl} alt={displayName} size="sm" />
-                  {!collapsed && <span className="footer-label truncate">{displayName}</span>}
+                  {!collapsed && !dropdownOpen && <span className="footer-label truncate">{displayName}</span>}
                 </button>
               }
               content={
@@ -100,15 +98,19 @@ export function AppShell() {
                     </div>
                   </DropdownLabel>
                   <DropdownSeparator />
-                  <DropdownItem onClick={() => void navigate('/app/settings')}>
+                  <DropdownItem onClick={() => { setDropdownOpen(false); void navigate('/app/settings') }}>
                     <Settings size={16} className="mr-2" /> Settings
                   </DropdownItem>
                   <DropdownSeparator />
-                  <DropdownItem onClick={() => void signOut()}>
+                  <DropdownItem onClick={() => { setDropdownOpen(false); void signOut(); }}>
                     <LogOut size={16} className="mr-2" /> Sign out
                   </DropdownItem>
                 </>
               }
+              above
+              isOpen={dropdownOpen}
+              onOpen={() => setDropdownOpen(true)}
+              onClose={() => setDropdownOpen(false)}
             />
           )}
 

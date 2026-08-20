@@ -6,16 +6,148 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import type { SupabaseClient, Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { config } from '@/lib/config';
+import {
+  createSession,
+  createUser,
+  findOrCreateOAuthUser,
+  findUserByEmail,
+  getCurrentUser,
+  getSession,
+  setSession,
+  subscribeAuth,
+  verifyCredentials,
+  type LocalSession,
+  type StoredUser,
+} from '@/lib/localAuth';
 
 export type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export const supabase = createBrowserClient(
-  config.supabaseUrl,
-  config.supabaseAnonKey,
-) as SupabaseClient;
+function toSupabaseUser(stored: StoredUser | null): SupabaseUser | null {
+  if (!stored) return null;
+  const fullName = `${stored.firstName} ${stored.lastName}`.trim();
+  return {
+    id: stored.id,
+    email: stored.email,
+    app_metadata: {},
+    user_metadata: {
+      first_name: stored.firstName,
+      last_name: stored.lastName,
+      full_name: fullName,
+      contact: stored.contact,
+      country: stored.countryName,
+      timezone: stored.timezone,
+      avatar_url: stored.avatarUrl,
+    },
+    aud: 'authenticated',
+    created_at: stored.createdAt,
+  };
+}
+
+function toSession(session: LocalSession, stored: StoredUser): Session {
+  return {
+    access_token: session.accessToken,
+    token_type: 'bearer',
+    expires_in: 999999999,
+    refresh_token: 'local',
+    user: toSupabaseUser(stored) as SupabaseUser,
+  } as unknown as Session;
+}
+
+const noopChain = new Proxy(function () {}, {
+  get: () => noopChain,
+  apply: () => noopChain,
+}) as unknown as { [key: string]: unknown };
+
+const storageStub = {
+  from: () => ({
+    upload: () => Promise.resolve({ data: { path: '' }, error: null }),
+    getPublicUrl: () => ({ data: { publicUrl: '' } }),
+    remove: () => Promise.resolve({ data: [], error: null }),
+  }),
+};
+
+function metaString(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+export const supabase = {
+  auth: {
+    signUp({ email, password, options }: { email: string; password: string; options?: { data?: Record<string, unknown> } }) {
+      if (findUserByEmail(email)) {
+        return { data: { user: null, session: null }, error: { message: 'An account with this email already exists.' } };
+      }
+      const meta = options?.data ?? {};
+      const user = createUser({
+        email,
+        password,
+        firstName: metaString(meta.first_name) || metaString(meta.firstName),
+        lastName: metaString(meta.last_name) || metaString(meta.lastName),
+        contact: metaString(meta.contact),
+        countryCode: metaString(meta.country),
+        countryName: metaString(meta.countryName) || metaString(meta.country),
+        dialCode: metaString(meta.dialCode),
+        timezone: metaString(meta.timezone),
+      });
+      const session = createSession(user.id);
+      setSession(session);
+      return { data: { user: toSupabaseUser(user), session: toSession(session, user) }, error: null };
+    },
+    signInWithPassword({ email, password }: { email: string; password: string }) {
+      const user = verifyCredentials(email, password);
+      if (!user) {
+        return { data: { user: null, session: null }, error: { message: 'Invalid email or password.' } };
+      }
+      const session = createSession(user.id);
+      setSession(session);
+      return { data: { user: toSupabaseUser(user), session: toSession(session, user) }, error: null };
+    },
+    signInWithOAuth({ provider }: { provider?: string }) {
+      const name = String(provider ?? 'oauth').replace(/[^a-z0-9]/gi, '').toLowerCase();
+      const user = findOrCreateOAuthUser(name);
+      const session = createSession(user.id);
+      setSession(session);
+      return { data: { user: toSupabaseUser(user), session: toSession(session, user), provider }, error: null };
+    },
+    signOut() {
+      setSession(null);
+      return { error: null };
+    },
+    getSession() {
+      const session = getSession();
+      const user = session ? getCurrentUser() : null;
+      return { data: { session: session && user ? toSession(session, user) : null }, error: null };
+    },
+    getUser() {
+      const user = getCurrentUser();
+      return { data: { user: user ? toSupabaseUser(user) : null }, error: null };
+    },
+    onAuthStateChange(callback: (event: string, session: Session | null) => void) {
+      const unsubscribe = subscribeAuth(() => {
+        const session = getSession();
+        const user = session ? getCurrentUser() : null;
+        callback(session ? 'SIGNED_IN' : 'SIGNED_OUT', session && user ? toSession(session, user) : null);
+      });
+      return { data: { subscription: { unsubscribe } } };
+    },
+    resetPasswordForEmail() {
+      return { data: {}, error: null };
+    },
+    exchangeCodeForSession() {
+      const session = getSession();
+      const user = session ? getCurrentUser() : null;
+      return {
+        data: { session: session && user ? toSession(session, user) : null, user: user ? toSupabaseUser(user) : null },
+        error: null,
+      };
+    },
+  },
+  storage: storageStub,
+  from: () => noopChain,
+  channel: () => noopChain,
+  removeChannel: () => noopChain,
+  rpc: () => noopChain,
+} as unknown as SupabaseClient;
 
 interface AuthState {
   user: SupabaseUser | null;
@@ -35,33 +167,21 @@ const AuthContext = createContext<AuthState>({
 
 export function SupabaseProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSessionState] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const initialize = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
+    const sync = () => {
+      const activeSession = getSession();
+      const stored = activeSession ? getCurrentUser() : null;
+      setUser(stored ? toSupabaseUser(stored) : null);
+      setSessionState(activeSession && stored ? toSession(activeSession, stored) : null);
       setLoading(false);
       setInitialized(true);
     };
-    void initialize();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    sync();
+    return subscribeAuth(sync);
   }, []);
 
   const value = useMemo(

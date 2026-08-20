@@ -1,155 +1,144 @@
-import { useEffect, useRef, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
 import {
   MessageSquare,
   Image as ImageIcon,
   History,
+  Files,
+  FileText,
+  Brain,
+  Plug,
   CreditCard,
   Settings,
   Sun,
   Moon,
   PanelLeftClose,
   PanelLeft,
-  LogOut,
+  Menu,
+  Search,
 } from 'lucide-react';
-import {
-  Avatar,
-  DropdownItem,
-  DropdownLabel,
-  DropdownSeparator,
-} from '@/shared/components';
+import { IconButton } from '@/shared/components';
 import { useAppStore } from '@/lib/appStore';
 import { useTheme } from '@/lib/theme';
-import { supabase, useAuth, useUser } from '@/lib/supabase';
+import { useAuth } from '@/lib/supabase';
+import { AccountMenu } from './AccountMenu';
+import { GlobalSearch } from '@/app/GlobalSearch';
 
-const navigation = [
+const primaryNav = [
   { name: 'Chat', href: '/app/chat', icon: MessageSquare },
-  { name: 'Image Playground', href: '/app/image', icon: ImageIcon },
+  { name: 'Images', href: '/app/image', icon: ImageIcon },
   { name: 'History', href: '/app/history', icon: History },
-  { name: 'Billing', href: '/app/billing', icon: CreditCard },
 ];
+
+const workspaceNav = [
+  { name: 'Files', href: '/app/files', icon: Files },
+  { name: 'Documents', href: '/app/documents', icon: FileText },
+  { name: 'Knowledge', href: '/app/knowledge', icon: Brain },
+];
+
+const connectionsNav = [{ name: 'Integrations', href: '/app/integrations', icon: Plug }];
+
+const accountNav = [
+  { name: 'Billing', href: '/app/billing', icon: CreditCard },
+  { name: 'Settings', href: '/app/settings', icon: Settings },
+];
+
+type NavItem = { name: string; href: string; icon: typeof MessageSquare };
+
+function NavSection({
+  label,
+  items,
+  collapsed,
+  onNavigate,
+}: {
+  label: string;
+  items: NavItem[];
+  collapsed: boolean;
+  onNavigate: () => void;
+}) {
+  return (
+    <>
+      {!collapsed && <span className="nav-section-label">{label}</span>}
+      {items.map((item) => (
+        <NavLink
+          key={item.name}
+          to={item.href}
+          title={collapsed ? item.name : undefined}
+          className={({ isActive }) => (isActive ? 'active' : '')}
+          onClick={onNavigate}
+        >
+          <item.icon size={18} aria-hidden />
+          {!collapsed && <span className="nav-label">{item.name}</span>}
+        </NavLink>
+      ))}
+    </>
+  );
+}
 
 export function AppShell() {
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const { resolvedTheme, toggleTheme } = useTheme();
   const { isSignedIn } = useAuth();
-  const user = useUser();
-  const navigate = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const sidebarRef = useRef<HTMLElement>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
-    if (!dropdownOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen((prev) => !prev);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [dropdownOpen]);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
-  const accountOpen = dropdownOpen && isSignedIn && Boolean(user);
-
-  const displayName =
-    String(user?.user_metadata?.full_name ?? '') ||
-    String(user?.user_metadata?.name ?? '') ||
-    user?.email ||
-    'Account';
-  const avatarUrl = typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : undefined;
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setDropdownOpen(false);
-    void navigate('/sign-in');
-  };
-
-  const brandLabelHidden = collapsed || accountOpen;
+  const closeDrawer = () => setMobileNavOpen(false);
 
   return (
-    <div className={`app-shell ${collapsed ? 'collapsed' : ''}`}>
-      <aside ref={sidebarRef} className={`sidebar ${collapsed ? 'collapsed' : ''}`} aria-label="Primary navigation">
+    <div className={`app-shell ${collapsed ? 'collapsed' : ''} ${mobileNavOpen ? 'drawer-open' : ''}`}>
+      {mobileNavOpen && <div className="sidebar-backdrop" onClick={closeDrawer} aria-hidden />}
+
+      <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} aria-label="Primary navigation">
         <div className="flex items-center justify-between">
-          <NavLink to="/app/chat" className="brand" aria-label="JT-Code home">
-            <span className="brand-mark">JT</span>
-            {!brandLabelHidden && <span className="nav-label">JT-Code</span>}
-          </NavLink>
+          <div className="flex items-center gap-2">
+            <IconButton className="mobile-only" aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
+              <Menu size={18} aria-hidden />
+            </IconButton>
+            <NavLink to="/app/chat" className="brand" aria-label="JT-Code home">
+              <span className="brand-mark">JT</span>
+              {!collapsed && <span className="nav-label">JT-Code</span>}
+            </NavLink>
+          </div>
         </div>
 
-        {!accountOpen && (
-          <nav className="nav-links compact">
-            <span className="nav-section-label">Workspace</span>
-            {navigation.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                title={collapsed ? item.name : undefined}
-                className={({ isActive }) => (isActive ? 'active' : '')}
-              >
-                <item.icon size={18} />
-                {!collapsed && <span className="nav-label">{item.name}</span>}
-              </NavLink>
-            ))}
-          </nav>
-        )}
+        <button type="button" className="search-trigger" onClick={() => setSearchOpen(true)} aria-label="Search (Ctrl/Cmd + K)">
+          <Search size={16} aria-hidden />
+          {!collapsed && <span>Search…</span>}
+          {!collapsed && <kbd className="search-kbd">⌘K</kbd>}
+        </button>
+
+        <nav className="nav-links compact">
+          <NavSection label="Primary" items={primaryNav} collapsed={collapsed} onNavigate={closeDrawer} />
+          <NavSection label="Workspace" items={workspaceNav} collapsed={collapsed} onNavigate={closeDrawer} />
+          <NavSection label="Connections" items={connectionsNav} collapsed={collapsed} onNavigate={closeDrawer} />
+          <NavSection label="Account" items={accountNav} collapsed={collapsed} onNavigate={closeDrawer} />
+        </nav>
 
         <div className="sidebar-footer compact">
-          {!accountOpen && (
-            <>
-              <button type="button" onClick={toggleTheme} title={collapsed ? 'Toggle theme' : undefined}>
-                {resolvedTheme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                {!collapsed && <span className="footer-label">Theme</span>}
-              </button>
+          <button type="button" onClick={toggleTheme} title={collapsed ? 'Toggle theme' : undefined}>
+            {resolvedTheme === 'dark' ? <Moon size={18} aria-hidden /> : <Sun size={18} aria-hidden />}
+            {!collapsed && <span className="footer-label">Theme</span>}
+          </button>
 
-              <NavLink to="/app/settings" title={collapsed ? 'Settings' : undefined}>
-                <Settings size={18} />
-                {!collapsed && <span className="footer-label">Settings</span>}
-              </NavLink>
-            </>
-          )}
+          {isSignedIn && <AccountMenu collapsed={collapsed} />}
 
-          {isSignedIn && user && (
-            <button
-              type="button"
-              className="account-row"
-              title={collapsed ? displayName : undefined}
-              onClick={() => setDropdownOpen((prev) => !prev)}
-            >
-              <Avatar src={avatarUrl} alt={displayName} size="sm" />
-              {!collapsed && !accountOpen && <span className="footer-label truncate">{displayName}</span>}
-            </button>
-          )}
-
-          {!accountOpen && (
-            <button type="button" onClick={toggleSidebar} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-              {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-              {!collapsed && <span className="footer-label">Collapse</span>}
-            </button>
-          )}
+          <button type="button" onClick={toggleSidebar} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+            {collapsed ? <PanelLeft size={18} aria-hidden /> : <PanelLeftClose size={18} aria-hidden />}
+            {!collapsed && <span className="footer-label">Collapse</span>}
+          </button>
         </div>
-
-        {accountOpen && (
-          <div className="account-overlay">
-            <DropdownLabel>
-              <div className="px-2 py-1.5 text-sm">
-                <div className="font-medium">{displayName}</div>
-                <div className="text-muted-foreground">{user?.email}</div>
-              </div>
-            </DropdownLabel>
-            <DropdownSeparator />
-            <DropdownItem onClick={() => { setDropdownOpen(false); void navigate('/app/settings'); }}>
-              <Settings size={16} className="mr-2" /> Settings
-            </DropdownItem>
-            <DropdownSeparator />
-            <DropdownItem onClick={() => void signOut()}>
-              <LogOut size={16} className="mr-2" /> Sign out
-            </DropdownItem>
-          </div>
-        )}
       </aside>
 
       <main className="main-content">
@@ -157,6 +146,8 @@ export function AppShell() {
           <Outlet />
         </div>
       </main>
+
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

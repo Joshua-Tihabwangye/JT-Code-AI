@@ -5,6 +5,10 @@ import { queryClient } from '@/lib/queryClient';
 import { ApiClientProvider } from '@/lib/api/client';
 import { ThemeProvider } from '@/lib/theme';
 import { SupabaseProvider } from '@/lib/supabase';
+import { RepositoryProvider } from '@/lib/data';
+import { ToastProvider } from '@/shared/components';
+import { ErrorBoundary } from '@/app/ErrorBoundary';
+import { OfflineBanner } from '@/app/OfflineBanner';
 import { AppDataInitializer } from './AppDataInitializer';
 
 export function AppProviders({ children }: PropsWithChildren) {
@@ -13,10 +17,17 @@ export function AppProviders({ children }: PropsWithChildren) {
       <SupabaseProvider>
         <QueryClientProvider client={queryClient}>
           <ApiClientProvider>
-            <BrowserRouter>
-              <AppDataInitializer />
-              {children}
-            </BrowserRouter>
+            <RepositoryProvider>
+              <ErrorBoundary>
+                <ToastProvider>
+                  <OfflineBanner />
+                  <BrowserRouter>
+                    <AppDataInitializer />
+                    {children}
+                  </BrowserRouter>
+                </ToastProvider>
+              </ErrorBoundary>
+            </RepositoryProvider>
           </ApiClientProvider>
         </QueryClientProvider>
       </SupabaseProvider>

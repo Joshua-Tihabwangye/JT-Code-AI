@@ -14,6 +14,8 @@ import { ImagePlaygroundPage } from '@/features/image/ImagePlaygroundPage';
 import { BillingPage } from '@/features/billing/BillingPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { HistoryPage } from '@/features/history/HistoryPage';
+import { IntegrationsPage } from '@/features/integrations/IntegrationsPage';
+import { KnowledgePage } from '@/features/knowledge/KnowledgePage';
 
 export function App() {
   return (
@@ -38,6 +40,8 @@ export function App() {
           <Route path="history" element={<HistoryPage />} />
           <Route path="billing" element={<BillingPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="integrations" element={<IntegrationsPage />} />
+          <Route path="knowledge" element={<KnowledgePage />} />
         </Route>
       </Route>
 

@@ -46,6 +46,7 @@ export function ApiClientProvider({ children }: PropsWithChildren) {
   );
 
   useEffect(() => {
+    if (config.dataMode === 'mock') return;
     if (!session?.access_token) return;
     void client.get('/auth/ping');
   }, [session?.access_token, client]);

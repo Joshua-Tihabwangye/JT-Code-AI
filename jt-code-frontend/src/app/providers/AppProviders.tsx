@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 import { queryClient } from '@/lib/queryClient';
 import { ApiClientProvider } from '@/lib/api/client';
 import { ThemeProvider } from '@/lib/theme';
+import '@/i18n/config';
 import { SupabaseProvider } from '@/lib/supabase';
 import { RepositoryProvider } from '@/lib/data';
 import { ToastProvider } from '@/shared/components';

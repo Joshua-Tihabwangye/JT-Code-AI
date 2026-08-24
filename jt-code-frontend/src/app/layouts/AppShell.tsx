@@ -16,6 +16,7 @@ import { IconButton } from '@/shared/components';
 import { useAppStore } from '@/lib/appStore';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/supabase';
+import { useTranslation } from 'react-i18next';
 import { AccountMenu } from './AccountMenu';
 import { GlobalSearch } from '@/app/GlobalSearch';
 
@@ -62,6 +63,7 @@ function NavSection({
 }
 
 export function AppShell() {
+  const { t } = useTranslation();
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -106,8 +108,8 @@ export function AppShell() {
         </button>
 
         <nav className="nav-links compact">
-          <NavSection label="Primary" items={primaryNav} collapsed={collapsed} onNavigate={closeDrawer} />
-          <NavSection label="Account" items={accountNav} collapsed={collapsed} onNavigate={closeDrawer} />
+          <NavSection label={t('nav.primary')} items={primaryNav.map((i) => ({ ...i, name: t(`nav.${i.name.toLowerCase()}`) }))} collapsed={collapsed} onNavigate={closeDrawer} />
+          <NavSection label={t('nav.account')} items={accountNav.map((i) => ({ ...i, name: t(`nav.${i.name.toLowerCase()}`) }))} collapsed={collapsed} onNavigate={closeDrawer} />
         </nav>
 
         <div className="sidebar-footer compact">

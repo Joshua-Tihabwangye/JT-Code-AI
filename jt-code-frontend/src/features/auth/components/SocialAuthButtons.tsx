@@ -2,6 +2,7 @@ interface SocialAuthButtonsProps {
   onGoogle?: () => void;
   onApple?: () => void;
   disabled?: boolean;
+  loadingProvider?: 'google' | 'apple' | null;
 }
 
 function GoogleIcon() {
@@ -39,6 +40,7 @@ export function SocialAuthButtons({
   onGoogle,
   onApple,
   disabled,
+  loadingProvider = null,
 }: SocialAuthButtonsProps) {
   return (
     <div className="social-auth-grid">
@@ -49,7 +51,7 @@ export function SocialAuthButtons({
         disabled={disabled}
       >
         <GoogleIcon />
-        <span>Google</span>
+        <span>{loadingProvider === 'google' ? 'Connecting…' : 'Google'}</span>
       </button>
       <button
         type="button"
@@ -58,7 +60,7 @@ export function SocialAuthButtons({
         disabled={disabled}
       >
         <AppleIcon />
-        <span>Apple</span>
+        <span>{loadingProvider === 'apple' ? 'Connecting…' : 'Apple'}</span>
       </button>
     </div>
   );

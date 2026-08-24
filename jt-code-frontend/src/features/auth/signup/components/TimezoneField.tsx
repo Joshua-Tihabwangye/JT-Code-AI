@@ -1,7 +1,6 @@
 import type { UseFormReturn } from 'react-hook-form';
 import type { SignupSchema } from '../schema';
-import { useCountryMetadata } from '../hooks/useCountryMetadata';
-import { FormError } from '../../components/FormError';
+import { getCountryMetadata } from '../../lib/countryMetadata';
 
 interface Props {
   form: UseFormReturn<SignupSchema>;
@@ -9,7 +8,8 @@ interface Props {
 
 export function TimezoneField({ form }: Props) {
   const countryCode = form.watch('countryCode');
-  const { timezones } = useCountryMetadata(countryCode);
+  const country = getCountryMetadata(countryCode);
+  const timezones = country?.timezones ?? [];
 
   return (
     <div className="form-field">
@@ -26,7 +26,12 @@ export function TimezoneField({ form }: Props) {
           </option>
         ))}
       </select>
-      <FormError message={form.formState.errors.timezone?.message} />
+      <p className="field-help">
+        Suggested timezones are filtered by the selected country, but you can override them.
+      </p>
+      {form.formState.errors.timezone?.message && (
+        <p className="field-error">{form.formState.errors.timezone.message}</p>
+      )}
     </div>
   );
 }

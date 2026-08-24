@@ -29,6 +29,7 @@ export function useSignupForm(
       password: '',
       confirmPassword: '',
       countryCode: defaultCountry.code,
+      dialCode: defaultCountry.dialCode,
       contact: '',
       timezone: defaultCountry.timezones[0] ?? '',
       acceptedTerms: false,
@@ -46,6 +47,11 @@ export function useSignupForm(
       form.setValue('timezone', country.timezones[0] ?? '', {
         shouldValidate: true,
       });
+    }
+
+    const currentDialCode = form.getValues('dialCode');
+    if (currentDialCode !== country.dialCode) {
+      form.setValue('dialCode', country.dialCode, { shouldValidate: true });
     }
 
     // Reset phone because its format belongs to the previously selected country.

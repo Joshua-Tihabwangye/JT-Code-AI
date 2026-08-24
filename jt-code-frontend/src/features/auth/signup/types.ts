@@ -7,6 +7,7 @@ export interface SignupFormValues {
   password: string;
   confirmPassword: string;
   countryCode: CountryCode | '';
+  dialCode: string;
   contact: string;
   timezone: string;
   acceptedTerms: boolean;

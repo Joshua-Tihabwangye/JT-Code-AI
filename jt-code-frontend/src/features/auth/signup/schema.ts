@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { CountryCode } from 'libphonenumber-js';
+import { isValidPhoneNumberForCountry } from '../../auth/lib/phone';
 
 export const signupSchema = z
   .object({
@@ -21,6 +23,7 @@ export const signupSchema = z
       .regex(/[0-9]/, 'Password must contain a number.'),
     confirmPassword: z.string(),
     countryCode: z.string().min(2, 'Select your country.'),
+    dialCode: z.string().min(1, 'Select a dial code.'),
     contact: z.string().trim().min(5, 'Enter your phone number.'),
     timezone: z.string().min(1, 'Select your timezone.'),
     acceptedTerms: z
@@ -28,6 +31,15 @@ export const signupSchema = z
       .refine((value) => value === true, {
         message: 'You must accept the Terms and Privacy Policy.',
       }),
+  })
+  .superRefine((values, ctx) => {
+    if (values.countryCode && !isValidPhoneNumberForCountry(values.contact, values.countryCode as CountryCode)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['contact'],
+        message: 'Enter a valid phone number for the selected country.',
+      });
+    }
   })
   .refine((values) => values.password === values.confirmPassword, {
     path: ['confirmPassword'],

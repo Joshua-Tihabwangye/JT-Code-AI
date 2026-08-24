@@ -21,6 +21,7 @@ export interface LocalSession {
 
 const USERS_KEY = 'jtcode_users';
 const SESSION_KEY = 'jtcode_session';
+const RESET_CODES_KEY = 'jtcode_reset_codes';
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -168,4 +169,52 @@ export function createSession(userId: string): LocalSession {
     userId,
     issuedAt: new Date().toISOString(),
   };
+}
+
+export interface ResetCodeRecord {
+  email: string;
+  code: string;
+  issuedAt: string;
+  usedAt: string | null;
+}
+
+export function issueResetCode(email: string): ResetCodeRecord {
+  const normalized = email.trim().toLowerCase();
+  const codes = readJSON<Record<string, ResetCodeRecord>>(RESET_CODES_KEY, {});
+  const record: ResetCodeRecord = {
+    email: normalized,
+    code: '000000',
+    issuedAt: new Date().toISOString(),
+    usedAt: null,
+  };
+  codes[normalized] = record;
+  writeJSON(RESET_CODES_KEY, codes);
+  return record;
+}
+
+export function getResetCodeRecord(email: string): ResetCodeRecord | null {
+  const normalized = email.trim().toLowerCase();
+  const codes = readJSON<Record<string, ResetCodeRecord>>(RESET_CODES_KEY, {});
+  return codes[normalized] ?? null;
+}
+
+export function consumeResetCode(email: string, code: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  const codes = readJSON<Record<string, ResetCodeRecord>>(RESET_CODES_KEY, {});
+  const record = codes[normalized];
+  if (!record || record.code !== code) return false;
+  record.usedAt = new Date().toISOString();
+  codes[normalized] = record;
+  writeJSON(RESET_CODES_KEY, codes);
+  return true;
+}
+
+export function updateUserPassword(email: string, newPassword: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  const users = getStoredUsers();
+  const user = users.find((entry) => entry.email.toLowerCase() === normalized);
+  if (!user) return false;
+  user.passwordHash = hashPassword(newPassword);
+  saveStoredUsers(users);
+  return true;
 }

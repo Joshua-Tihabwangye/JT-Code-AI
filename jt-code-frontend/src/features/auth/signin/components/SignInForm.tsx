@@ -17,7 +17,7 @@ interface Props {
 
 export function SignInForm({ onSignedIn }: Props) {
   const [submitError, setSubmitError] = useState('');
-  const [oauthLoading, setOauthLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
 
   const handleSignin = async (payload: SignInPayload) => {
     setSubmitError('');
@@ -33,7 +33,7 @@ export function SignInForm({ onSignedIn }: Props) {
 
   const handleOAuth = async (provider: 'google' | 'apple') => {
     setSubmitError('');
-    setOauthLoading(true);
+    setLoadingProvider(provider);
     try {
       const { error } = await supabase.auth.signInWithOAuth({ provider });
       if (error) {
@@ -42,20 +42,25 @@ export function SignInForm({ onSignedIn }: Props) {
       }
       onSignedIn();
     } finally {
-      setOauthLoading(false);
+      setLoadingProvider(null);
     }
   };
 
-  const isSubmitting = form.formState.isSubmitting || oauthLoading;
+  const isSubmitting = form.formState.isSubmitting || !!loadingProvider;
 
   return (
-    <section className="signup-card">
+    <section className="signup-card auth-card">
       <SignInHeader />
+
+      <p className="signup-subtitle">
+        Use the same mock account you created on the signup page, or sign in with a social shortcut.
+      </p>
 
       <SocialAuthButtons
         onGoogle={() => void handleOAuth('google')}
         onApple={() => void handleOAuth('apple')}
         disabled={isSubmitting}
+        loadingProvider={loadingProvider}
       />
 
       <div className="signup-divider">

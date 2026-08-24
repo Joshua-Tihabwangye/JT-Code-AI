@@ -9,9 +9,18 @@ import examples from 'libphonenumber-js/mobile/examples';
 export interface CountryMetadata {
   code: CountryCode;
   name: string;
+  flag: string;
   dialCode: string;
   phonePlaceholder: string;
   timezones: string[];
+}
+
+function countryCodeToFlag(code: CountryCode): string {
+  return code
+    .toUpperCase()
+    .split('')
+    .map((char) => String.fromCodePoint(0x1f1e6 + (char.charCodeAt(0) - 65)))
+    .join('');
 }
 
 function cleanExample(value: string): string {
@@ -40,6 +49,7 @@ export function getCountryMetadataList(): CountryMetadata[] {
         return {
           code,
           name: country.name,
+          flag: countryCodeToFlag(code),
           dialCode: `+${getCountryCallingCode(code)}`,
           phonePlaceholder: getPhonePlaceholder(code),
           timezones: ([...country.timezones] as string[]).sort(),

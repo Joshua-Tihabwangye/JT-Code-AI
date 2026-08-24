@@ -1,6 +1,6 @@
 .signup-card {
   width: 100%;
-  max-width: 430px;
+  max-width: 620px;
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
@@ -8,7 +8,7 @@
 
 .signup-header h1 {
   margin: 0;
-  font-size: 1.95rem;
+  font-size: clamp(2rem, 2.7vw, 2.7rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--text);
@@ -17,6 +17,13 @@
   margin: 0.4rem 0 0;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+.signup-subtitle {
+  margin: -0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 .social-auth-grid {
@@ -82,7 +89,7 @@
   display: grid;
   gap: 0.4rem;
 }
-.form-field label {
+.form-field > label {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text);
@@ -108,6 +115,10 @@
   outline: none;
   border-color: var(--azure);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--azure) 22%, transparent);
+}
+
+.form-field input[type="checkbox"] {
+  height: auto;
 }
 
 .password-input,
@@ -184,6 +195,174 @@
   font-size: 0.95rem;
 }
 
+.country-combobox {
+  position: relative;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.country-pill {
+  position: absolute;
+  top: 2.85rem;
+  right: 0.75rem;
+  transform: translateY(calc(-100% - 0.4rem));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.country-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--panel);
+  box-shadow: 0 25px 60px -35px rgba(0, 0, 0, 0.4);
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  border: none;
+  border-radius: 0.8rem;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.country-option:hover,
+.country-option.is-active {
+  background: color-mix(in srgb, var(--azure) 8%, var(--panel));
+}
+
+.country-option__flag {
+  font-size: 1.1rem;
+}
+
+.country-option__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.country-option__label strong {
+  font-size: 0.9rem;
+}
+
+.country-option__label span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.country-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.phone-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.phone-row__dial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--panel) 90%, var(--secondary));
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.field-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.password-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0.1rem 0 0;
+  display: grid;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.password-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.password-checklist li.is-met {
+  color: var(--text);
+}
+
+.password-checklist li svg {
+  flex: none;
+  color: var(--azure);
+}
+
+.password-match {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.password-match.is-ok {
+  color: var(--success);
+}
+
+.password-match.is-error {
+  color: var(--danger);
+}
+
+.signup-note {
+  padding: 0.85rem 0.95rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--azure) 16%, var(--border));
+  background: color-mix(in srgb, var(--azure) 7%, var(--panel));
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .country-helper {
   font-size: 0.8rem;
   color: var(--muted);
@@ -218,13 +397,13 @@
   width: 100%;
   height: 2.95rem;
   border: none;
-  border-radius: 0.85rem;
-  background: linear-gradient(135deg, var(--azure), var(--azure-2));
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, #0a0a0a, #2b2b2b);
   color: #fff;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  box-shadow: 0 12px 26px -12px var(--azure);
+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.55);
   transition: transform 0.08s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 .signup-submit:hover:not(:disabled) {
@@ -260,5 +439,20 @@
 @media (max-width: 520px) {
   .signup-grid--two {
     grid-template-columns: 1fr;
+  }
+
+  .phone-row {
+    flex-direction: column;
+  }
+
+  .phone-row__dial {
+    justify-content: flex-start;
+    min-height: 2.85rem;
+  }
+
+  .country-pill {
+    position: static;
+    transform: none;
+    justify-self: end;
   }
 }

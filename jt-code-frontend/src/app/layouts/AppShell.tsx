@@ -4,12 +4,7 @@ import {
   MessageSquare,
   Image as ImageIcon,
   History,
-  Files,
-  FileText,
-  Brain,
-  Plug,
   CreditCard,
-  Settings,
   Sun,
   Moon,
   PanelLeftClose,
@@ -30,17 +25,8 @@ const primaryNav = [
   { name: 'History', href: '/app/history', icon: History },
 ];
 
-const workspaceNav = [
-  { name: 'Files', href: '/app/files', icon: Files },
-  { name: 'Documents', href: '/app/documents', icon: FileText },
-  { name: 'Knowledge', href: '/app/knowledge', icon: Brain },
-];
-
-const connectionsNav = [{ name: 'Integrations', href: '/app/integrations', icon: Plug }];
-
 const accountNav = [
   { name: 'Billing', href: '/app/billing', icon: CreditCard },
-  { name: 'Settings', href: '/app/settings', icon: Settings },
 ];
 
 type NavItem = { name: string; href: string; icon: typeof MessageSquare };
@@ -121,8 +107,6 @@ export function AppShell() {
 
         <nav className="nav-links compact">
           <NavSection label="Primary" items={primaryNav} collapsed={collapsed} onNavigate={closeDrawer} />
-          <NavSection label="Workspace" items={workspaceNav} collapsed={collapsed} onNavigate={closeDrawer} />
-          <NavSection label="Connections" items={connectionsNav} collapsed={collapsed} onNavigate={closeDrawer} />
           <NavSection label="Account" items={accountNav} collapsed={collapsed} onNavigate={closeDrawer} />
         </nav>
 

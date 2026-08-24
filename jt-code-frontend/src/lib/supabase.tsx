@@ -10,12 +10,16 @@ import type { SupabaseClient, Session, User as SupabaseUser } from '@supabase/su
 import {
   createSession,
   createUser,
+  consumeResetCode,
+  getResetCodeRecord,
   findOrCreateOAuthUser,
   findUserByEmail,
   getCurrentUser,
   getSession,
+  issueResetCode,
   setSession,
   subscribeAuth,
+  updateUserPassword,
   verifyCredentials,
   type LocalSession,
   type StoredUser,
@@ -130,7 +134,31 @@ export const supabase = {
       });
       return { data: { subscription: { unsubscribe } } };
     },
-    resetPasswordForEmail() {
+    resetPasswordForEmail(email: string) {
+      if (!findUserByEmail(email)) {
+        return { data: {}, error: { message: 'No account exists for that email address.' } };
+      }
+      const record = issueResetCode(email);
+      return { data: { email: record.email, resetCode: record.code }, error: null };
+    },
+    async resetPassword({
+      email,
+      code,
+      newPassword,
+    }: {
+      email: string;
+      code: string;
+      newPassword: string;
+    }) {
+      const record = getResetCodeRecord(email);
+      if (!record || record.code !== code) {
+        return { data: {}, error: { message: 'Invalid or expired reset code.' } };
+      }
+      const ok = updateUserPassword(record.email, newPassword);
+      if (!ok) {
+        return { data: {}, error: { message: 'Sign in to reset your password.' } };
+      }
+      consumeResetCode(record.email, code);
       return { data: {}, error: null };
     },
     exchangeCodeForSession() {

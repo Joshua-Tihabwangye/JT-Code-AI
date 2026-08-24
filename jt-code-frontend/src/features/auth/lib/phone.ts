@@ -26,3 +26,15 @@ export function normalizePhoneNumber(
     return null;
   }
 }
+
+export function formatPhoneNumberForCountry(
+  value: string,
+  countryCode: CountryCode,
+): string {
+  try {
+    const parsed = parsePhoneNumberFromString(value, countryCode);
+    return parsed ? parsed.formatNational() : value.trim();
+  } catch {
+    return value.trim();
+  }
+}

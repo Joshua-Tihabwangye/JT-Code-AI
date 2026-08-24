@@ -20,8 +20,12 @@ a { color: var(--azure); text-decoration: none; }
   flex-direction: column;
   color: var(--text);
   background:
-    radial-gradient(1100px 620px at 12% -12%, color-mix(in srgb, var(--azure) 9%, transparent), transparent 58%),
-    var(--bg);
+    radial-gradient(1100px 620px at 12% -12%, color-mix(in srgb, var(--azure) 8%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 45%, var(--bg)), var(--bg));
+}
+
+.auth-page--centered {
+  overflow: hidden;
 }
 
 .auth-theme-toggle {
@@ -51,6 +55,61 @@ a { color: var(--azure); text-decoration: none; }
   flex: 1;
   display: grid;
   grid-template-columns: 1.04fr 0.96fr;
+}
+
+.auth-shell {
+  flex: 1;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1rem;
+  padding: clamp(4.5rem, 9vw, 7rem) 1.25rem 2rem;
+}
+
+.auth-shell__brand {
+  width: min(100%, 640px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+}
+
+.auth-shell__tag {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.auth-shell__panel {
+  width: min(100%, 640px);
+}
+
+.auth-shell__notice {
+  width: min(100%, 640px);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.auth-shell__notice svg {
+  color: var(--azure);
+  flex: none;
+}
+
+.auth-shell__notice p {
+  margin: 0;
 }
 
 /* ===== Brand panel ===== */
@@ -179,7 +238,7 @@ a { color: var(--azure); text-decoration: none; }
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 2rem;
+  padding: 1rem clamp(1rem, 3vw, 2rem) 1.2rem;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 0.8rem;
@@ -193,14 +252,22 @@ a { color: var(--azure); text-decoration: none; }
 .auth-card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 1.5rem;
-  padding: 2rem;
+  border-radius: 1.75rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
   box-shadow: 0 30px 70px -38px rgba(15, 30, 70, 0.28);
   animation: auth-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .auth-card--forgot { max-width: 440px; }
 
+.auth-card--forgot {
+  max-width: 520px;
+}
+
 .auth-card__heading { margin-bottom: 1.5rem; }
+.auth-card__heading--forgot {
+  display: grid;
+  gap: 0.55rem;
+}
 .auth-card__heading h2 {
   margin: 0;
   font-size: 1.6rem;
@@ -208,6 +275,23 @@ a { color: var(--azure); text-decoration: none; }
   letter-spacing: -0.02em;
 }
 .auth-card__heading p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+
+.auth-card__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--azure) 11%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--azure) 20%, var(--border));
+  color: var(--azure);
+}
+
+.auth-card__icon--success {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--panel));
+  border-color: color-mix(in srgb, var(--success) 22%, var(--border));
+}
 
 /* ===== Social + divider ===== */
 .social-stack { display: grid; gap: 0.65rem; }
@@ -315,14 +399,120 @@ a { color: var(--azure); text-decoration: none; }
   width: 100%;
   height: 2.95rem;
   border: none;
-  border-radius: 0.85rem;
-  background: linear-gradient(135deg, var(--azure), var(--azure-2));
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, #0a0a0a, #2b2b2b);
   color: #fff;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  box-shadow: 0 12px 26px -12px var(--azure);
+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.55);
   transition: transform 0.08s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.secondary-button,
+.text-link,
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  padding: 0.75rem 1rem;
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.08s ease;
+}
+
+.secondary-button:hover,
+.text-link:hover,
+.back-link:hover {
+  border-color: var(--azure);
+  background: color-mix(in srgb, var(--azure) 5%, var(--panel));
+}
+
+.text-link,
+.back-link {
+  border-color: transparent;
+  background: transparent;
+  padding: 0;
+  width: fit-content;
+  color: var(--azure);
+}
+
+.back-link {
+  margin-top: 0.2rem;
+}
+
+.reset-code-card {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--azure) 7%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--azure) 14%, var(--border));
+}
+
+.reset-code-card span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.reset-code-card strong {
+  font-size: 1.6rem;
+  letter-spacing: 0.14em;
+}
+
+.legal-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(900px 500px at 12% 0%, color-mix(in srgb, var(--azure) 8%, transparent), transparent 56%),
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 55%, var(--bg)), var(--bg));
+}
+
+.legal-card {
+  width: min(100%, 760px);
+  padding: clamp(1.5rem, 3vw, 2.2rem);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--panel);
+  box-shadow: 0 24px 60px -36px rgba(0, 0, 0, 0.35);
+}
+
+.legal-card h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  letter-spacing: -0.03em;
+}
+
+.legal-card p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.legal-eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--azure);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.legal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 .primary-button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.03); }
 .primary-button:active:not(:disabled) { transform: translateY(0); }

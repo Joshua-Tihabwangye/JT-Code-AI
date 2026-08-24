@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { Eye, EyeOff, Lock } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { SignupSchema } from '../schema';
-import { FormError } from '../../components/FormError';
+import { Input } from '@/shared/components/Input';
 
 interface Props {
   form: UseFormReturn<SignupSchema>;
@@ -10,6 +10,7 @@ interface Props {
   label: string;
   placeholder: string;
   autoComplete: 'new-password' | 'current-password';
+  helper?: ReactNode;
 }
 
 export function PasswordField({
@@ -18,32 +19,35 @@ export function PasswordField({
   label,
   placeholder,
   autoComplete,
+  helper,
 }: Props) {
   const [visible, setVisible] = useState(false);
 
   return (
     <div className="form-field">
-      <label htmlFor={field}>{label}</label>
-      <div className="password-input">
-        <input
-          id={field}
-          type={visible ? 'text' : 'password'}
-          autoComplete={autoComplete}
-          placeholder={placeholder}
-          {...form.register(field)}
-        />
-        <button
-          type="button"
-          className="password-toggle"
-          aria-label={visible ? `Hide ${label}` : `Show ${label}`}
-          aria-pressed={visible}
-          onClick={() => setVisible((value) => !value)}
-        >
-          {visible ? <EyeOff size={16} /> : <Eye size={16} />}
-          <span>{visible ? 'Hide' : 'Show'}</span>
-        </button>
-      </div>
-      <FormError message={form.formState.errors[field]?.message} />
+      <Input
+        id={field}
+        label={label}
+        type={visible ? 'text' : 'password'}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        leftIcon={<Lock size={16} aria-hidden />}
+        rightIcon={(
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={visible ? `Hide ${label}` : `Show ${label}`}
+            aria-pressed={visible}
+            onClick={() => setVisible((value) => !value)}
+          >
+            {visible ? <EyeOff size={16} /> : <Eye size={16} />}
+            <span>{visible ? 'Hide' : 'Show'}</span>
+          </button>
+        )}
+        {...form.register(field)}
+        error={form.formState.errors[field]?.message}
+      />
+      {helper && <div className="field-help">{helper}</div>}
     </div>
   );
 }

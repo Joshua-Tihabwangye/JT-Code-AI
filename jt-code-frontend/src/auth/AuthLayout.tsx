@@ -1,29 +1,18 @@
-import type { ReactNode } from 'react'
-import { MessageSquareText, Sparkles, ShieldCheck, Moon, Sun } from 'lucide-react'
-import { useTheme } from '@/lib/theme'
+import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+import { Moon, ShieldCheck, Sun } from 'lucide-react';
+import { useTheme } from '@/lib/theme';
 
 interface AuthLayoutProps {
-  children: ReactNode
-}
-
-function Feature({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
-  return (
-    <div className="auth-feature">
-      <div className="auth-feature__icon">{icon}</div>
-      <div>
-        <strong>{title}</strong>
-        <span>{text}</span>
-      </div>
-    </div>
-  )
+  children: ReactNode;
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
-  const { resolvedTheme, setTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page--centered">
       <button
         type="button"
         className="auth-theme-toggle"
@@ -34,69 +23,31 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         {isDark ? 'Light' : 'Dark'}
       </button>
 
-      <main className="auth-grid">
-        <section className="brand-panel" aria-label="JT-Code">
-          <div className="brand-panel__inner">
-            <div className="brand-logo">
-              <div className="brand-logo__mark">JT</div>
-              <span>JT-Code</span>
-            </div>
+      <main className="auth-shell">
+        <div className="auth-shell__brand">
+          <Link to="/" className="brand">
+            <span className="brand-mark">JT</span>
+            <span>JT-Code</span>
+          </Link>
+          <span className="auth-shell__tag">Private AI workspace</span>
+        </div>
 
-            <div className="brand-copy">
-              <h1>One workspace for questions, files, research and creation.</h1>
-              <p>JT-Code is your general AI assistant — chat, upload files, and create across one calm interface.</p>
-            </div>
+        <div className="auth-shell__panel">{children}</div>
 
-            <div className="brand-illustration-wrap">
-              <img
-                src="/auth-illustration.png"
-                className="brand-illustration"
-                alt="The JT-Code assistant interface"
-              />
-            </div>
-
-            <div className="auth-features">
-              <Feature
-                icon={<MessageSquareText size={20} strokeWidth={2.1} />}
-                title="Chat & research"
-                text="Ask, draft, and reason across tasks"
-              />
-              <Feature
-                icon={<Sparkles size={20} strokeWidth={2.1} />}
-                title="Create & edit"
-                text="Images, documents, and more"
-              />
-              <Feature
-                icon={<ShieldCheck size={20} strokeWidth={2.1} />}
-                title="Private by design"
-                text="Your data stays yours"
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="form-panel">
-          <div className="form-panel__inner">{children}</div>
-          <div className="trust-note">
-            <ShieldCheck size={21} />
-            <div>
-              <p>Your data is secure and never used to train models.</p>
-              <span>
-                Read our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Service</a>.
-              </span>
-            </div>
-          </div>
-        </section>
+        <div className="auth-shell__notice">
+          <ShieldCheck size={18} />
+          <p>Your data stays in the workspace and mock auth persists across refreshes.</p>
+        </div>
       </main>
 
       <footer className="auth-footer">
-        <span>© {new Date().getFullYear()} JT-Code, Inc. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} JT-Code, Inc.</span>
         <nav>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-          <a href="/contact">Contact</a>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/contact">Contact</Link>
         </nav>
       </footer>
     </div>
-  )
+  );
 }

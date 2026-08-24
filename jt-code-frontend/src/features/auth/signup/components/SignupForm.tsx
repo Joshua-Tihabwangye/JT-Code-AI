@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, CircleAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SignupHeader } from './SignupHeader';
 import { SocialAuthButtons } from '../../components/SocialAuthButtons';
@@ -6,6 +7,7 @@ import { NameFields } from './NameFields';
 import { EmailField } from './EmailField';
 import { PasswordField } from './PasswordField';
 import { CountryField } from './CountryField';
+import { DialCodeField } from './DialCodeField';
 import { PhoneField } from './PhoneField';
 import { TimezoneField } from './TimezoneField';
 import { TermsField } from './TermsField';
@@ -20,9 +22,18 @@ interface Props {
   onSignedUp: () => void;
 }
 
+function PasswordRequirement({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <li className={ok ? 'is-met' : ''}>
+      {ok ? <Check size={14} aria-hidden /> : <CircleAlert size={14} aria-hidden />}
+      <span>{label}</span>
+    </li>
+  );
+}
+
 export function SignupForm({ onSignedUp }: Props) {
   const [submitError, setSubmitError] = useState('');
-  const [oauthLoading, setOauthLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
 
   const handleSignup = async (payload: SignupPayload) => {
     setSubmitError('');
@@ -35,10 +46,20 @@ export function SignupForm({ onSignedUp }: Props) {
   };
 
   const { form, submit } = useSignupForm(handleSignup);
+  const password = form.watch('password');
+  const confirmPassword = form.watch('confirmPassword');
+  const isSubmitting = form.formState.isSubmitting || !!loadingProvider;
+
+  const passwordChecks = [
+    { ok: password.length >= 8, label: 'At least 8 characters' },
+    { ok: /[A-Z]/.test(password), label: 'One uppercase letter' },
+    { ok: /[a-z]/.test(password), label: 'One lowercase letter' },
+    { ok: /[0-9]/.test(password), label: 'One number' },
+  ];
 
   const handleOAuth = async (provider: 'google' | 'apple') => {
     setSubmitError('');
-    setOauthLoading(true);
+    setLoadingProvider(provider);
     try {
       const { error } = await supabase.auth.signInWithOAuth({ provider });
       if (error) {
@@ -47,21 +68,24 @@ export function SignupForm({ onSignedUp }: Props) {
       }
       onSignedUp();
     } finally {
-      setOauthLoading(false);
+      setLoadingProvider(null);
     }
   };
 
-  const isSubmitting = form.formState.isSubmitting || oauthLoading;
-
   return (
-    <section className="signup-card">
+    <section className="signup-card auth-card">
       <SignupHeader />
 
-      <SocialAuthButtons
-        onGoogle={() => void handleOAuth('google')}
-        onApple={() => void handleOAuth('apple')}
-        disabled={isSubmitting}
-      />
+      <p className="signup-subtitle">
+        Create a secure account with the fields JT-Code actually uses across the app.
+      </p>
+
+        <SocialAuthButtons
+          onGoogle={() => void handleOAuth('google')}
+          onApple={() => void handleOAuth('apple')}
+          disabled={isSubmitting}
+          loadingProvider={loadingProvider}
+        />
 
       <div className="signup-divider">
         <span />
@@ -69,30 +93,59 @@ export function SignupForm({ onSignedUp }: Props) {
         <span />
       </div>
 
-      <form onSubmit={(event) => { void form.handleSubmit(submit)(event); }} noValidate className="signup-form">
+      <form
+        onSubmit={(event) => {
+          void form.handleSubmit(submit)(event);
+        }}
+        noValidate
+        className="signup-form"
+      >
         <NameFields form={form} />
         <EmailField form={form} />
+
         <PasswordField
           form={form}
           field="password"
           label="Password"
           placeholder="Create a password"
           autoComplete="new-password"
+          helper={(
+            <ul className="password-checklist" aria-label="Password requirements">
+              {passwordChecks.map((check) => (
+                <PasswordRequirement key={check.label} ok={check.ok} label={check.label} />
+              ))}
+            </ul>
+          )}
         />
+
         <PasswordField
           form={form}
           field="confirmPassword"
           label="Confirm password"
           placeholder="Confirm your password"
           autoComplete="new-password"
+          helper={(
+            <div className={`password-match ${confirmPassword ? (confirmPassword === password ? 'is-ok' : 'is-error') : ''}`}>
+              {confirmPassword && confirmPassword === password
+                ? 'Passwords match.'
+                : confirmPassword
+                  ? 'Passwords do not match yet.'
+                  : 'Re-enter your password to confirm it.'}
+            </div>
+          )}
         />
+
         <CountryField form={form} />
-        <PhoneField form={form} />
+
+        <div className="signup-grid signup-grid--two">
+          <DialCodeField form={form} />
+          <PhoneField form={form} />
+        </div>
+
         <TimezoneField form={form} />
 
-        <div className="country-helper">
-          Phone format and timezone options automatically update based on the
-          selected country.
+        <div className="signup-note">
+          The selected country updates phone validation and timezone suggestions automatically.
         </div>
 
         <TermsField form={form} />

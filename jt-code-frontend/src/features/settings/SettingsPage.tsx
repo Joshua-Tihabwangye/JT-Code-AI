@@ -3,12 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser, supabase } from '@/lib/supabase';
 import { useApiClient } from '@/lib/api/client';
 import { getUserProfile, updateUserProfile, deleteAccount } from '@/features/settings/api';
-import { Button, Input, Select, Card, CardContent, CardHeader, CardTitle, Alert } from '@/shared/components';
-import { User } from 'lucide-react';
+import { Button, Input, Select, Alert } from '@/shared/components';
+import { User, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { COUNTRY_METADATA, getCountryMetadata, type CountryMetadata } from '@/features/auth/lib/countryMetadata';
 import { formatPhoneNumberForCountry } from '@/features/auth/lib/phone';
-import { useLanguage } from '@/i18n/useLanguage';
 import type { UserProfile } from '@/features/settings/api';
 
 function resolveCountry(value?: string): CountryMetadata {
@@ -23,13 +22,13 @@ function resolveCountry(value?: string): CountryMetadata {
 
 export function SettingsPage() {
   const { t } = useTranslation();
-  const { currentLanguage, setLanguage, languages } = useLanguage();
   const client = useApiClient();
   const queryClient = useQueryClient();
   const supabaseUser = useUser();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   const user = useQuery({ queryKey: ['user-profile'], queryFn: () => getUserProfile(client) });
 
@@ -57,6 +56,7 @@ export function SettingsPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       setSuccess(t('settings.profileUpdated'));
+      setEditing(false);
       setTimeout(() => setSuccess(''), 3000);
     },
     onError: () => setError(t('settings.updateProfileError')),
@@ -70,12 +70,6 @@ export function SettingsPage() {
     },
     onError: () => setError(t('settings.deleteAccountError')),
   });
-
-  function handleDeleteAccount() {
-    if (window.confirm(t('settings.deleteAccountConfirm'))) {
-      deleteAccountMutation.mutate();
-    }
-  }
 
   function handleProfileChange(field: keyof UserProfile, value: string) {
     setProfileForm((prev) => ({ ...prev, [field]: value }));
@@ -110,6 +104,32 @@ export function SettingsPage() {
     updateProfileMutation.mutate(payload);
   }
 
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+    supabase.storage
+      .from('avatars')
+      .upload(fileName, file, { cacheControl: 'public, max-age=31536000', upsert: true })
+      .then(async (result) => {
+        if (result?.error) throw new Error((result.error as unknown as string) || 'Upload failed');
+        const publicUrl = supabase.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
+        setAvatarUrl(publicUrl);
+        try {
+          await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
+        } catch (metaErr) {
+          console.error('Failed to persist avatar metadata:', metaErr);
+        }
+      })
+      .catch((err) => {
+        console.error('Avatar upload error:', err);
+        setError(t('settings.uploadAvatarError'));
+      });
+  }
+
   function handleProfileReset() {
     const backend = user.data;
     const supabaseMeta = supabaseUser?.user_metadata as { avatar_url?: string } || {};
@@ -127,12 +147,25 @@ export function SettingsPage() {
     setAvatarUrl(supabaseMeta.avatar_url || '');
   }
 
+  function handleDeleteAccount() {
+    if (window.confirm(t('settings.deleteAccountConfirm'))) {
+      deleteAccountMutation.mutate();
+    }
+  }
+
   const selectedCountry = getCountryMetadata(profileForm.country || '');
   const countryOptions = COUNTRY_METADATA.map((c) => ({
     value: c.code,
     label: `${c.flag} ${c.name} (${c.dialCode})`,
   }));
   const timezoneOptions = (selectedCountry?.timezones ?? []).map((tz) => ({ value: tz, label: tz }));
+
+  const meta = supabaseUser?.user_metadata as { full_name?: string; name?: string } | undefined;
+  const displayName =
+    meta?.full_name ||
+    meta?.name ||
+    `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() ||
+    t('settings.yourProfile');
 
   return (
     <section className="workspace">
@@ -142,6 +175,12 @@ export function SettingsPage() {
           <h1>{t('settings.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('settings.subtitle')}</p>
         </div>
+        {!editing && (
+          <Button type="button" variant="outline" size="sm" onClick={() => setEditing(true)} aria-label={t('settings.editProfile')}>
+            <Pencil size={16} aria-hidden />
+            <span>{t('settings.edit')}</span>
+          </Button>
+        )}
       </header>
 
       {error && (
@@ -155,89 +194,64 @@ export function SettingsPage() {
         </Alert>
       )}
 
-      <div className="space-y-6">
-        <Card className="border-border/60">
-          <CardContent className="p-6 flex flex-col items-center text-center relative">
-            <div className="relative mb-4">
-              <div className="w-28 h-28 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-border">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Profile picture" className="w-full h-full object-cover" />
-                ) : (
-                  <User size={40} className="text-muted-foreground" />
-                )}
-              </div>
-              <label
-                className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer"
-                title={t('settings.updateProfilePicture')}
-                aria-label={t('settings.updateProfilePicture')}
-              >
-                <Pencil size={14} />
-                <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-              </label>
+      <div className="space-y-10 max-w-4xl mx-auto">
+        <div className="flex items-center gap-4">
+          <label className={`relative ${editing ? 'cursor-pointer group' : 'cursor-default'}`} title={editing ? t('settings.changePhoto') : undefined} aria-label={editing ? t('settings.changePhoto') : undefined}>
+            <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-border transition group-hover:opacity-80">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile picture" className="w-full h-full object-cover" />
+              ) : (
+                <User size={36} className="text-muted-foreground" />
+              )}
             </div>
-            <div className="text-base font-semibold text-foreground">
-              {supabaseUser?.user_metadata?.full_name || supabaseUser?.user_metadata?.name || `${profileForm.first_name || ''} ${profileForm.last_name || ''}`.trim() || t('settings.yourProfile')}
-            </div>
+            {editing && <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />}
+          </label>
+          <div>
+            <div className="text-base font-semibold text-foreground">{displayName}</div>
             <div className="text-sm text-muted-foreground">{supabaseUser?.email || profileForm.email}</div>
-          </CardContent>
-        </Card>
+            {editing && <p className="text-xs text-muted-foreground mt-1">{t('settings.changePhoto')}</p>}
+          </div>
+        </div>
 
-        <Card className="border-border/60">
-          <CardHeader>
-            <CardTitle className="text-base text-foreground">{t('settings.language')}</CardTitle>
-            <p className="text-sm text-muted-foreground">{t('settings.languageHelp')}</p>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full max-w-sm">
-              <Select
-                id="language"
-                options={languages.map((l) => ({ value: l.code, label: `${l.nativeName} — ${l.englishName}` }))}
-                value={currentLanguage}
-                onChange={(e) => setLanguage(e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60">
-          <CardHeader>
-            <CardTitle className="text-base text-foreground">{t('settings.profileInformation')}</CardTitle>
+        <section>
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-foreground">{t('settings.profileInformation')}</h2>
             <p className="text-sm text-muted-foreground">{t('settings.profileInformationDesc')}</p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleProfileSubmit} className="space-y-5">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Input label={t('settings.firstName')} value={profileForm.first_name || ''} onChange={(e) => handleProfileChange('first_name', e.target.value)} />
-                <Input label={t('settings.lastName')} value={profileForm.last_name || ''} onChange={(e) => handleProfileChange('last_name', e.target.value)} />
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Input
-                  label={t('settings.email')}
-                  type="email"
-                  value={profileForm.email || ''}
-                  readOnly
-                  aria-readonly="true"
+          </div>
+          <form onSubmit={handleProfileSubmit} className="space-y-5 max-w-4xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input label={t('settings.firstName')} value={profileForm.first_name || ''} onChange={(e) => handleProfileChange('first_name', e.target.value)} disabled={!editing} />
+              <Input label={t('settings.lastName')} value={profileForm.last_name || ''} onChange={(e) => handleProfileChange('last_name', e.target.value)} disabled={!editing} />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label={t('settings.email')}
+                type="email"
+                value={profileForm.email || ''}
+                readOnly
+                aria-readonly="true"
+              />
+              <div className="w-full">
+                <label htmlFor="country" className="block text-sm font-medium text-foreground mb-1.5">
+                  {t('settings.country')}
+                </label>
+                <Select
+                  id="country"
+                  options={countryOptions}
+                  value={profileForm.country || ''}
+                  disabled={!editing}
+                  onChange={(e) => handleCountryChange(e.target.value)}
                 />
-                <div className="w-full">
-                  <label htmlFor="country" className="block text-sm font-medium text-foreground mb-1.5">
-                    {t('settings.country')}
-                  </label>
-                  <Select
-                    id="country"
-                    options={countryOptions}
-                    value={profileForm.country || ''}
-                    onChange={(e) => handleCountryChange(e.target.value)}
-                  />
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {t('settings.countryHelp')}
-                  </p>
-                </div>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  {t('settings.countryHelp')}
+                </p>
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="w-full">
-                  <label htmlFor="contact" className="block text-sm font-medium text-foreground mb-1.5">
-                    {t('settings.contact')}
-                  </label>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="w-full">
+                <label htmlFor="contact" className="block text-sm font-medium text-foreground mb-1.5">
+                  {t('settings.contact')}
+                </label>
                   <input
                     id="contact"
                     type="tel"
@@ -247,60 +261,54 @@ export function SettingsPage() {
                     placeholder={selectedCountry?.phonePlaceholder ?? t('settings.contact')}
                     onChange={(e) => handleProfileChange('contact', e.target.value)}
                     onBlur={(e) => handleContactBlur(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    disabled={!editing}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-60"
                   />
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {t('settings.contactHelp', { country: selectedCountry?.name ?? t('settings.yourCountry') })}
-                  </p>
-                </div>
-                <div className="w-full">
-                  <label htmlFor="timezone" className="block text-sm font-medium text-foreground mb-1.5">
-                    {t('settings.timezone')}
-                  </label>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  {t('settings.contactHelp', { country: selectedCountry?.name ?? t('settings.yourCountry') })}
+                </p>
+              </div>
+              <div className="w-full">
+                <label htmlFor="timezone" className="block text-sm font-medium text-foreground mb-1.5">
+                  {t('settings.timezone')}
+                </label>
                   <Select
                     id="timezone"
                     options={timezoneOptions}
                     placeholder={timezoneOptions.length ? undefined : t('settings.noTimezone')}
                     value={profileForm.timezone || ''}
-                    disabled={!timezoneOptions.length}
+                    disabled={!editing || !timezoneOptions.length}
                     onChange={(e) => handleProfileChange('timezone', e.target.value)}
                   />
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {t('settings.timezoneHelp')}
-                  </p>
-                </div>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  {t('settings.timezoneHelp')}
+                </p>
               </div>
+            </div>
 
+            {editing && (
               <div className="flex items-center gap-3 pt-2">
                 <Button type="submit" disabled={updateProfileMutation.isPending}>
                   {updateProfileMutation.isPending ? t('common.loading') : t('common.saveChanges')}
                 </Button>
-                <Button type="button" variant="outline" onClick={handleProfileReset}>{t('common.cancel')}</Button>
+                <Button type="button" variant="outline" onClick={() => { handleProfileReset(); setEditing(false); }}>{t('common.cancel')}</Button>
               </div>
+            )}
+          </form>
+        </section>
 
-              <div className="mt-4">
-                <label className="file-label">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      handleAvatarChange(e);
-                    }}
-                    className="hidden"
-                  />
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Profile picture" className="w-12 h-12 rounded-full object-cover" />
-                  ) : (
-                    <User size={20} className="text-muted-foreground" />
-                  )}
-                  <span>Update profile picture</span>
-                </label>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <section>
+          <h2 className="text-lg font-semibold text-destructive mb-1">{t('settings.dangerZone')}</h2>
+          <p className="text-sm text-muted-foreground mb-4">{t('settings.deleteAccountDesc')}</p>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={deleteAccountMutation.isPending}
+          >
+            {deleteAccountMutation.isPending ? t('common.loading') : t('settings.deleteAccount')}
+          </Button>
+        </section>
       </div>
     </section>
   );

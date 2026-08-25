@@ -1,4 +1,5 @@
 import { useState, useRef, type FormEvent, type FocusEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Send, Paperclip, Image as ImageIcon, FileText, X, ChevronDown, Mic } from 'lucide-react';
 import { useApiClient } from '@/lib/api/client';
@@ -10,7 +11,8 @@ interface Props {
   placeholder?: string;
 }
 
-export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT-Code anything…' }: Props) {
+export function ChatComposer({ disabled = false, onSubmit, placeholder }: Props) {
+  const { t } = useTranslation();
   const client = useApiClient();
   const [text, setText] = useState('');
   const [showAttachMenu, setShowAttachMenu] = useState(false);
@@ -21,7 +23,8 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const subscription = useQuery({ queryKey: ['subscription'], queryFn: () => getSubscription(client) });
-  const planName = subscription.data?.plan_name ?? 'Free';
+  const planName = subscription.data?.plan_name ?? t('chat.defaultPlan');
+  const resolvedPlaceholder = placeholder ?? t('composer.defaultPlaceholder');
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -80,7 +83,7 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT
       <button
         type="button"
         className="icon"
-        title="Attach"
+        title={t('composer.attach')}
         onClick={() => setShowAttachMenu((v) => !v)}
       >
         <Plus size={18} />
@@ -88,10 +91,10 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT
       {showAttachMenu && (
         <div className="attach-menu">
           <button type="button" onClick={() => handleAttach('document')}>
-            <Paperclip size={14} /> Attach a document
+            <Paperclip size={14} /> {t('composer.attachDocument')}
           </button>
           <button type="button" onClick={() => handleAttach('image')}>
-            <ImageIcon size={14} /> Attach an image
+            <ImageIcon size={14} /> {t('composer.attachImage')}
           </button>
         </div>
       )}
@@ -104,7 +107,7 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT
           setText(event.target.value);
           autoResize();
         }}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         rows={1}
         disabled={disabled}
         onKeyDown={(event) => {
@@ -116,15 +119,15 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder = 'Ask JT
       />
 
       <div className="composer-actions">
-        <div className="composer-actions-center" title="Current plan">
+        <div className="composer-actions-center" title={t('composer.currentPlan')}>
           {planName} <ChevronDown size={12} />
         </div>
 
-        <button className="icon" type="button" title="Voice input">
+        <button className="icon" type="button" title={t('composer.voiceInput')}>
           <Mic size={18} />
         </button>
 
-        <button className="send" type="submit" disabled={disabled || !text.trim()} title="Send message">
+        <button className="send" type="submit" disabled={disabled || !text.trim()} title={t('composer.sendMessage')}>
           <Send size={16} />
         </button>
       </div>

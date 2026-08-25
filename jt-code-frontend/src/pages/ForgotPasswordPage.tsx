@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, CheckCircle2, KeyRound, Mail, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '@/auth/AuthLayout';
@@ -8,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 type Stage = 'email' | 'sent' | 'reset' | 'complete';
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const auth = supabase.auth as typeof supabase.auth & {
     resetPasswordForEmail(email: string): { data?: { resetCode?: string }; error?: { message?: string } | null };
@@ -36,7 +38,7 @@ export default function ForgotPasswordPage() {
       const result = await auth.resetPasswordForEmail(email);
       const error = result.error;
       if (error) {
-        setErrorMsg(error.message || 'Could not send the password reset link.');
+        setErrorMsg(error.message || t('forgot.errors.sendFailed'));
         return;
       }
       const nextResetCode = String((result as { data?: { resetCode?: string } }).data?.resetCode ?? '000000');
@@ -44,7 +46,7 @@ export default function ForgotPasswordPage() {
       setCode(nextResetCode);
       setStage('sent');
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setErrorMsg(err instanceof Error ? err.message : t('forgot.errors.unexpected'));
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +57,7 @@ export default function ForgotPasswordPage() {
     setErrorMsg('');
     setSuccessMsg('');
     if (newPassword !== confirmPassword) {
-      setErrorMsg('Passwords do not match.');
+      setErrorMsg(t('forgot.errors.mismatch'));
       return;
     }
 
@@ -67,13 +69,13 @@ export default function ForgotPasswordPage() {
         newPassword,
       });
       if (error) {
-        setErrorMsg(error.message || 'Could not reset your password.');
+        setErrorMsg(error.message || t('forgot.errors.resetFailed'));
         return;
       }
-      setSuccessMsg('Your password has been updated. You can sign in with the new password.');
+      setSuccessMsg(t('forgot.updatedMessage'));
       setStage('complete');
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setErrorMsg(err instanceof Error ? err.message : t('forgot.errors.unexpected'));
     } finally {
       setIsLoading(false);
     }
@@ -88,14 +90,14 @@ export default function ForgotPasswordPage() {
               <div className="auth-card__icon">
                 <ShieldCheck size={18} />
               </div>
-              <h2>Reset your password</h2>
-              <p>Enter your email address and we’ll prepare a mock reset flow you can complete right here.</p>
+              <h2>{t('forgot.resetTitle')}</h2>
+              <p>{t('forgot.resetDesc')}</p>
             </div>
 
             <form onSubmit={(event) => void sendResetLink(event)} className="auth-form auth-form--forgot">
               <Input
                 id="reset-email"
-                label="Email address"
+                label={t('forgot.emailLabel')}
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -106,11 +108,11 @@ export default function ForgotPasswordPage() {
               />
 
               <button type="submit" className="primary-button" disabled={isLoading}>
-                {isLoading ? 'Sending…' : 'Send reset code'}
+                {isLoading ? t('forgot.sending') : t('forgot.sendCode')}
               </button>
 
               <Link to="/sign-in" className="back-link">
-                <ArrowLeft size={17} /> Back to sign in
+                <ArrowLeft size={17} /> {t('forgot.backToSignIn')}
               </Link>
             </form>
           </>
@@ -122,26 +124,26 @@ export default function ForgotPasswordPage() {
               <div className="auth-card__icon">
                 <KeyRound size={18} />
               </div>
-              <h2>Check your email</h2>
+              <h2>{t('forgot.checkTitle')}</h2>
               <p>
-                We sent a mock reset message to <strong>{email}</strong>. The code below will unlock the next step.
+                {t('forgot.checkDescPlain', { email })}
               </p>
             </div>
 
             <div className="reset-code-card">
-              <span>Mock reset code</span>
+              <span>{t('forgot.mockResetCode')}</span>
               <strong>{resetCode}</strong>
               <button type="button" className="secondary-button" onClick={() => setStage('reset')}>
-                Use this code now
+                {t('forgot.useCodeNow')}
               </button>
             </div>
 
             <button type="button" className="text-link" onClick={() => setStage('reset')}>
-              I already have a reset code
+              {t('forgot.haveCode')}
             </button>
 
             <Link to="/sign-in" className="back-link">
-              <ArrowLeft size={17} /> Back to sign in
+              <ArrowLeft size={17} /> {t('forgot.backToSignIn')}
             </Link>
           </>
         )}
@@ -152,14 +154,14 @@ export default function ForgotPasswordPage() {
               <div className="auth-card__icon">
                 <ShieldCheck size={18} />
               </div>
-              <h2>Create a new password</h2>
-              <p>Enter the reset code and choose a new password for {email}.</p>
+              <h2>{t('forgot.newPasswordTitle')}</h2>
+              <p>{t('forgot.newPasswordDesc', { email })}</p>
             </div>
 
             <form onSubmit={(event) => void completeReset(event)} className="auth-form auth-form--forgot">
               <Input
                 id="reset-code"
-                label="Reset code"
+                label={t('forgot.codeLabel')}
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
                 placeholder="000000"
@@ -167,31 +169,31 @@ export default function ForgotPasswordPage() {
               />
               <Input
                 id="new-password"
-                label="New password"
+                label={t('forgot.newPasswordLabel')}
                 type="password"
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
-                placeholder="Create a new password"
+                placeholder={t('signup.passwordPlaceholder')}
                 autoComplete="new-password"
               />
               <Input
                 id="confirm-password"
-                label="Confirm password"
+                label={t('forgot.confirmPasswordLabel')}
                 type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
-                placeholder="Confirm your password"
+                placeholder={t('signup.confirmPasswordPlaceholder')}
                 autoComplete="new-password"
               />
 
               {errorMsg && <div className="form-error">{errorMsg}</div>}
 
               <button type="submit" className="primary-button" disabled={isLoading}>
-                {isLoading ? 'Updating…' : 'Reset password'}
+                {isLoading ? t('forgot.updating') : t('forgot.resetButton')}
               </button>
 
               <button type="button" className="text-link" onClick={() => setStage('sent')}>
-                Back to code step
+                {t('forgot.backToCode')}
               </button>
             </form>
           </>
@@ -203,7 +205,7 @@ export default function ForgotPasswordPage() {
               <div className="auth-card__icon auth-card__icon--success">
                 <CheckCircle2 size={18} />
               </div>
-              <h2>Password updated</h2>
+              <h2>{t('forgot.updatedTitle')}</h2>
               <p>{successMsg}</p>
             </div>
 
@@ -212,7 +214,7 @@ export default function ForgotPasswordPage() {
               className="primary-button"
               onClick={() => void navigate('/sign-in', { replace: true })}
             >
-              Return to sign in
+              {t('forgot.returnToSignIn')}
             </button>
           </>
         )}

@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { withTranslation, type WithTranslation } from 'react-i18next';
 
-interface ErrorBoundaryProps {
+interface ErrorBoundaryProps extends WithTranslation {
   children: ReactNode;
 }
 
@@ -8,7 +9,7 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundaryBase extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { error: null };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
@@ -25,13 +26,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   };
 
   render() {
+    const { t } = this.props;
     if (this.state.error) {
       return (
         <div className="fatal-error" role="alert">
-          <h1>Something went wrong</h1>
-          <p>{this.state.error.message || 'An unexpected error occurred.'}</p>
+          <h1>{t('chrome.fatalTitle')}</h1>
+          <p>{this.state.error.message || t('chrome.unexpectedError')}</p>
           <button type="button" className="account-popover-item" onClick={this.handleReload}>
-            Reload application
+            {t('chrome.reloadApp')}
           </button>
         </div>
       );
@@ -39,3 +41,5 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryBase);

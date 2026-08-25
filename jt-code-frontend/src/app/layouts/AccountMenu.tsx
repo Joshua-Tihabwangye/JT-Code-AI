@@ -1,10 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Settings, LogOut, Keyboard, type LucideIcon } from 'lucide-react';
-import { Avatar, Badge, Select } from '@/shared/components';
+import { Avatar, Badge } from '@/shared/components';
 import { supabase, useAuth, useUser } from '@/lib/supabase';
-import { useTranslation } from 'react-i18next';
-import { useLanguage } from '@/i18n/useLanguage';
 
 interface AccountMenuProps {
   collapsed: boolean;
@@ -13,9 +12,8 @@ interface AccountMenuProps {
 export function AccountMenu({ collapsed }: AccountMenuProps) {
   const user = useUser();
   const { isSignedIn } = useAuth();
-  const navigate = useNavigate();
   const { t } = useTranslation();
-  const { currentLanguage, setLanguage, languages } = useLanguage();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -25,7 +23,7 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
     String(user?.user_metadata?.full_name ?? '') ||
     String(user?.user_metadata?.name ?? '') ||
     user?.email ||
-    'Account';
+    t('menu.account');
   const email = user?.email ?? '';
   const avatarUrl = typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : undefined;
   const plan = String(user?.user_metadata?.plan ?? 'Free');
@@ -89,9 +87,9 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
   if (!isSignedIn || !user) return null;
 
   const items: { label: string; icon: LucideIcon; onClick: () => void }[] = [
-    { label: 'Settings', icon: Settings, onClick: closeAnd(() => navigate('/app/settings')) },
+    { label: t('menu.settings'), icon: Settings, onClick: closeAnd(() => navigate('/app/settings')) },
     {
-      label: 'Keyboard shortcuts',
+      label: t('menu.keyboardShortcuts'),
       icon: Keyboard,
       onClick: closeAnd(() => navigate('/app/settings')),
     },
@@ -118,7 +116,7 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
           ref={menuRef}
           id={menuId}
           role="menu"
-          aria-label="Account"
+          aria-label={t('menu.account')}
           className={`account-popover ${collapsed ? 'collapsed' : ''}`}
           onKeyDown={onMenuKeyDown}
         >
@@ -131,15 +129,6 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
             <Badge variant="secondary" className="account-plan-badge">
               {plan}
             </Badge>
-          </div>
-          <div className="px-3 py-2">
-            <div className="text-xs font-medium text-muted-foreground mb-1.5">{t('settings.language')}</div>
-            <Select
-              id="account-language"
-              options={languages.map((l) => ({ value: l.code, label: `${l.nativeName} — ${l.englishName}` }))}
-              value={currentLanguage}
-              onChange={(e) => setLanguage(e.target.value)}
-            />
           </div>
           <div className="account-popover-separator" />
           {items.map((item) => (
@@ -156,7 +145,7 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
             onClick={closeAnd(() => signOut())}
           >
             <LogOut size={16} aria-hidden />
-            <span>Sign out</span>
+            <span>{t('menu.signOut')}</span>
           </button>
         </div>
       )}

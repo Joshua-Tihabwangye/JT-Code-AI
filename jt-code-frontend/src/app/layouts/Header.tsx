@@ -1,4 +1,5 @@
 import { Link, useNavigate, type NavigateFunction } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button, Avatar, Dropdown, DropdownItem, DropdownSeparator, DropdownLabel } from '@/shared/components';
 import { useAuth, useUser, supabase, type SupabaseUser } from '@/lib/supabase';
 import { LogOut, Settings } from 'lucide-react';
@@ -8,6 +9,7 @@ const headerDropdownContent = (
   user: SupabaseUser,
   navigate: NavigateFunction,
   handleSignOut: () => void,
+  t: (key: string) => string,
 ) => (
   <>
     <DropdownLabel>
@@ -19,12 +21,12 @@ const headerDropdownContent = (
     <DropdownSeparator />
     <DropdownItem onClick={() => void navigate('/app/settings')}>
       <Settings size={16} className="mr-2" />
-      Profile & Settings
+      {t('menu.profileAndSettings')}
     </DropdownItem>
     <DropdownSeparator />
     <DropdownItem onClick={handleSignOut}>
       <LogOut size={16} className="mr-2" />
-      Sign out
+      {t('menu.signOut')}
     </DropdownItem>
   </>
 );
@@ -33,6 +35,7 @@ export function Header() {
   const { isSignedIn } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -44,7 +47,7 @@ export function Header() {
       String(user.user_metadata?.full_name ?? '') ||
       String(user.user_metadata?.name ?? '') ||
       user.email ||
-      'Account';
+      t('menu.account');
     const avatarUrl =
       typeof user.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : undefined;
 
@@ -58,7 +61,7 @@ export function Header() {
                 <span>{displayName}</span>
               </button>
             }
-            content={headerDropdownContent(displayName, user, navigate, () => void handleSignOut())}
+            content={headerDropdownContent(displayName, user, navigate, () => void handleSignOut(), t)}
           />
         </div>
       </header>
@@ -69,10 +72,10 @@ export function Header() {
     <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/sign-in">Sign In</Link>
+          <Link to="/sign-in">{t('menu.signIn')}</Link>
         </Button>
         <Button variant="primary" size="sm" asChild>
-          <Link to="/sign-up">Get Started</Link>
+          <Link to="/sign-up">{t('menu.getStarted')}</Link>
         </Button>
       </div>
     </header>

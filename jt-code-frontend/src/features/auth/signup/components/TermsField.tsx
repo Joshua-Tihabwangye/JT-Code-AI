@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import type { SignupSchema } from '../schema';
 import { FormError } from '../../components/FormError';
@@ -8,6 +9,9 @@ interface Props {
 }
 
 export function TermsField({ form }: Props) {
+  const { t } = useTranslation();
+  const errorMessage = form.formState.errors.acceptedTerms?.message;
+
   return (
     <div>
       <div className="terms-field">
@@ -17,14 +21,16 @@ export function TermsField({ form }: Props) {
           {...form.register('acceptedTerms')}
         />
         <label htmlFor="acceptedTerms">
-          I agree to the <Link to="/terms">Terms</Link> and{' '}
-          <Link to="/privacy">Privacy Policy</Link>.
+          {t('signup.termsPrefix')}
+          <Link to="/terms">{t('signup.termsLink')}</Link>
+          {t('signup.termsMiddle')}
+          <Link to="/privacy">{t('signup.privacyLink')}</Link>.
         </label>
       </div>
       <p className="field-help">
-        You can review these legal pages before you finish signing up.
+        {t('signup.termsHelp')}
       </p>
-      <FormError message={form.formState.errors.acceptedTerms?.message} />
+      <FormError message={errorMessage ? t(errorMessage) : undefined} />
     </div>
   );
 }

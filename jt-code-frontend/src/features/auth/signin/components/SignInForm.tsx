@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SignInHeader } from './SignInHeader';
 import { SocialAuthButtons } from '../../components/SocialAuthButtons';
 import { EmailField } from './EmailField';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function SignInForm({ onSignedIn }: Props) {
+  const { t } = useTranslation();
   const [submitError, setSubmitError] = useState('');
   const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
 
@@ -53,7 +55,7 @@ export function SignInForm({ onSignedIn }: Props) {
       <SignInHeader />
 
       <p className="signup-subtitle">
-        Use the same mock account you created on the signup page, or sign in with a social shortcut.
+        {t('signin.helpText')}
       </p>
 
       <SocialAuthButtons
@@ -65,7 +67,7 @@ export function SignInForm({ onSignedIn }: Props) {
 
       <div className="signup-divider">
         <span />
-        <span>or</span>
+        <span>{t('common.or')}</span>
         <span />
       </div>
 
@@ -74,17 +76,17 @@ export function SignInForm({ onSignedIn }: Props) {
         <PasswordField form={form} />
 
         <div className="form-options">
-          <Link to="/forgot-password">Forgot password?</Link>
+          <Link to="/forgot-password">{t('signin.forgotPassword')}</Link>
         </div>
 
         {submitError && <div className="form-error">{submitError}</div>}
 
-        <SubmitButton isSubmitting={isSubmitting} label="Sign in" />
+        <SubmitButton isSubmitting={isSubmitting} label={t('signin.submit')} />
       </form>
 
       <footer className="signup-footer">
-        <span>Don't have an account?</span>
-        <Link to="/sign-up">Create account</Link>
+        <span>{t('signin.noAccount')}</span>
+        <Link to="/sign-up">{t('signin.createAccount')}</Link>
       </footer>
     </section>
   );

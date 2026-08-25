@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   MessageSquare,
@@ -10,15 +10,14 @@ import {
   PanelLeftClose,
   PanelLeft,
   Menu,
-  Search,
 } from 'lucide-react';
-import { IconButton } from '@/shared/components';
+import { IconButton, Select } from '@/shared/components';
 import { useAppStore } from '@/lib/appStore';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/i18n/useLanguage';
 import { AccountMenu } from './AccountMenu';
-import { GlobalSearch } from '@/app/GlobalSearch';
 
 const primaryNav = [
   { name: 'Chat', href: '/app/chat', icon: MessageSquare },
@@ -64,23 +63,12 @@ function NavSection({
 
 export function AppShell() {
   const { t } = useTranslation();
+  const { currentLanguage, setLanguage, languages } = useLanguage();
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const { resolvedTheme, toggleTheme } = useTheme();
   const { isSignedIn } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
 
   const closeDrawer = () => setMobileNavOpen(false);
 
@@ -91,7 +79,7 @@ export function AppShell() {
       <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} aria-label="Primary navigation">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <IconButton className="mobile-only" aria-label="Open navigation" onClick={() => setMobileNavOpen(true)}>
+            <IconButton className="mobile-only" aria-label={t('chrome.openNavigation')} onClick={() => setMobileNavOpen(true)}>
               <Menu size={18} aria-hidden />
             </IconButton>
             <NavLink to="/app/chat" className="brand" aria-label="JT-Code home">
@@ -101,11 +89,15 @@ export function AppShell() {
           </div>
         </div>
 
-        <button type="button" className="search-trigger" onClick={() => setSearchOpen(true)} aria-label="Search (Ctrl/Cmd + K)">
-          <Search size={16} aria-hidden />
-          {!collapsed && <span>Search…</span>}
-          {!collapsed && <kbd className="search-kbd">⌘K</kbd>}
-        </button>
+        <div className="sidebar-language">
+          {!collapsed && <span className="nav-section-label">{t('settings.language')}</span>}
+          <Select
+            aria-label={t('settings.language')}
+            options={languages.map((l) => ({ value: l.code, label: `${l.nativeName} — ${l.englishName}` }))}
+            value={currentLanguage}
+            onChange={(e) => setLanguage(e.target.value)}
+          />
+        </div>
 
         <nav className="nav-links compact">
           <NavSection label={t('nav.primary')} items={primaryNav.map((i) => ({ ...i, name: t(`nav.${i.name.toLowerCase()}`) }))} collapsed={collapsed} onNavigate={closeDrawer} />
@@ -113,16 +105,16 @@ export function AppShell() {
         </nav>
 
         <div className="sidebar-footer compact">
-          <button type="button" onClick={toggleTheme} title={collapsed ? 'Toggle theme' : undefined}>
+          <button type="button" onClick={toggleTheme} title={collapsed ? t('chrome.toggleTheme') : undefined}>
             {resolvedTheme === 'dark' ? <Moon size={18} aria-hidden /> : <Sun size={18} aria-hidden />}
-            {!collapsed && <span className="footer-label">Theme</span>}
+            {!collapsed && <span className="footer-label">{t('chrome.theme')}</span>}
           </button>
 
           {isSignedIn && <AccountMenu collapsed={collapsed} />}
 
-          <button type="button" onClick={toggleSidebar} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+          <button type="button" onClick={toggleSidebar} title={collapsed ? t('chrome.expandSidebar') : t('chrome.collapseSidebar')}>
             {collapsed ? <PanelLeft size={18} aria-hidden /> : <PanelLeftClose size={18} aria-hidden />}
-            {!collapsed && <span className="footer-label">Collapse</span>}
+            {!collapsed && <span className="footer-label">{t('chrome.collapse')}</span>}
           </button>
         </div>
       </aside>
@@ -132,8 +124,6 @@ export function AppShell() {
           <Outlet />
         </div>
       </main>
-
-      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

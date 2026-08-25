@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, FlagTriangleRight, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { COUNTRY_METADATA, getCountryMetadata } from '../../lib/countryMetadata';
 import type { SignupSchema } from '../schema';
@@ -11,6 +12,7 @@ interface Props {
 
 export function CountryField({ form }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
   const selectedCode = form.watch('countryCode');
   const selectedCountry = getCountryMetadata(selectedCode) ?? COUNTRY_METADATA[0]!;
   const [query, setQuery] = useState(selectedCountry.name);
@@ -57,12 +59,12 @@ export function CountryField({ form }: Props) {
 
   return (
     <div className="form-field">
-      <label htmlFor="country-search">Country</label>
+      <label htmlFor="country-search">{t('signup.country.label')}</label>
       <div className="country-combobox" ref={containerRef}>
         <Input
           id="country-search"
           value={query}
-          placeholder="Search a country"
+          placeholder={t('signup.country.searchPlaceholder')}
           leftIcon={<Search size={16} aria-hidden />}
           rightIcon={<ChevronDown size={16} aria-hidden />}
           onChange={(event) => {
@@ -88,7 +90,7 @@ export function CountryField({ form }: Props) {
           type="button"
           className="country-pill"
           onClick={() => setOpen((value) => !value)}
-          aria-label={`Selected country ${selectedCountry.name}`}
+          aria-label={t('signup.country.selectedAria', { name: selectedCountry.name })}
         >
           <span aria-hidden>{selectedCountry.flag}</span>
           <span>{selectedCountry.dialCode}</span>
@@ -121,17 +123,17 @@ export function CountryField({ form }: Props) {
             {!filteredCountries.length && (
               <div className="country-empty">
                 <FlagTriangleRight size={16} aria-hidden />
-                <span>No countries match “{query}”.</span>
+                <span>{t('signup.country.noMatch', { query })}</span>
               </div>
             )}
           </div>
         )}
       </div>
       <p className="field-help">
-        The selected country updates your dial code, phone validation and timezone suggestions.
+        {t('signup.country.help')}
       </p>
       {form.formState.errors.countryCode?.message && (
-        <p className="field-error">{form.formState.errors.countryCode.message}</p>
+        <p className="field-error">{t(form.formState.errors.countryCode.message)}</p>
       )}
     </div>
   );

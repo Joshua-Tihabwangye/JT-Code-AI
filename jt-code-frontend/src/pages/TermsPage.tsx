@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function TermsPage() {
+  const { t } = useTranslation();
   return (
     <main className="legal-page">
       <section className="legal-card">
-        <p className="legal-eyebrow">Terms of Service</p>
-        <h1>JT-Code Terms</h1>
+        <p className="legal-eyebrow">{t('legal.terms.eyebrow')}</p>
+        <h1>{t('legal.terms.title')}</h1>
         <p>
-          This workspace is currently running in mock mode. By using it, you agree that data entered into the app
-          may be stored locally in your browser for product testing and development.
+          {t('legal.terms.p1')}
         </p>
         <p>
-          The frontend may simulate authentication, billing, file storage and content workflows until the API mode is
-          connected.
+          {t('legal.terms.p2')}
         </p>
         <div className="legal-actions">
-          <Link to="/sign-up" className="primary-button primary-button--link">Create account</Link>
-          <Link to="/contact" className="secondary-button">Contact support</Link>
+          <Link to="/sign-up" className="primary-button primary-button--link">{t('legal.terms.createAccount')}</Link>
+          <Link to="/contact" className="secondary-button">{t('legal.terms.contactSupport')}</Link>
         </div>
       </section>
     </main>

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import type { SignupSchema } from '../schema';
 import { Input } from '@/shared/components/Input';
@@ -22,6 +23,8 @@ export function PasswordField({
   helper,
 }: Props) {
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
+  const errorMessage = form.formState.errors[field]?.message;
 
   return (
     <div className="form-field">
@@ -36,16 +39,16 @@ export function PasswordField({
           <button
             type="button"
             className="password-toggle"
-            aria-label={visible ? `Hide ${label}` : `Show ${label}`}
+            aria-label={visible ? t('common.hide') : t('common.show')}
             aria-pressed={visible}
             onClick={() => setVisible((value) => !value)}
           >
             {visible ? <EyeOff size={16} /> : <Eye size={16} />}
-            <span>{visible ? 'Hide' : 'Show'}</span>
+            <span>{visible ? t('common.hide') : t('common.show')}</span>
           </button>
         )}
         {...form.register(field)}
-        error={form.formState.errors[field]?.message}
+        error={errorMessage ? t(errorMessage) : undefined}
       />
       {helper && <div className="field-help">{helper}</div>}
     </div>

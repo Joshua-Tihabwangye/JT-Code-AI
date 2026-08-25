@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { COUNTRY_METADATA } from '../../lib/countryMetadata';
 import type { SignupSchema } from '../schema';
@@ -16,12 +17,13 @@ function uniqueDialCodes() {
 }
 
 export function DialCodeField({ form }: Props) {
+  const { t } = useTranslation();
   const dialCode = form.watch('dialCode');
   const dialCodeField = form.register('dialCode');
 
   return (
     <div className="form-field">
-      <label htmlFor="dialCode">Dial code</label>
+      <label htmlFor="dialCode">{t('signup.dialCode.label')}</label>
       <select
         id="dialCode"
         {...dialCodeField}
@@ -37,9 +39,9 @@ export function DialCodeField({ form }: Props) {
           </option>
         ))}
       </select>
-      <p className="field-help">You can override the default code if you're signing up for a different calling region.</p>
+      <p className="field-help">{t('signup.dialCode.help')}</p>
       {form.formState.errors.dialCode?.message && (
-        <p className="field-error">{form.formState.errors.dialCode.message}</p>
+        <p className="field-error">{t(form.formState.errors.dialCode.message)}</p>
       )}
     </div>
   );

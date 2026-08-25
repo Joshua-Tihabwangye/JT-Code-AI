@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
 import { ChatComposer } from '@/features/chat/ChatComposer';
 import { ChatBackground } from '@/features/chat/ChatBackground';
 import { createChatRequest, createConversation, streamChatRequest, getConversations } from '@/features/chat/api';
 import { Button, ScrollArea, Avatar, Badge } from '@/shared/components';
 import type { ChatRequest, Conversation } from '@/features/chat/types';
+import { useBillingStore } from '@/features/billing/store';
 import { Sparkles, Plus } from 'lucide-react';
 
 interface LocalMessage {
@@ -64,17 +66,18 @@ function useTypingText(text: string, speed = 60) {
 }
 
 export function ChatPage() {
+  const { t } = useTranslation();
   const client = useApiClient();
   const conversationId = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<LocalMessage[]>([
-    { id: 'welcome', role: 'assistant', content: 'Hello! I am JT-Code. What are we building today?', status: 'complete' },
+    { id: 'welcome', role: 'assistant', content: t('chat.welcome'), status: 'complete' },
   ]);
   const [busy, setBusy] = useState(false);
   const [, setConversations] = useState<Conversation[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
 
-  const headline = useTypingText('What should we build today?', 160);
+  const headline = useTypingText(t('chat.headline'), 160);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -101,6 +104,7 @@ export function ChatPage() {
     setBusy(true);
     const userMessageId = crypto.randomUUID();
     setMessages((current) => [...current, { id: userMessageId, role: 'user', content: text, status: 'complete' }]);
+    useBillingStore.getState().consumeCredits(5, 'Chat');
 
     const assistantId = crypto.randomUUID();
     setMessages((current) => [...current, { id: assistantId, role: 'assistant', content: '', status: 'streaming' }]);
@@ -124,10 +128,10 @@ export function ChatPage() {
           if (message.id !== assistantId) return message;
           if (type === 'failed') {
             const errorData = data as { message?: string };
-            return { ...message, content: errorData.message ?? 'The request failed.', status: 'error' };
+            return { ...message, content: errorData.message ?? t('chat.requestFailed'), status: 'error' };
           }
           const updated = data as Partial<ChatRequest>;
-          return { ...message, content: updated.outputText || `Status: ${updated.status ?? 'running'}…`, status: 'streaming' };
+          return { ...message, content: updated.outputText || t('chat.statusRunning', { status: updated.status ?? 'running' }), status: 'streaming' };
         }));
       });
 
@@ -157,7 +161,7 @@ export function ChatPage() {
     saveChatSession(messages, conversationId.current);
     conversationId.current = null;
     setMessages([
-      { id: 'welcome', role: 'assistant', content: 'Hello! I am JT-Code. What are we building today?', status: 'complete' },
+      { id: 'welcome', role: 'assistant', content: t('chat.welcome'), status: 'complete' },
     ]);
     setShowNewChat(false);
   }
@@ -174,7 +178,7 @@ export function ChatPage() {
 
           <div className="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-sm text-secondary-foreground text-xs font-medium border border-border">
             <Sparkles size={14} className="text-primary" />
-            AI-powered coding agent
+            {t('chat.badge')}
           </div>
 
           <h1 className="chat-headline relative">
@@ -183,38 +187,27 @@ export function ChatPage() {
           </h1>
 
           <p className="chat-subhead relative">
-            Ask JT-Code about code, architecture, research, documents, or anything else.
+            {t('chat.subhead')}
           </p>
 
           <div className="relative w-full max-w-[720px]">
-            <ChatComposer disabled={busy} onSubmit={send} placeholder="Message JT-Code…" />
+            <ChatComposer disabled={busy} onSubmit={send} placeholder={t('chat.composerPlaceholder')} />
           </div>
 
-          <div className="relative flex flex-wrap items-center justify-center gap-2">
-            {['Refactor a function', 'Explain a codebase', 'Generate tests', 'Write documentation'].map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => void send(suggestion)}
-                className="px-3 py-1.5 text-xs rounded-full border border-border bg-card/80 backdrop-blur-sm hover:bg-secondary transition-colors text-muted-foreground"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
+           <div className="relative flex flex-wrap items-center justify-center gap-2" />
         </div>
       ) : (
         <>
           <header className="relative z-10 flex items-center justify-between px-6 py-3 border-b border-border bg-card/70 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-foreground">
-                {conversationId.current ? 'Conversation' : 'New Chat'}
+                {conversationId.current ? t('chat.conversation') : t('chat.newChat')}
               </h2>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-xs">GPT-4o</Badge>
               <Button variant="ghost" size="sm" onClick={() => setShowNewChat(true)}>
-                <Plus size={16} className="mr-1" /> New Chat
+                <Plus size={16} className="mr-1" /> {t('chat.newChat')}
               </Button>
             </div>
           </header>
@@ -241,16 +234,16 @@ export function ChatPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="message-role">
-                            {message.role === 'assistant' ? 'JT-Code' : message.role === 'user' ? 'You' : message.role}
+                            {message.role === 'assistant' ? 'JT-Code' : message.role === 'user' ? t('chat.you') : message.role}
                           </span>
                           {message.status === 'streaming' && (
                             <span className="flex items-center gap-1 text-xs text-muted-foreground">
                               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                              Streaming...
+                              {t('chat.streaming')}
                             </span>
                           )}
                           {message.status === 'error' && (
-                            <Badge variant="destructive" className="text-xs">Error</Badge>
+                            <Badge variant="destructive" className="text-xs">{t('chat.errorBadge')}</Badge>
                           )}
                         </div>
                         <p>{message.content}</p>
@@ -264,7 +257,7 @@ export function ChatPage() {
           </div>
 
           <div className="relative z-10 p-4 border-t border-border bg-card/70 backdrop-blur-sm">
-            <ChatComposer disabled={busy} onSubmit={send} placeholder={busy ? 'Processing...' : 'Message JT-Code...'} />
+            <ChatComposer disabled={busy} onSubmit={send} placeholder={busy ? t('chat.composerPlaceholderBusy') : t('chat.composerPlaceholder')} />
           </div>
         </>
       )}
@@ -272,11 +265,11 @@ export function ChatPage() {
       {showNewChat && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowNewChat(false)}>
           <div className="w-full max-w-md rounded-xl bg-card text-card-foreground p-6 shadow-xl border border-border" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold mb-2">Start New Chat?</h2>
-            <p className="text-muted-foreground mb-6">Your current conversation will be saved. You can continue it later from the history.</p>
+            <h2 className="text-lg font-semibold mb-2">{t('chat.startNewChatTitle')}</h2>
+            <p className="text-muted-foreground mb-6">{t('chat.startNewChatDesc')}</p>
             <div className="flex gap-3 justify-end">
-              <Button variant="ghost" onClick={() => setShowNewChat(false)}>Cancel</Button>
-              <Button onClick={handleNewChat}>New Chat</Button>
+              <Button variant="ghost" onClick={() => setShowNewChat(false)}>{t('common.cancel')}</Button>
+              <Button onClick={handleNewChat}>{t('chat.newChat')}</Button>
             </div>
           </div>
         </div>

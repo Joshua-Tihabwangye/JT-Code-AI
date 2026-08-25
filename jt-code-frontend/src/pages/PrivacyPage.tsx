@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPage() {
+  const { t } = useTranslation();
   return (
     <main className="legal-page">
       <section className="legal-card">
-        <p className="legal-eyebrow">Privacy Policy</p>
-        <h1>JT-Code Privacy</h1>
+        <p className="legal-eyebrow">{t('legal.privacy.eyebrow')}</p>
+        <h1>{t('legal.privacy.title')}</h1>
         <p>
-          JT-Code stores account and workspace state locally in mock mode so the frontend can run without a backend.
-          Browser storage is used to preserve sessions, conversations, files, documents and other sample data.
+          {t('legal.privacy.p1')}
         </p>
         <p>
-          When API mode is enabled, the same product surfaces can switch to transport-backed repositories without
-          changing the page components.
+          {t('legal.privacy.p2')}
         </p>
         <div className="legal-actions">
-          <Link to="/sign-in" className="primary-button primary-button--link">Sign in</Link>
-          <Link to="/terms" className="secondary-button">Read terms</Link>
+          <Link to="/sign-in" className="primary-button primary-button--link">{t('legal.privacy.signIn')}</Link>
+          <Link to="/terms" className="secondary-button">{t('legal.privacy.readTerms')}</Link>
         </div>
       </section>
     </main>

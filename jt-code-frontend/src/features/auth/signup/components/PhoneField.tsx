@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CountryCode } from 'libphonenumber-js';
 import { Phone } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -12,15 +13,19 @@ interface Props {
 }
 
 export function PhoneField({ form }: Props) {
+  const { t } = useTranslation();
   const countryCode = form.watch('countryCode');
   const dialCode = form.watch('dialCode');
   const country = getCountryMetadata(countryCode) ?? undefined;
-  const placeholder = useMemo(() => country?.phonePlaceholder ?? 'Enter phone number', [country]);
+  const placeholder = useMemo(
+    () => country?.phonePlaceholder ?? t('signup.phone.defaultPlaceholder'),
+    [country, t],
+  );
   const contactField = form.register('contact');
 
   return (
     <div className="form-field">
-      <label htmlFor="contact">Contact / phone number</label>
+      <label htmlFor="contact">{t('signup.phone.label')}</label>
       <div className="phone-row">
         <div className="phone-row__dial">{dialCode}</div>
         <Input
@@ -42,7 +47,7 @@ export function PhoneField({ form }: Props) {
         />
       </div>
       <p className="field-help">
-        Use the phone number format commonly used in {country?.name ?? 'your country'}.
+        {t('signup.phone.help', { country: country?.name ?? t('signup.phone.yourCountry') })}
       </p>
     </div>
   );

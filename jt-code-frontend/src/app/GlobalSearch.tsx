@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '@/shared/components';
 import { MessageSquare, Image as ImageIcon, Files, FileText, CornerDownLeft } from 'lucide-react';
@@ -16,6 +17,7 @@ interface SearchResult {
 }
 
 export function GlobalSearch({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
   const repos = useRepositories();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -56,7 +58,7 @@ export function GlobalSearch({ open, onClose }: { open: boolean; onClose: () => 
         id: c.id,
         type: 'chat',
         title: c.title,
-        subtitle: c.preview || 'Conversation',
+        subtitle: c.preview || t('search.conversation'),
         to: '/app/history',
       }));
 
@@ -65,21 +67,21 @@ export function GlobalSearch({ open, onClose }: { open: boolean; onClose: () => 
       .map((img) => ({
         id: img.id,
         type: 'image',
-        title: img.prompt.slice(0, 60) || 'Generated image',
-        subtitle: `Image · ${img.style}`,
+        title: img.prompt.slice(0, 60) || t('search.generatedImage'),
+        subtitle: t('search.imageType', { style: img.style }),
         to: '/app/image',
       }));
 
     const file: SearchResult[] = files
       .filter((f) => match(f.name))
-      .map((f) => ({ id: f.id, type: 'file', title: f.name, subtitle: 'File', to: '/app/files' }));
+      .map((f) => ({ id: f.id, type: 'file', title: f.name, subtitle: t('search.file'), to: '/app/files' }));
 
     const document: SearchResult[] = documents
       .filter((d) => match(d.title))
-      .map((d) => ({ id: d.id, type: 'document', title: d.title, subtitle: 'Document', to: '/app/documents' }));
+      .map((d) => ({ id: d.id, type: 'document', title: d.title, subtitle: t('search.document'), to: '/app/documents' }));
 
     return [...chat, ...image, ...file, ...document].slice(0, 20);
-  }, [query, conversations, images, files, documents]);
+  }, [query, conversations, images, files, documents, t]);
 
   useEffect(() => {
     setActive(0);
@@ -115,17 +117,17 @@ export function GlobalSearch({ open, onClose }: { open: boolean; onClose: () => 
   return (
     <div className="fixed inset-0 z-[95] flex items-start justify-center p-4 pt-[12vh]">
       <div className="fixed inset-0 bg-black/50" aria-hidden onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-xl border border-border bg-background p-3 shadow-2xl" role="dialog" aria-modal="true" aria-label="Search">
+      <div className="relative w-full max-w-xl rounded-xl border border-border bg-background p-3 shadow-2xl" role="dialog" aria-modal="true" aria-label={t('common.search')}>
         <SearchInput
           autoFocus
           value={query}
           onChange={setQuery}
           onClear={() => setQuery('')}
-          placeholder="Search chats, images, files, documents…"
+          placeholder={t('search.placeholder')}
         />
         <div className="mt-2 max-h-[50vh] overflow-y-auto">
           {results.length === 0 ? (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">No results found.</div>
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">{t('search.noResults')}</div>
           ) : (
             results.map((result, index) => {
               const Icon = icons[result.type];

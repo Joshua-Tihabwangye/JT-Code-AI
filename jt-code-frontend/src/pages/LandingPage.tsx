@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/lib/supabase';
 
 export function LandingPage() {
   const { isSignedIn } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <main className="landing">
@@ -10,31 +12,29 @@ export function LandingPage() {
         <div className="brand"><span className="brand-mark">JT</span><span>JT-Code</span></div>
         <div className="header-actions">
           {isSignedIn ? (
-            <Link className="button primary" to="/app/chat">Open JT-Code</Link>
+            <Link className="button primary" to="/app/chat">{t('landing.openApp')}</Link>
           ) : (
             <>
-              <Link className="button ghost" to="/sign-in">Sign in</Link>
-              <Link className="button primary" to="/sign-up">Create account</Link>
+              <Link className="button ghost" to="/sign-in">{t('landing.signIn')}</Link>
+              <Link className="button primary" to="/sign-up">{t('landing.createAccount')}</Link>
             </>
           )}
         </div>
       </header>
       <section className="hero">
-        <p className="eyebrow">WEB + MOBILE AI ASSISTANT</p>
-        <h1>One clear workspace for questions, files, research and creation.</h1>
-        <p className="hero-copy">
-          JT-Code is the only assistant name used throughout this platform. The web client is React and TypeScript; authentication is handled by Supabase Auth and all business state lives in the Django API.
-        </p>
+        <p className="eyebrow">{t('landing.eyebrow')}</p>
+        <h1>{t('landing.headline')}</h1>
+        <p className="hero-copy">{t('landing.copy')}</p>
         {isSignedIn ? (
-          <Link className="button primary large" to="/app/chat">Continue to workspace</Link>
+          <Link className="button primary large" to="/app/chat">{t('landing.continueToWorkspace')}</Link>
         ) : (
-          <Link className="button primary large" to="/sign-up">Start with JT-Code</Link>
+          <Link className="button primary large" to="/sign-up">{t('landing.startWith')}</Link>
         )}
       </section>
-      <section className="feature-grid" aria-label="Platform foundations">
-        <article><h2>Secure identity</h2><p>Supabase Auth sessions are verified again by Django before every protected action.</p></article>
-        <article><h2>Durable data</h2><p>Supabase-hosted PostgreSQL remains the transactional source of truth.</p></article>
-        <article><h2>Managed assets</h2><p>Signed Cloudinary uploads keep secrets outside the browser.</p></article>
+      <section className="feature-grid" aria-label={t('landing.foundationsLabel')}>
+        <article><h2>{t('landing.feature1Title')}</h2><p>{t('landing.feature1Desc')}</p></article>
+        <article><h2>{t('landing.feature2Title')}</h2><p>{t('landing.feature2Desc')}</p></article>
+        <article><h2>{t('landing.feature3Title')}</h2><p>{t('landing.feature3Desc')}</p></article>
       </section>
     </main>
   );

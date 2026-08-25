@@ -4,9 +4,13 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+export function formatDate(
+  date: Date | string,
+  options?: Intl.DateTimeFormatOptions,
+  locale = 'en-US',
+): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -14,9 +18,13 @@ export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOpt
   });
 }
 
-export function formatDateTime(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+export function formatDateTime(
+  date: Date | string,
+  options?: Intl.DateTimeFormatOptions,
+  locale = 'en-US',
+): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleString('en-US', {
+  return d.toLocaleString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

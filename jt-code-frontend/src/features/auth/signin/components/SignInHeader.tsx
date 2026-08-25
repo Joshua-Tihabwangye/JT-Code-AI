@@ -1,8 +1,11 @@
+import { useTranslation } from 'react-i18next';
+
 export function SignInHeader() {
+  const { t } = useTranslation();
   return (
     <header className="signup-header">
-      <h1>Welcome back</h1>
-      <p>Sign in to continue to JT-Code</p>
+      <h1>{t('signin.title')}</h1>
+      <p>{t('signin.subtitle')}</p>
     </header>
   );
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import type { SignupSchema } from '../schema';
 import { getCountryMetadata } from '../../lib/countryMetadata';
@@ -7,19 +8,20 @@ interface Props {
 }
 
 export function TimezoneField({ form }: Props) {
+  const { t } = useTranslation();
   const countryCode = form.watch('countryCode');
   const country = getCountryMetadata(countryCode);
   const timezones = country?.timezones ?? [];
 
   return (
     <div className="form-field">
-      <label htmlFor="timezone">Timezone</label>
+      <label htmlFor="timezone">{t('signup.timezone.label')}</label>
       <select
         id="timezone"
         disabled={!timezones.length}
         {...form.register('timezone')}
       >
-        {!timezones.length && <option value="">No timezone available</option>}
+        {!timezones.length && <option value="">{t('signup.timezone.empty')}</option>}
         {timezones.map((timezone) => (
           <option key={timezone} value={timezone}>
             {timezone}
@@ -27,10 +29,10 @@ export function TimezoneField({ form }: Props) {
         ))}
       </select>
       <p className="field-help">
-        Suggested timezones are filtered by the selected country, but you can override them.
+        {t('signup.timezone.help')}
       </p>
       {form.formState.errors.timezone?.message && (
-        <p className="field-error">{form.formState.errors.timezone.message}</p>
+        <p className="field-error">{t(form.formState.errors.timezone.message)}</p>
       )}
     </div>
   );

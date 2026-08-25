@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   return (
     <main className="legal-page">
       <section className="legal-card">
-        <p className="legal-eyebrow">Contact</p>
-        <h1>Get help with JT-Code</h1>
+        <p className="legal-eyebrow">{t('legal.contact.eyebrow')}</p>
+        <h1>{t('legal.contact.title')}</h1>
         <p>
-          This release uses a mock frontend runtime, so the fastest path for support is the workspace itself.
-          Use the auth reset flow, sign out/sign in cycle, or refresh to verify persistence while developing.
+          {t('legal.contact.p1')}
         </p>
         <p>
-          If you want a real support route later, this page is now in place and can be wired to a ticketing or help
-          center integration without changing the public navigation.
+          {t('legal.contact.p2')}
         </p>
         <div className="legal-actions">
-          <Link to="/sign-in" className="primary-button primary-button--link">Back to sign in</Link>
-          <Link to="/sign-up" className="secondary-button">Create account</Link>
+          <Link to="/sign-in" className="primary-button primary-button--link">{t('legal.contact.backToSignIn')}</Link>
+          <Link to="/sign-up" className="secondary-button">{t('legal.contact.createAccount')}</Link>
         </div>
       </section>
     </main>

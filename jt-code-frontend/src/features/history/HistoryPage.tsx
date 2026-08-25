@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, Button } from '@/shared/components';
+import { Button } from '@/shared/components';
 import { MessageSquare, Trash2, Clock } from 'lucide-react';
 
 interface HistoryItem {
@@ -13,21 +14,23 @@ interface HistoryItem {
 
 const CHAT_HISTORY_KEY = 'jt-code-chat-history';
 
-function formatRelativeTime(iso: string) {
+function formatRelativeTime(iso: string, locale: string) {
   const date = new Date(iso);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  if (diffMs < 60_000) return rtf.format(-Math.round(diffMs / 1000), 'second');
   const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return rtf.format(-diffMins, 'minute');
   const diffHours = Math.floor(diffMs / 3600000);
+  if (diffHours < 24) return rtf.format(-diffHours, 'hour');
   const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  if (diffDays < 7) return rtf.format(-diffDays, 'day');
+  return date.toLocaleDateString(locale);
 }
 
 export function HistoryPage() {
+  const { t, i18n } = useTranslation();
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
@@ -43,7 +46,7 @@ export function HistoryPage() {
   }, []);
 
   function clearHistory() {
-    if (confirm('Clear all chat history?')) {
+    if (confirm(t('history.clearConfirm'))) {
       localStorage.removeItem(CHAT_HISTORY_KEY);
       setHistory([]);
     }
@@ -61,49 +64,50 @@ export function HistoryPage() {
     <section className="workspace">
       <header className="workspace-header">
         <div>
-          <p className="eyebrow">History</p>
-          <h1>History</h1>
-          <p className="text-sm text-muted-foreground mt-1">Your recent chats and sessions.</p>
+          <p className="eyebrow">{t('history.eyebrow')}</p>
+          <h1>{t('history.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('history.subtitle')}</p>
         </div>
         {history.length > 0 && (
           <Button variant="outline" onClick={clearHistory} className="gap-1.5">
-            <Trash2 size={16} /> Clear history
+            <Trash2 size={16} /> {t('history.clearHistory')}
           </Button>
         )}
       </header>
 
       {history.length === 0 ? (
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="p-12 text-center">
-            <Clock size={40} className="mx-auto mb-3 text-muted-foreground/40" />
-            <h2 className="text-base font-semibold text-foreground mb-1">No history yet</h2>
-            <p className="text-sm text-muted-foreground mb-4">Start a chat and your conversations will appear here.</p>
-            <Button asChild>
-              <Link to="/app/chat">Start chatting</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center py-16">
+          <Clock size={40} className="mx-auto mb-3 text-muted-foreground" />
+          <h2 className="text-base font-semibold text-foreground mb-1">{t('history.emptyTitle')}</h2>
+          <p className="text-sm text-muted-foreground mb-5">{t('history.emptyDesc')}</p>
+          <Link
+            to="/app/chat"
+            className="inline-flex items-center justify-center rounded-md bg-secondary text-foreground px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors"
+          >
+            {t('history.startChatting')}
+          </Link>
+        </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="divide-y divide-border">
           {history.map((item) => (
-            <Card key={item.id} className="border-border/60 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-2.5 rounded-md bg-secondary text-secondary-foreground">
-                  <MessageSquare size={18} />
+            <div key={item.id} className="flex items-center gap-4 py-4">
+              <div className="p-2.5 rounded-md bg-secondary text-foreground">
+                <MessageSquare size={18} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground truncate">{item.title}</h3>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {formatRelativeTime(item.updatedAt, i18n.language)}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-foreground truncate">{item.title}</h3>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">{formatRelativeTime(item.updatedAt)}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">{item.preview}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.messages} messages</p>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
-                  <Trash2 size={16} />
-                </Button>
-              </CardContent>
-            </Card>
+                <p className="text-sm text-foreground/80 truncate">{item.preview}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t('common.messagesCount', { count: item.messages })}</p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)} aria-label={t('history.deleteItemAria', { title: item.title })}>
+                <Trash2 size={16} />
+              </Button>
+            </div>
           ))}
         </div>
       )}

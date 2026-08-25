@@ -1,4 +1,5 @@
 import { useState, useEffect, type ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApiClient, apiErrorMessage } from '@/lib/api/client';
 import { generateImage, understandImage, editImage } from '@/features/image/api';
 import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Alert, Spinner, Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components';
@@ -22,29 +23,10 @@ interface HistoryItem {
   timestamp: number;
 }
 
-const templates = [
-  { id: 'photo', label: 'Photo' },
-  { id: 'illustration', label: 'Illustration' },
-  { id: '3d', label: '3D Render' },
-  { id: 'logo', label: 'Logo' },
-  { id: 'concept', label: 'Concept Art' },
-];
-
-const sizes = [
-  { value: '1024x1024', label: 'Square 1024×1024' },
-  { value: '1792x1024', label: 'Landscape 1792×1024' },
-  { value: '1024x1792', label: 'Portrait 1024×1792' },
-];
-
-const styles = [
-  { value: 'auto', label: 'Auto' },
-  { value: 'vivid', label: 'Vivid' },
-  { value: 'natural', label: 'Natural' },
-];
-
 const HISTORY_KEY = 'jt-code-image-history';
 
 export function ImagePlaygroundPage() {
+  const { t, i18n } = useTranslation();
   const client = useApiClient();
   const [activeTab, setActiveTab] = useState<string>('generate');
   const [prompt, setPrompt] = useState('');
@@ -60,6 +42,26 @@ export function ImagePlaygroundPage() {
   const [error, setError] = useState('');
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  const templates = [
+    { id: 'photo', label: t('images.templatePhoto') },
+    { id: 'illustration', label: t('images.templateIllustration') },
+    { id: '3d', label: t('images.template3d') },
+    { id: 'logo', label: t('images.templateLogo') },
+    { id: 'concept', label: t('images.templateConcept') },
+  ];
+
+  const sizes = [
+    { value: '1024x1024', label: t('images.sizeSquare') },
+    { value: '1792x1024', label: t('images.sizeLandscape') },
+    { value: '1024x1792', label: t('images.sizePortrait') },
+  ];
+
+  const styles = [
+    { value: 'auto', label: t('images.styleAuto') },
+    { value: 'vivid', label: t('images.styleVivid') },
+    { value: 'natural', label: t('images.styleNatural') },
+  ];
 
   useEffect(() => {
     try {
@@ -85,7 +87,7 @@ export function ImagePlaygroundPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
+      setError(t('images.errors.selectImageFile'));
       return;
     }
     setInputImage(file);
@@ -108,7 +110,7 @@ export function ImagePlaygroundPage() {
   }
 
   function clearHistory() {
-    if (confirm('Are you sure you want to clear your image history?')) {
+    if (confirm(t('images.clearHistoryConfirm'))) {
       setHistory([]);
     }
   }
@@ -124,7 +126,7 @@ export function ImagePlaygroundPage() {
   }
 
   function formatTimestamp(timestamp: number): string {
-    return new Date(timestamp).toLocaleString(undefined, {
+    return new Date(timestamp).toLocaleString(i18n.language, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -134,7 +136,7 @@ export function ImagePlaygroundPage() {
 
   async function handleGenerate() {
     if (!prompt.trim()) {
-      setError('Please enter a prompt');
+      setError(t('images.errors.enterPrompt'));
       return;
     }
     setBusy(true);
@@ -175,15 +177,15 @@ export function ImagePlaygroundPage() {
 
   async function handleUnderstand() {
     if (!inputImage) {
-      setError('Please upload an image first');
+      setError(t('images.errors.uploadFirst'));
       return;
     }
     setBusy(true);
     setError('');
     try {
-      const question = prompt || 'Describe this image in detail';
+      const question = prompt || t('images.defaultQuestion');
       const result = await understandImage(client, inputImage, question);
-      const description = result.description || result.text || 'No result';
+      const description = result.description || result.text || t('images.errors.noResult');
       setUnderstandingResult(description);
       const historyItem: HistoryItem = {
         id: crypto.randomUUID(),
@@ -205,7 +207,7 @@ export function ImagePlaygroundPage() {
 
   async function handleEdit() {
     if (!inputImage || !prompt.trim()) {
-      setError('Please upload an image and enter a prompt');
+      setError(t('images.errors.uploadAndPrompt'));
       return;
     }
     setBusy(true);
@@ -245,7 +247,7 @@ export function ImagePlaygroundPage() {
         <div className="image-preview-area">
           <div className="flex flex-col items-center gap-3 text-muted-foreground">
             <Spinner size="lg" />
-            <p className="text-sm">Generating your image…</p>
+            <p className="text-sm">{t('images.generating')}</p>
           </div>
         </div>
       );
@@ -290,7 +292,7 @@ export function ImagePlaygroundPage() {
         <div className="image-preview-area">
           {understandingResult ? (
             <div className="text-left w-full">
-              <h3 className="font-medium text-foreground mb-2">Analysis</h3>
+              <h3 className="font-medium text-foreground mb-2">{t('images.analysis')}</h3>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{understandingResult}</p>
             </div>
           ) : inputImagePreview ? (
@@ -299,8 +301,8 @@ export function ImagePlaygroundPage() {
             <div className="flex flex-col items-center gap-3">
               <ImageIcon size={48} className="text-muted-foreground/40" />
               <div>
-                <p className="text-muted-foreground mb-1">Upload an image to get started</p>
-                <p className="text-xs text-muted-foreground">PNG, JPG, WebP up to 10MB</p>
+                <p className="text-muted-foreground mb-1">{t('images.uploadToGetStarted')}</p>
+                <p className="text-xs text-muted-foreground">{t('images.fileTypesHint')}</p>
               </div>
             </div>
           )}
@@ -312,7 +314,7 @@ export function ImagePlaygroundPage() {
       <div className="image-preview-area">
         <div className="flex flex-col items-center gap-3">
           <ImageIcon size={48} className="text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">Your generated images will appear here</p>
+          <p className="text-sm text-muted-foreground">{t('images.generatedHere')}</p>
         </div>
       </div>
     );
@@ -325,9 +327,9 @@ export function ImagePlaygroundPage() {
     <section className="workspace">
       <header className="workspace-header">
         <div>
-          <p className="eyebrow">Image Studio</p>
-          <h1>Image Studio</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create, edit, and understand images with AI.</p>
+          <p className="eyebrow">{t('images.eyebrow')}</p>
+          <h1>{t('images.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('images.subtitle')}</p>
         </div>
       </header>
 
@@ -340,52 +342,52 @@ export function ImagePlaygroundPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="inline-flex h-auto w-auto p-1 bg-secondary rounded-md mb-6">
           <TabsTrigger value="generate" className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-sm">
-            <Wand2 size={16} /> Generate
+            <Wand2 size={16} /> {t('images.tabs.generate')}
           </TabsTrigger>
           <TabsTrigger value="edit" className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-sm">
-            <PenTool size={16} /> Edit
+            <PenTool size={16} /> {t('images.tabs.edit')}
           </TabsTrigger>
           <TabsTrigger value="understand" className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-sm">
-            <ScanLine size={16} /> Understand
+            <ScanLine size={16} /> {t('images.tabs.understand')}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="generate">
           <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <div className="space-y-4">
-              <Textarea label="Prompt" placeholder="A futuristic cityscape at sunset, neon lights, cyberpunk style..." value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={4} />
-              <Textarea label="Negative prompt (optional)" placeholder="Things to avoid: blurry, low quality, distorted..." value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} rows={2} />
+              <Textarea label={t('images.promptLabel')} placeholder={t('images.promptPlaceholder')} value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={4} />
+              <Textarea label={t('images.negativePromptLabel')} placeholder={t('images.negativePromptPlaceholder')} value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} rows={2} />
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5 text-foreground">Size</label>
+                  <label className="block text-sm font-medium mb-1.5 text-foreground">{t('images.sizeLabel')}</label>
                   <select value={size} onChange={(e) => setSize(e.target.value)} className={selectClass}>
                     {sizes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5 text-foreground">Style</label>
+                  <label className="block text-sm font-medium mb-1.5 text-foreground">{t('images.styleLabel')}</label>
                   <select value={style} onChange={(e) => setStyle(e.target.value)} className={selectClass}>
                     {styles.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5 text-foreground">Count</label>
+                  <label className="block text-sm font-medium mb-1.5 text-foreground">{t('images.countLabel')}</label>
                   <select value={imageCount} onChange={(e) => setImageCount(parseInt(e.target.value))} className={selectClass}>
                     {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
               </div>
               <Button type="button" variant="ghost" size="sm" onClick={() => setShowMoreOptions(!showMoreOptions)} className="text-muted-foreground hover:text-foreground gap-1 px-0">
-                <Plus size={14} style={{ transform: showMoreOptions ? 'rotate(45deg)' : 'none' }} /> More options
+                <Plus size={14} style={{ transform: showMoreOptions ? 'rotate(45deg)' : 'none' }} /> {t('images.moreOptions')}
               </Button>
-              {showMoreOptions && <Input label="Seed (optional)" placeholder="Leave blank for random" type="number" />}
+              {showMoreOptions && <Input label={t('images.seedLabel')} placeholder={t('images.seedPlaceholder')} type="number" />}
               <Button onClick={() => void handleGenerate()} disabled={busy || !prompt.trim()} className="w-full" size="lg">
-                {busy ? <Spinner size="sm" /> : 'Generate Image'}
+                {busy ? <Spinner size="sm" /> : t('images.generateButton')}
               </Button>
             </div>
             <Card className="border-border/60 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base">Preview</CardTitle>
+                <CardTitle className="text-base">{t('images.preview')}</CardTitle>
               </CardHeader>
               <CardContent>{renderPreviewArea()}</CardContent>
             </Card>
@@ -398,8 +400,8 @@ export function ImagePlaygroundPage() {
               {!inputImagePreview ? (
                 <div className="border-2 border-dashed border-border rounded-md p-8 text-center cursor-pointer transition-colors hover:border-primary hover:bg-secondary/30" onClick={() => document.getElementById('image-edit-upload')?.click()}>
                   <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to upload an image to edit</p>
-                  <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WebP up to 10MB</p>
+                  <p className="text-sm text-muted-foreground">{t('images.uploadToEdit')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('images.fileTypesHint')}</p>
                   <input id="image-edit-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
               ) : (
@@ -416,20 +418,20 @@ export function ImagePlaygroundPage() {
                   </Button>
                 </div>
               )}
-              <Textarea label="Edit prompt" placeholder="Change the background to a beach at sunset..." value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
+              <Textarea label={t('images.editPromptLabel')} placeholder={t('images.editPromptPlaceholder')} value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-foreground">Size</label>
+                <label className="block text-sm font-medium mb-1.5 text-foreground">{t('images.sizeLabel')}</label>
                 <select value={size} onChange={(e) => setSize(e.target.value)} className={selectClass}>
                   {sizes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
               <Button onClick={() => void handleEdit()} disabled={busy || !inputImage || !prompt.trim()} className="w-full" size="lg">
-                {busy ? <Spinner size="sm" /> : 'Edit Image'}
+                {busy ? <Spinner size="sm" /> : t('images.editButton')}
               </Button>
             </div>
             <Card className="border-border/60 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base">Edited Result</CardTitle>
+                <CardTitle className="text-base">{t('images.editedResult')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {generatedImages.filter((img) => img.type === 'edit').length > 0 ? (
@@ -441,7 +443,7 @@ export function ImagePlaygroundPage() {
                   <div className="image-preview-area">
                     <div className="flex flex-col items-center gap-3">
                       <ImageIcon size={48} className="text-muted-foreground/40" />
-                      <p className="text-sm text-muted-foreground">Upload an image, describe the edit, and click Edit</p>
+                      <p className="text-sm text-muted-foreground">{t('images.uploadEditHint')}</p>
                     </div>
                   </div>
                 )}
@@ -456,8 +458,8 @@ export function ImagePlaygroundPage() {
               {!inputImagePreview ? (
                 <div className="border-2 border-dashed border-border rounded-md p-8 text-center cursor-pointer transition-colors hover:border-primary hover:bg-secondary/30" onClick={() => document.getElementById('image-understand-upload')?.click()}>
                   <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to upload an image to analyze</p>
-                  <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WebP up to 10MB</p>
+                  <p className="text-sm text-muted-foreground">{t('images.uploadToAnalyze')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('images.fileTypesHint')}</p>
                   <input id="image-understand-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
               ) : (
@@ -474,14 +476,14 @@ export function ImagePlaygroundPage() {
                   </Button>
                 </div>
               )}
-              <Textarea label="Question (optional)" placeholder="What is in this image? Describe it in detail..." value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
+              <Textarea label={t('images.questionLabel')} placeholder={t('images.questionPlaceholder')} value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
               <Button onClick={() => void handleUnderstand()} disabled={busy || !inputImage} className="w-full" size="lg">
-                {busy ? <Spinner size="sm" /> : 'Analyze Image'}
+                {busy ? <Spinner size="sm" /> : t('images.analyzeButton')}
               </Button>
             </div>
             <Card className="border-border/60 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base">Analysis Result</CardTitle>
+                <CardTitle className="text-base">{t('images.analysisResult')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {understandingResult ? (
@@ -490,7 +492,7 @@ export function ImagePlaygroundPage() {
                   <div className="image-preview-area">
                     <div className="flex flex-col items-center gap-3">
                       <ImageIcon size={48} className="text-muted-foreground/40" />
-                      <p className="text-sm text-muted-foreground">Upload an image and click Analyze to see results here</p>
+                      <p className="text-sm text-muted-foreground">{t('images.uploadAnalyzeHint')}</p>
                     </div>
                   </div>
                 )}
@@ -501,7 +503,7 @@ export function ImagePlaygroundPage() {
       </Tabs>
 
       <div className="mt-6">
-        <h3 className="text-sm font-medium text-muted-foreground mb-3">Suggested templates</h3>
+        <h3 className="text-sm font-medium text-muted-foreground mb-3">{t('images.templates')}</h3>
         <div className="flex flex-wrap gap-2">
           {templates.map((template) => (
             <Button
@@ -521,9 +523,9 @@ export function ImagePlaygroundPage() {
       {history.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-medium text-foreground">History</h3>
+            <h3 className="text-base font-medium text-foreground">{t('nav.history')}</h3>
             <Button type="button" variant="ghost" size="sm" onClick={clearHistory}>
-              Clear history
+              {t('history.clearHistory')}
             </Button>
           </div>
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

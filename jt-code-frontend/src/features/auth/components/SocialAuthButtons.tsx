@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface SocialAuthButtonsProps {
   onGoogle?: () => void;
   onApple?: () => void;
@@ -42,6 +44,7 @@ export function SocialAuthButtons({
   disabled,
   loadingProvider = null,
 }: SocialAuthButtonsProps) {
+  const { t } = useTranslation();
   return (
     <div className="social-auth-grid">
       <button
@@ -51,7 +54,7 @@ export function SocialAuthButtons({
         disabled={disabled}
       >
         <GoogleIcon />
-        <span>{loadingProvider === 'google' ? 'Connecting…' : 'Google'}</span>
+        <span>{loadingProvider === 'google' ? t('signin.connecting') : t('signin.google')}</span>
       </button>
       <button
         type="button"
@@ -60,7 +63,7 @@ export function SocialAuthButtons({
         disabled={disabled}
       >
         <AppleIcon />
-        <span>{loadingProvider === 'apple' ? 'Connecting…' : 'Apple'}</span>
+        <span>{loadingProvider === 'apple' ? t('signin.connecting') : t('signin.apple')}</span>
       </button>
     </div>
   );

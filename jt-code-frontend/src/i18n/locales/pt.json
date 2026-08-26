@@ -221,7 +221,8 @@
     "errorBadge": "Erro",
     "requestFailed": "A requisição falhou.",
     "statusRunning": "Status: {{status}}…",
-    "defaultPlan": "Grátis"
+    "defaultPlan": "Grátis",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "Anexar",

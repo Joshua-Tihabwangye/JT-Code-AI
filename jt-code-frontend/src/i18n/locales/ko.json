@@ -221,7 +221,8 @@
     "errorBadge": "오류",
     "requestFailed": "요청이 실패했습니다.",
     "statusRunning": "상태: {{status}}…",
-    "defaultPlan": "무료"
+    "defaultPlan": "무료",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "첨부",

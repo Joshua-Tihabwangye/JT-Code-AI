@@ -17,10 +17,12 @@ interface LocalMessage {
   metadata?: Record<string, unknown>;
 }
 
+type ChatPersistenceMode = 'ephemeral' | 'persistent';
+
 const CHAT_HISTORY_KEY = 'jt-code-chat-history';
 
-function saveChatSession(messages: LocalMessage[], conversationId: string | null, isSignedIn: boolean) {
-  if (!conversationId || messages.length <= 1 || !isSignedIn) return;
+function saveChatSession(messages: LocalMessage[], conversationId: string | null, persistenceMode: ChatPersistenceMode) {
+  if (persistenceMode !== 'persistent' || !conversationId || messages.length <= 1) return;
   const title = messages.find((m) => m.role === 'user')?.content.slice(0, 60) || 'New chat';
   const lastAssistant = [...messages].reverse().find((m: LocalMessage) => m.role === 'assistant' && m.status === 'complete');
   const preview = lastAssistant?.content.slice(0, 120) || '';
@@ -69,6 +71,7 @@ export function ChatPage() {
   const { t } = useTranslation();
   const client = useApiClient();
   const { isSignedIn } = useAuth();
+  const persistenceMode: ChatPersistenceMode = isSignedIn ? 'persistent' : 'ephemeral';
   const conversationId = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<LocalMessage[]>([
@@ -99,16 +102,30 @@ export function ChatPage() {
     setBusy(true);
     const userMessageId = crypto.randomUUID();
     setMessages((current) => [...current, { id: userMessageId, role: 'user', content: text, status: 'complete' }]);
-    useBillingStore.getState().consumeCredits(5, 'Chat');
+    if (persistenceMode === 'persistent') {
+      useBillingStore.getState().consumeCredits(5, 'Chat');
+    }
 
     const assistantId = crypto.randomUUID();
     setMessages((current) => [...current, { id: assistantId, role: 'assistant', content: '', status: 'streaming' }]);
 
     try {
+      if (persistenceMode === 'ephemeral') {
+        window.setTimeout(() => {
+          setMessages((current) => current.map((message) =>
+            message.id === assistantId
+              ? { ...message, content: t('chat.guestEphemeralReply'), status: 'complete' }
+              : message
+          ));
+          setBusy(false);
+        }, 350);
+        return;
+      }
+
       if (!conversationId.current) {
         const conversation = await createConversation(client);
         conversationId.current = conversation.id;
-        if (isSignedIn) void loadConversations();
+        void loadConversations();
       }
 
       const request = await createChatRequest(client, {
@@ -134,7 +151,7 @@ export function ChatPage() {
         const updated: LocalMessage[] = current.map((message) =>
           message.id === assistantId ? { ...message, status: 'complete' } : message
         );
-        saveChatSession(updated, conversationId.current, isSignedIn);
+        saveChatSession(updated, conversationId.current, persistenceMode);
         return updated;
       });
     } catch (error) {
@@ -144,7 +161,7 @@ export function ChatPage() {
             ? { ...message, content: apiErrorMessage(error), status: 'error' }
             : message
         );
-        saveChatSession(updated, conversationId.current, isSignedIn);
+        saveChatSession(updated, conversationId.current, persistenceMode);
         return updated;
       });
     } finally {
@@ -153,10 +170,11 @@ export function ChatPage() {
   }
 
   return (
-    <section className="chat-workspace">
+    <section className="chat-workspace" data-persistence-mode={persistenceMode}>
       <ChatBackground />
 
-      <div className="landing-layout pointer-events-auto flex flex-col items-center justify-center min-h-[none]">
+      <div className="chat-landing pointer-events-auto">
+        <section className="chat-landing-content">
         <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[520px] h-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_70%)] opacity-[0.08] dark:opacity-[0.18] blur-3xl" />
 
         <div className="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-sm text-secondary-foreground text-xs font-medium border border-border">
@@ -176,6 +194,7 @@ export function ChatPage() {
         <div className="relative w-full max-w-[720px] flex flex-col items-center gap-4">
           <ChatComposer disabled={busy} onSubmit={send} placeholder={t('chat.composerPlaceholder')} />
         </div>
+        </section>
       </div>
     </section>
   );

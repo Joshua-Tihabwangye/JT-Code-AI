@@ -221,7 +221,8 @@
     "errorBadge": "エラー",
     "requestFailed": "リクエストに失敗しました。",
     "statusRunning": "ステータス: {{status}}…",
-    "defaultPlan": "フリー"
+    "defaultPlan": "フリー",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "添付",

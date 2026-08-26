@@ -221,7 +221,8 @@
     "errorBadge": "त्रुटी",
     "requestFailed": "विनंती अयशस्वी झाली.",
     "statusRunning": "स्थिती: {{status}}…",
-    "defaultPlan": "मोफत"
+    "defaultPlan": "मोफत",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "जोडा",

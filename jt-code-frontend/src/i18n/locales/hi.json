@@ -221,7 +221,8 @@
     "errorBadge": "त्रुटि",
     "requestFailed": "अनुरोध विफल रहा।",
     "statusRunning": "स्थिति: {{status}}…",
-    "defaultPlan": "फ़्री"
+    "defaultPlan": "फ़्री",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "संलग्न करें",

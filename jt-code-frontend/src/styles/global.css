@@ -658,3 +658,56 @@ html.dark .glass { background: rgba(10, 20, 34, .7); }
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+
+/* Public app shell refinements */
+.sidebar-logo-row { display: flex; align-items: center; justify-content: flex-start; min-height: 2.5rem; width: 100%; }
+.sidebar.collapsed .sidebar-logo-row { justify-content: center; }
+.language-select-row {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  width: 100%;
+  padding: .35rem .65rem;
+  color: var(--foreground);
+}
+.language-select-row select { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--foreground); }
+.app-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 4rem;
+  padding: 1rem 1.5rem 0;
+  pointer-events: auto;
+}
+.main-content > .page-scroll { margin-top: -4rem; }
+.chat-landing {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 5rem 1.5rem 2rem;
+}
+.chat-landing-content {
+  position: relative;
+  width: min(760px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.sidebar a:focus-visible,
+.sidebar button:focus-visible,
+.account-popover-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (max-width: 768px) {
+  .app-shell,
+  .app-shell.collapsed { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: fixed; z-index: 60; transform: translateX(-100%); width: 260px; }
+  .app-shell.drawer-open .sidebar { transform: translateX(0); }
+  .chat-landing { padding-inline: 1rem; }
+}

@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { RequireAuth, PublicRoute } from '@/auth/ProtectedRoute';
 import { AppShell } from '@/app/layouts/AppShell';
-import { LandingPage } from '@/pages/LandingPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import SignInPage from '@/pages/SignInPage';
 import SignUpPage from '@/pages/SignUpPage';
@@ -21,7 +20,7 @@ export function App() {
     <Routes>
       {/* Public marketing routes - redirect to app if signed in */}
       <Route element={<PublicRoute />}>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<Navigate to="/app/chat" replace />} />
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -37,7 +36,8 @@ export function App() {
       <Route path="/app" element={<AppShell />}>
         <Route index element={<Navigate to="chat" replace />} />
         <Route path="chat" element={<ChatPage />} />
-        <Route path="image" element={<ImagePlaygroundPage />} />
+        <Route path="image" element={<Navigate to="/app/images" replace />} />
+        <Route path="images" element={<ImagePlaygroundPage />} />
         <Route path="history" element={<RequireAuth><HistoryPage /></RequireAuth>} />
         <Route path="billing" element={<RequireAuth><BillingPage /></RequireAuth>} />
         <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />

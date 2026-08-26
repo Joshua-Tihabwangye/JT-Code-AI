@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "Abrir navegação",
+    "closeNavigation": "Fechar navegação",
     "toggleTheme": "Alternar tema",
     "theme": "Tema",
     "expandSidebar": "Expandir barra lateral",
@@ -113,7 +114,8 @@
       "minLength": "Pelo menos 8 caracteres",
       "uppercase": "Uma letra maiúscula",
       "lowercase": "Uma letra minúscula",
-      "number": "Um número"
+      "number": "Um número",
+      "singleRule": "A senha deve ter pelo menos 8 caracteres e incluir pelo menos uma letra e um número."
     },
     "matchOk": "As senhas coincidem.",
     "matchError": "As senhas ainda não coincidem.",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "O sobrenome é muito longo.",
     "invalidEmail": "Informe um endereço de email válido.",
     "passwordMinLength": "A senha deve conter pelo menos 8 caracteres.",
+    "passwordLetter": "A senha deve conter pelo menos uma letra.",
     "passwordUppercase": "A senha deve conter uma letra maiúscula.",
     "passwordLowercase": "A senha deve conter uma letra minúscula.",
     "passwordNumber": "A senha deve conter um número.",

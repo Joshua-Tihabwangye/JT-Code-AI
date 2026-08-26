@@ -176,12 +176,12 @@ export function ChatPage() {
         <section className="chat-landing-content">
         <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[520px] h-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_70%)] opacity-[0.08] dark:opacity-[0.18] blur-3xl" />
 
-        <h1 className="chat-headline relative text-center my-6">
+        <h1 className="chat-headline relative text-center my-4">
           {headline.displayed}
           {!headline.done && <span className="chat-cursor" />}
         </h1>
 
-        <div className="relative w-full max-w-[720px] flex flex-col items-center gap-4">
+        <div className="relative w-full max-w-[720px] flex flex-col items-center gap-4 mt-12">
           <ChatComposer disabled={busy} onSubmit={send} placeholder={t('chat.composerPlaceholder')} />
         </div>
         </section>

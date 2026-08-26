@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "打开导航",
+    "closeNavigation": "关闭导航",
     "toggleTheme": "切换主题",
     "theme": "主题",
     "expandSidebar": "展开侧边栏",
@@ -113,7 +114,8 @@
       "minLength": "至少 8 个字符",
       "uppercase": "包含一个大写字母",
       "lowercase": "包含一个小写字母",
-      "number": "包含一个数字"
+      "number": "包含一个数字",
+      "singleRule": "密码必须至少包含8个字符，并且至少包含一个字母和一个数字。"
     },
     "matchOk": "两次输入的密码一致。",
     "matchError": "两次输入的密码还不一致。",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "姓氏过长。",
     "invalidEmail": "请输入有效的电子邮箱地址。",
     "passwordMinLength": "密码必须至少包含 8 个字符。",
+    "passwordLetter": "密码必须包含至少一个字母。",
     "passwordUppercase": "密码必须包含一个大写字母。",
     "passwordLowercase": "密码必须包含一个小写字母。",
     "passwordNumber": "密码必须包含一个数字。",

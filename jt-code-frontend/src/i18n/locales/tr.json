@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "Gezinmeyi aç",
+    "closeNavigation": "Gezintiyi kapat",
     "toggleTheme": "Temayı değiştir",
     "theme": "Tema",
     "expandSidebar": "Kenar çubuğunu genişlet",
@@ -113,7 +114,8 @@
       "minLength": "En az 8 karakter",
       "uppercase": "Bir büyük harf",
       "lowercase": "Bir küçük harf",
-      "number": "Bir rakam"
+      "number": "Bir rakam",
+      "singleRule": "Şifre en az 8 karakter uzunluğunda olmalı ve en az bir harf ve bir rakam içermelidir."
     },
     "matchOk": "Şifreler eşleşiyor.",
     "matchError": "Şifreler henüz eşleşmiyor.",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "Soyad çok uzun.",
     "invalidEmail": "Geçerli bir e-posta adresi girin.",
     "passwordMinLength": "Şifre en az 8 karakter içermelidir.",
+    "passwordLetter": "Şifre en az bir harf içermelidir.",
     "passwordUppercase": "Şifre bir büyük harf içermelidir.",
     "passwordLowercase": "Şifre bir küçük harf içermelidir.",
     "passwordNumber": "Şifre bir rakam içermelidir.",

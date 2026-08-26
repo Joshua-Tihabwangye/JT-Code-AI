@@ -1,9 +1,7 @@
-import { useState, useRef, type FormEvent, type FocusEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent, type FocusEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 import { Plus, Send, Paperclip, Image as ImageIcon, FileText, X, ChevronDown, Mic } from 'lucide-react';
 import { useApiClient } from '@/lib/api/client';
-import { getSubscription } from '@/features/billing/api';
 
 interface Props {
   disabled?: boolean;
@@ -22,8 +20,6 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder }: Props)
   const documentInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const subscription = useQuery({ queryKey: ['subscription'], queryFn: () => getSubscription(client) });
-  const planName = subscription.data?.plan_name ?? t('chat.defaultPlan');
   const resolvedPlaceholder = placeholder ?? t('composer.defaultPlaceholder');
 
   async function submit(event: FormEvent) {
@@ -69,6 +65,18 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder }: Props)
     }
   }
 
+  // Close attach menu when clicking outside
+  function handleClickOutside(event: Event) {
+    const target = event.target as Element;
+    if (target.closest('.composer.compact') || target.closest('.attach-menu')) return;
+    setShowAttachMenu(false);
+  }
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   return (
     <form
       className="composer compact"
@@ -80,25 +88,6 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder }: Props)
         boxShadow: focused ? '0 0 0 2px var(--ring)' : undefined,
       }}
     >
-      <button
-        type="button"
-        className="icon"
-        title={t('composer.attach')}
-        onClick={() => setShowAttachMenu((v) => !v)}
-      >
-        <Plus size={18} />
-      </button>
-      {showAttachMenu && (
-        <div className="attach-menu">
-          <button type="button" onClick={() => handleAttach('document')}>
-            <Paperclip size={14} /> {t('composer.attachDocument')}
-          </button>
-          <button type="button" onClick={() => handleAttach('image')}>
-            <ImageIcon size={14} /> {t('composer.attachImage')}
-          </button>
-        </div>
-      )}
-
       <textarea
         ref={textareaRef}
         id="jt-code-prompt"
@@ -118,11 +107,30 @@ export function ChatComposer({ disabled = false, onSubmit, placeholder }: Props)
         }}
       />
 
-      <div className="composer-actions">
-        <div className="composer-actions-center" title={t('composer.currentPlan')}>
-          {planName} <ChevronDown size={12} />
+      {/* Attach menu - positioned above the + button */}
+      {showAttachMenu && (
+        <div className="attach-menu">
+          <button type="button" onClick={() => handleAttach('document')}>
+            <Paperclip size={14} /> {t('composer.attachDocument')}
+          </button>
+          <button type="button" onClick={() => handleAttach('image')}>
+            <ImageIcon size={14} /> {t('composer.attachImage')}
+          </button>
         </div>
+      )}
 
+      {/* + button below the prompt on the left */}
+      <button
+        type="button"
+        className="icon"
+        title={t('composer.attach')}
+        onClick={() => setShowAttachMenu((v) => !v)}
+      >
+        <Plus size={18} />
+      </button>
+
+      {/* Microphone and send button on the right */}
+      <div className="composer-actions">
         <button className="icon" type="button" title={t('composer.voiceInput')}>
           <Mic size={18} />
         </button>

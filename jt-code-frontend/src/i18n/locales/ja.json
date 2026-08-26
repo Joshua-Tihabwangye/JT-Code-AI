@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "ナビゲーションを開く",
+    "closeNavigation": "ナビゲーションを閉じる",
     "toggleTheme": "テーマを切り替え",
     "theme": "テーマ",
     "expandSidebar": "サイドバーを展開",
@@ -113,7 +114,8 @@
       "minLength": "8 文字以上",
       "uppercase": "大文字を 1 文字",
       "lowercase": "小文字を 1 文字",
-      "number": "数字を 1 つ"
+      "number": "数字を 1 つ",
+      "singleRule": "パスワードは8文字以上で、少なくとも1つの文字と1つの数字を含む必要があります。"
     },
     "matchOk": "パスワードが一致しています。",
     "matchError": "パスワードがまだ一致していません。",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "姓が長すぎます。",
     "invalidEmail": "有効なメールアドレスを入力してください。",
     "passwordMinLength": "パスワードは 8 文字以上である必要があります。",
+    "passwordLetter": "パスワードには少なくとも1つの文字を含める必要があります。",
     "passwordUppercase": "パスワードには大文字を含める必要があります。",
     "passwordLowercase": "パスワードには小文字を含める必要があります。",
     "passwordNumber": "パスワードには数字を含める必要があります。",

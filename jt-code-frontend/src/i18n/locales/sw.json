@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "Fungua urambazaji",
+    "closeNavigation": "Funga uongozi",
     "toggleTheme": "Badilisha mandhari",
     "theme": "Mandhari",
     "expandSidebar": "Panua upau wa pembeni",
@@ -113,7 +114,8 @@
       "minLength": "Angalau herufi 8",
       "uppercase": "Herufi kubwa moja",
       "lowercase": "Herufi ndogo moja",
-      "number": "Nambari moja"
+      "number": "Nambari moja",
+      "singleRule": "Nenosiri lazima liwe na herufi angalau 8 na liwe na angalau herufi moja na nambari moja."
     },
     "matchOk": "Manenosiri yanalingana.",
     "matchError": "Manenosiri bado hayalingani.",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "Jina la ukoo ni refu mno.",
     "invalidEmail": "Weka barua pepe sahihi.",
     "passwordMinLength": "Nenosiri lazima liwe na angalau herufi 8.",
+    "passwordLetter": "Nenosiri lazima liwe na angalau herufi moja.",
     "passwordUppercase": "Nenosiri lazima liwe na herufi kubwa.",
     "passwordLowercase": "Nenosiri lazima liwe na herufi ndogo.",
     "passwordNumber": "Nenosiri lazima liwe na nambari.",

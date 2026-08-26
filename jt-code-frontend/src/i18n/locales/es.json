@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "Abrir navegación",
+    "closeNavigation": "Cerrar navegación",
     "toggleTheme": "Cambiar tema",
     "theme": "Tema",
     "expandSidebar": "Expandir barra lateral",
@@ -113,7 +114,8 @@
       "minLength": "Al menos 8 caracteres",
       "uppercase": "Una letra mayúscula",
       "lowercase": "Una letra minúscula",
-      "number": "Un número"
+      "number": "Un número",
+      "singleRule": "La contraseña debe tener al menos 8 caracteres e incluir al menos una letra y un número."
     },
     "matchOk": "Las contraseñas coinciden.",
     "matchError": "Las contraseñas aún no coinciden.",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "El apellido es demasiado largo.",
     "invalidEmail": "Introduce una dirección de correo válida.",
     "passwordMinLength": "La contraseña debe contener al menos 8 caracteres.",
+    "passwordLetter": "La contraseña debe contener al menos una letra.",
     "passwordUppercase": "La contraseña debe contener una letra mayúscula.",
     "passwordLowercase": "La contraseña debe contener una letra minúscula.",
     "passwordNumber": "La contraseña debe contener un número.",

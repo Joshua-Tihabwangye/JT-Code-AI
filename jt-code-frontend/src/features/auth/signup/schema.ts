@@ -20,8 +20,7 @@ export const signupSchema = z
     password: z
       .string()
       .min(8, 'authErrors.passwordMinLength')
-      .regex(/[A-Z]/, 'authErrors.passwordUppercase')
-      .regex(/[a-z]/, 'authErrors.passwordLowercase')
+      .regex(/[A-Za-z]/, 'authErrors.passwordLetter')
       .regex(/[0-9]/, 'authErrors.passwordNumber'),
     confirmPassword: z.string(),
     countryCode: z.string().min(2, 'authErrors.selectCountry'),

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Check, CircleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { SignupHeader } from './SignupHeader';
@@ -22,15 +21,6 @@ interface Props {
   onSignedUp: () => void;
 }
 
-function PasswordRequirement({ ok, label }: { ok: boolean; label: string }) {
-  return (
-    <li className={ok ? 'is-met' : ''}>
-      {ok ? <Check size={14} aria-hidden /> : <CircleAlert size={14} aria-hidden />}
-      <span>{label}</span>
-    </li>
-  );
-}
-
 export function SignupForm({ onSignedUp }: Props) {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = useState('');
@@ -50,13 +40,6 @@ export function SignupForm({ onSignedUp }: Props) {
   const password = form.watch('password');
   const confirmPassword = form.watch('confirmPassword');
   const isSubmitting = form.formState.isSubmitting || !!loadingProvider;
-
-  const passwordChecks = [
-    { ok: password.length >= 8, label: t('signup.requirements.minLength') },
-    { ok: /[A-Z]/.test(password), label: t('signup.requirements.uppercase') },
-    { ok: /[a-z]/.test(password), label: t('signup.requirements.lowercase') },
-    { ok: /[0-9]/.test(password), label: t('signup.requirements.number') },
-  ];
 
   const handleOAuth = async (provider: 'google' | 'apple') => {
     setSubmitError('');
@@ -112,13 +95,11 @@ export function SignupForm({ onSignedUp }: Props) {
             label={t('signup.passwordLabel')}
             placeholder={t('signup.passwordPlaceholder')}
             autoComplete="new-password"
-            helper={(
-              <ul className="password-checklist" aria-label={t('signup.requirements.title')}>
-                {passwordChecks.map((check) => (
-                  <PasswordRequirement key={check.label} ok={check.ok} label={check.label} />
-                ))}
-              </ul>
-            )}
+            helper={
+              <p className="password-requirement">
+                {t('signup.requirements.singleRule')}
+              </p>
+            }
           />
 
           <PasswordField

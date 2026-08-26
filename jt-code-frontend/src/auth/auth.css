@@ -608,8 +608,10 @@ a { color: var(--azure); text-decoration: none; }
   .form-panel { padding: 2.5rem 1.25rem; max-width: 520px; margin: 0 auto; }
 }
 @media (max-width: 520px) {
-  .auth-card { padding: 1.5rem; border-radius: 1.25rem; }
+  .auth-card { padding: 1.25rem; border-radius: 1.25rem; }
   .auth-topbar { padding: 0.85rem 1rem; }
   .auth-back-button span { display: none; }
   .auth-back-button { padding: 0 0.7rem; }
+  .auth-shell { padding: clamp(3rem, 6vw, 5rem) 1rem 1.5rem; }
+  .auth-shell__panel { width: min(100%, 600px); }
 }

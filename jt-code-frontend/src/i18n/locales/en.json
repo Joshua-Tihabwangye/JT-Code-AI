@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
     "toggleTheme": "Toggle theme",
     "theme": "Theme",
     "expandSidebar": "Expand sidebar",
@@ -122,7 +123,8 @@
       "minLength": "At least 8 characters",
       "uppercase": "One uppercase letter",
       "lowercase": "One lowercase letter",
-      "number": "One number"
+      "number": "One number",
+      "singleRule": "Password must be at least 8 characters and include at least one letter and one number."
     },
     "matchOk": "Passwords match.",
     "matchError": "Passwords do not match yet.",
@@ -195,10 +197,9 @@
     "lastNameRequired": "Last name is required.",
     "lastNameTooLong": "Last name is too long.",
     "invalidEmail": "Enter a valid email address.",
-    "passwordMinLength": "Password must contain at least 8 characters.",
-    "passwordUppercase": "Password must contain an uppercase letter.",
-    "passwordLowercase": "Password must contain a lowercase letter.",
-    "passwordNumber": "Password must contain a number.",
+    "passwordMinLength": "Password must be at least 8 characters.",
+    "passwordLetter": "Password must contain at least one letter.",
+    "passwordNumber": "Password must contain at least one number.",
     "selectCountry": "Select your country.",
     "selectDialCode": "Select a dial code.",
     "phoneRequired": "Enter your phone number.",

@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "Buka navigasi",
+    "closeNavigation": "Tutup navigasi",
     "toggleTheme": "Ganti tema",
     "theme": "Tema",
     "expandSidebar": "Perluas bilah samping",
@@ -113,7 +114,8 @@
       "minLength": "Minimal 8 karakter",
       "uppercase": "Satu huruf besar",
       "lowercase": "Satu huruf kecil",
-      "number": "Satu angka"
+      "number": "Satu angka",
+      "singleRule": "Kata sandi harus minimal 8 karakter dan menyertakan setidaknya satu huruf dan satu angka."
     },
     "matchOk": "Kata sandi cocok.",
     "matchError": "Kata sandi belum cocok.",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "Nama belakang terlalu panjang.",
     "invalidEmail": "Masukkan alamat email yang valid.",
     "passwordMinLength": "Kata sandi harus memuat minimal 8 karakter.",
+    "passwordLetter": "Kata sandi harus menyertakan setidaknya satu huruf.",
     "passwordUppercase": "Kata sandi harus memuat huruf besar.",
     "passwordLowercase": "Kata sandi harus memuat huruf kecil.",
     "passwordNumber": "Kata sandi harus memuat angka.",

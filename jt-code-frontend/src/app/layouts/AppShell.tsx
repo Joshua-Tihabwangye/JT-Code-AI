@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   MessageSquare,
@@ -10,8 +10,8 @@ import {
   PanelLeftClose,
   PanelLeft,
   Menu,
+  X,
 } from 'lucide-react';
-import { IconButton } from '@/shared/components';
 import { useAppStore } from '@/lib/appStore';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/supabase';
@@ -55,19 +55,79 @@ export function AppShell() {
   const { resolvedTheme, toggleTheme } = useTheme();
   const { isSignedIn } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileHamburgerRef = useRef<HTMLButtonElement>(null);
+  const mobileDrawerRef = useRef<HTMLDivElement>(null);
 
-  const closeDrawer = () => setMobileNavOpen(false);
+  const closeDrawer = useCallback(() => setMobileNavOpen(false), []);
+
+  // Focus management for mobile drawer
+  useEffect(() => {
+    if (mobileNavOpen) {
+      const first = mobileDrawerRef.current?.querySelector<HTMLElement>('[role="menuitem"], button, a, [tabindex="0"]');
+      first?.focus();
+    }
+  }, [mobileNavOpen]);
+
+  // Escape key closes mobile drawer
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileNavOpen(false);
+        mobileHamburgerRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [mobileNavOpen]);
+
+  // Lock body scroll when mobile drawer open
+  useEffect(() => {
+    if (mobileNavOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileNavOpen]);
 
   return (
     <div className={`app-shell ${collapsed ? 'collapsed' : ''} ${mobileNavOpen ? 'drawer-open' : ''}`}>
-      {mobileNavOpen && <div className="sidebar-backdrop" onClick={closeDrawer} aria-hidden />}
+      {/* Always-visible mobile header — OUTSIDE the hidden drawer */}
+      <header className="mobile-topbar" role="banner">
+        <button
+          ref={mobileHamburgerRef}
+          type="button"
+          className="mobile-hamburger"
+          aria-label={mobileNavOpen ? t('chrome.closeNavigation', { defaultValue: 'Close navigation' }) : t('chrome.openNavigation')}
+          aria-expanded={mobileNavOpen}
+          onClick={() => setMobileNavOpen((prev) => !prev)}
+        >
+          {mobileNavOpen ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
+        </button>
+        <NavLink to="/app/chat" className="brand mobile-brand" aria-label="JT-Code home">
+          <span className="brand-mark">JT</span>
+          <span className="mobile-brand-name">JT-Code</span>
+        </NavLink>
+      </header>
 
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} aria-label="Primary navigation">
+      {/* Mobile backdrop */}
+      {mobileNavOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={closeDrawer}
+          aria-hidden
+        />
+      )}
+
+      {/* Sidebar drawer */}
+      <aside
+        ref={mobileDrawerRef}
+        className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+        aria-label="Primary navigation"
+      >
         <div className="sidebar-logo-row">
-          <IconButton className="mobile-only" aria-label={t('chrome.openNavigation')} onClick={() => setMobileNavOpen(true)}>
-            <Menu size={18} aria-hidden />
-          </IconButton>
-          <NavLink to="/app/chat" className="brand" aria-label="JT-Code home">
+          <NavLink to="/app/chat" className="brand" aria-label="JT-Code home" onClick={closeDrawer}>
             <span className="brand-mark">JT</span>
             {!collapsed && <span className="nav-label">JT-Code</span>}
           </NavLink>
@@ -98,9 +158,6 @@ export function AppShell() {
       </aside>
 
       <main className="main-content">
-        <header className="app-header">
-          <span className="sr-only">JT-Code application</span>
-        </header>
         <div className="page-scroll">
           <Outlet />
         </div>

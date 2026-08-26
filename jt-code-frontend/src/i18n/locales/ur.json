@@ -31,6 +31,7 @@
   },
   "chrome": {
     "openNavigation": "نیویگیشن کھولیں",
+    "closeNavigation": "نیویگیشن بند کریں",
     "toggleTheme": "تھیم بدلیں",
     "theme": "تھیم",
     "expandSidebar": "سائیڈبار بڑھائیں",
@@ -113,7 +114,8 @@
       "minLength": "کم از کم 8 حروف",
       "uppercase": "ایک بڑا حرف (uppercase)",
       "lowercase": "ایک چھوٹا حرف (lowercase)",
-      "number": "ایک عدد"
+      "number": "ایک عدد",
+      "singleRule": "پاس ورڈ میں کم از کم 8 حروف ہونے چاہئیں اور کم از کم ایک حرف اور ایک نمبر شامل ہونا چاہیے۔"
     },
     "matchOk": "پاس ورڈ مماثل ہیں۔",
     "matchError": "پاس ورڈ ابھی مماثل نہیں ہیں۔",
@@ -183,6 +185,7 @@
     "lastNameTooLong": "آخری نام بہت لمبا ہے۔",
     "invalidEmail": "درست ای میل ایڈریس درج کریں۔",
     "passwordMinLength": "پاس ورڈ میں کم از کم 8 حروف ہونے چاہئیں۔",
+    "passwordLetter": "پاس ورڈ میں کم از کم ایک حرف ہونا چاہیے۔",
     "passwordUppercase": "پاس ورڈ میں ایک بڑا حرف (uppercase) ہونا چاہیے۔",
     "passwordLowercase": "پاس ورڈ میں ایک چھوٹا حرف (lowercase) ہونا چاہیے۔",
     "passwordNumber": "پاس ورڈ میں ایک عدد ہونا چاہیے۔",

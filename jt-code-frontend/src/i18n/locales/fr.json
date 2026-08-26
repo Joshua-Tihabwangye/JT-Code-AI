@@ -81,13 +81,11 @@
     "switchToDark": "Passer au thème sombre",
     "light": "Clair",
     "dark": "Sombre",
-    "tagline": "Espace de travail IA privé",
-    "notice": "Vos données restent dans l'espace de travail et l'authentification simulée persiste après actualisation."
+    "tagline": "Espace de travail IA privé"
   },
   "signin": {
     "title": "Bon retour",
     "subtitle": "Connectez-vous pour continuer vers JT-Code",
-    "helpText": "Utilisez le même compte simulé que celui créé sur la page d'inscription, ou connectez-vous via un raccourci social.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Connexion…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Créez votre compte",
     "subtitle": "Commencez votre aventure avec JT-Code",
-    "helpText": "Créez un compte sécurisé avec les champs que JT-Code utilise réellement dans l'application.",
     "firstNameLabel": "Prénom",
     "lastNameLabel": "Nom",
     "emailLabel": "Adresse e-mail",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Réinitialisez votre mot de passe",
-    "resetDesc": "Saisissez votre adresse e-mail et nous préparerons un flux de réinitialisation simulé que vous pourrez compléter ici même.",
     "emailLabel": "Adresse e-mail",
     "sendCode": "Envoyer le code de réinitialisation",
     "sending": "Envoi…",
     "backToSignIn": "Retour à la connexion",
     "checkTitle": "Vérifiez votre e-mail",
-    "checkDesc": "Nous avons envoyé un message de réinitialisation simulé à <0>{{email}}</0>. Le code ci-dessous débloquera l'étape suivante.",
-    "checkDescPlain": "Nous avons envoyé un message de réinitialisation simulé à {{email}}. Le code ci-dessous débloquera l'étape suivante.",
-    "mockResetCode": "Code de réinitialisation simulé",
     "useCodeNow": "Utilisez ce code maintenant",
     "haveCode": "J'ai déjà un code de réinitialisation",
     "newPasswordTitle": "Créer un nouveau mot de passe",
@@ -206,10 +199,8 @@
     "redirecting": "Redirection…"
   },
   "chat": {
-    "badge": "Agent de codage propulsé par l'IA",
     "headline": "Que devons-nous construire aujourd'hui ?",
     "welcome": "Bonjour ! Je suis JT-Code. Que construisons-nous aujourd'hui ?",
-    "subhead": "Demandez à JT-Code tout ce qui concerne le code, l'architecture, la recherche, les documents ou autre chose.",
     "composerPlaceholder": "Message à JT-Code…",
     "composerPlaceholderBusy": "Traitement...",
     "conversation": "Conversation",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Contact",
       "title": "Obtenir de l'aide avec JT-Code",
-      "p1": "Cette version utilise un environnement frontal simulé, donc le moyen le plus rapide d'obtenir de l'assistance est l'espace de travail lui-même. Utilisez le flux de réinitialisation, le cycle de déconnexion/reconnexion ou actualisez la page pour vérifier la persistance pendant le développement.",
-      "p2": "Si vous souhaitez une véritable voie d'assistance plus tard, cette page est déjà en place et peut être connectée à une intégration de tickets ou de centre d'aide sans modifier la navigation publique.",
       "backToSignIn": "Retour à la connexion",
       "createAccount": "Créer un compte"
     },
     "privacy": {
       "eyebrow": "Politique de confidentialité",
       "title": "Confidentialité JT-Code",
-      "p1": "JT-Code stocke localement l'état du compte et de l'espace de travail en mode simulé afin que le frontend puisse fonctionner sans backend. Le stockage du navigateur sert à conserver les sessions, conversations, fichiers, documents et autres données d'exemple.",
-      "p2": "Lorsque le mode API est activé, les mêmes surfaces produit peuvent basculer vers des dépôts adossés au transport sans modifier les composants de page.",
       "signIn": "Se connecter",
       "readTerms": "Lire les conditions"
     },
     "terms": {
       "eyebrow": "Conditions d'utilisation",
       "title": "Conditions JT-Code",
-      "p1": "Cet espace de travail fonctionne actuellement en mode simulé. En l'utilisant, vous acceptez que les données saisies dans l'application puissent être stockées localement dans votre navigateur à des fins de test et de développement du produit.",
-      "p2": "Le frontend peut simuler l'authentification, la facturation, le stockage de fichiers et les flux de contenu jusqu'à ce que le mode API soit connecté.",
       "createAccount": "Créer un compte",
       "contactSupport": "Contacter l'assistance"
     },

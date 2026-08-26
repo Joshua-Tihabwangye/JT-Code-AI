@@ -81,13 +81,11 @@
     "switchToDark": "Mudar para tema escuro",
     "light": "Claro",
     "dark": "Escuro",
-    "tagline": "Workspace de IA privado",
-    "notice": "Seus dados ficam no workspace e o mock auth persiste entre atualizações."
+    "tagline": "Workspace de IA privado"
   },
   "signin": {
     "title": "Bem-vindo de volta",
     "subtitle": "Entre para continuar no JT-Code",
-    "helpText": "Use a mesma conta mock que você criou na página de cadastro ou entre com um atalho social.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Conectando…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Crie sua conta",
     "subtitle": "Comece sua jornada com o JT-Code",
-    "helpText": "Crie uma conta segura com os campos que o JT-Code realmente usa em todo o app.",
     "firstNameLabel": "Nome",
     "lastNameLabel": "Sobrenome",
     "emailLabel": "Endereço de email",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Redefina sua senha",
-    "resetDesc": "Informe seu endereço de email e prepararemos um fluxo de redefinição mock que você pode concluir aqui mesmo.",
     "emailLabel": "Endereço de email",
     "sendCode": "Enviar código de redefinição",
     "sending": "Enviando…",
     "backToSignIn": "Voltar ao login",
     "checkTitle": "Verifique seu email",
-    "checkDesc": "Enviamos uma mensagem de redefinição mock para <0>{{email}}</0>. O código abaixo desbloqueia a próxima etapa.",
-    "checkDescPlain": "Enviamos uma mensagem de redefinição mock para {{email}}. O código abaixo desbloqueia a próxima etapa.",
-    "mockResetCode": "Código de redefinição mock",
     "useCodeNow": "Use este código agora",
     "haveCode": "Já tenho um código de redefinição",
     "newPasswordTitle": "Crie uma nova senha",
@@ -206,10 +199,8 @@
     "redirecting": "Redirecionando…"
   },
   "chat": {
-    "badge": "Agente de programação com IA",
     "headline": "O que vamos construir hoje?",
     "welcome": "Olá! Eu sou o JT-Code. O que vamos construir hoje?",
-    "subhead": "Pergunte ao JT-Code sobre código, arquitetura, pesquisa, documentos ou qualquer outra coisa.",
     "composerPlaceholder": "Mensagem para o JT-Code…",
     "composerPlaceholderBusy": "Processando...",
     "conversation": "Conversa",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Contato",
       "title": "Obtenha ajuda com o JT-Code",
-      "p1": "Esta versão usa um runtime frontend mock, então o caminho mais rápido para suporte é o próprio workspace. Use o fluxo de redefinição de autenticação, o ciclo de sair/entrar ou atualize a página para verificar a persistência durante o desenvolvimento.",
-      "p2": "Se quiser uma rota de suporte real mais tarde, esta página já está pronta e pode ser conectada a uma integração de tickets ou central de ajuda sem alterar a navegação pública.",
       "backToSignIn": "Voltar ao login",
       "createAccount": "Criar conta"
     },
     "privacy": {
       "eyebrow": "Política de Privacidade",
       "title": "Privacidade do JT-Code",
-      "p1": "O JT-Code armazena o estado da conta e do workspace localmente em modo mock para que o frontend funcione sem backend. O armazenamento do navegador é usado para preservar sessões, conversas, arquivos, documentos e outros dados de exemplo.",
-      "p2": "Quando o modo API for ativado, as mesmas telas do produto podem mudar para repositórios com transporte sem alterar os componentes das páginas.",
       "signIn": "Entrar",
       "readTerms": "Ler os termos"
     },
     "terms": {
       "eyebrow": "Termos de Serviço",
       "title": "Termos do JT-Code",
-      "p1": "Este workspace está atualmente em modo mock. Ao usá-lo, você concorda que os dados inseridos no app podem ser armazenados localmente no seu navegador para testes e desenvolvimento do produto.",
-      "p2": "O frontend pode simular autenticação, faturamento, armazenamento de arquivos e fluxos de conteúdo até que o modo API seja conectado.",
       "createAccount": "Criar conta",
       "contactSupport": "Falar com o suporte"
     },

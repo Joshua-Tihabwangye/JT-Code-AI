@@ -7,7 +7,6 @@ import { SocialAuthButtons } from '../../components/SocialAuthButtons';
 import { NameFields } from './NameFields';
 import { EmailField } from './EmailField';
 import { PasswordField } from './PasswordField';
-import { CountryField } from './CountryField';
 import { DialCodeField } from './DialCodeField';
 import { PhoneField } from './PhoneField';
 import { TimezoneField } from './TimezoneField';
@@ -78,11 +77,7 @@ export function SignupForm({ onSignedUp }: Props) {
     <section className="signup-card auth-card">
       <SignupHeader />
 
-      <p className="signup-subtitle">
-        {t('signup.helpText')}
-      </p>
-
-        <SocialAuthButtons
+      <SocialAuthButtons
           onGoogle={() => void handleOAuth('google')}
           onApple={() => void handleOAuth('apple')}
           disabled={isSubmitting}
@@ -102,52 +97,55 @@ export function SignupForm({ onSignedUp }: Props) {
         noValidate
         className="signup-form"
       >
-        <NameFields form={form} />
-        <EmailField form={form} />
-
-        <PasswordField
-          form={form}
-          field="password"
-          label={t('signup.passwordLabel')}
-          placeholder={t('signup.passwordPlaceholder')}
-          autoComplete="new-password"
-          helper={(
-            <ul className="password-checklist" aria-label={t('signup.requirements.title')}>
-              {passwordChecks.map((check) => (
-                <PasswordRequirement key={check.label} ok={check.ok} label={check.label} />
-              ))}
-            </ul>
-          )}
-        />
-
-        <PasswordField
-          form={form}
-          field="confirmPassword"
-          label={t('signup.confirmPasswordLabel')}
-          placeholder={t('signup.confirmPasswordPlaceholder')}
-          autoComplete="new-password"
-          helper={(
-            <div className={`password-match ${confirmPassword ? (confirmPassword === password ? 'is-ok' : 'is-error') : ''}`}>
-              {confirmPassword && confirmPassword === password
-                ? t('signup.matchOk')
-                : confirmPassword
-                  ? t('signup.matchError')
-                  : t('signup.matchHint')}
-            </div>
-          )}
-        />
-
-        <CountryField form={form} />
-
-        <div className="signup-grid signup-grid--two">
-          <DialCodeField form={form} />
-          <PhoneField form={form} />
+        <div className="signup-section">
+          <h2 className="signup-section__title">{t('signup.section.profile')}</h2>
+          <NameFields form={form} />
         </div>
 
-        <TimezoneField form={form} />
+        <div className="signup-section">
+          <h2 className="signup-section__title">{t('signup.section.account')}</h2>
+          <EmailField form={form} />
 
-        <div className="signup-note">
-          {t('signup.note')}
+          <PasswordField
+            form={form}
+            field="password"
+            label={t('signup.passwordLabel')}
+            placeholder={t('signup.passwordPlaceholder')}
+            autoComplete="new-password"
+            helper={(
+              <ul className="password-checklist" aria-label={t('signup.requirements.title')}>
+                {passwordChecks.map((check) => (
+                  <PasswordRequirement key={check.label} ok={check.ok} label={check.label} />
+                ))}
+              </ul>
+            )}
+          />
+
+          <PasswordField
+            form={form}
+            field="confirmPassword"
+            label={t('signup.confirmPasswordLabel')}
+            placeholder={t('signup.confirmPasswordPlaceholder')}
+            autoComplete="new-password"
+            helper={(
+              <div className={`password-match ${confirmPassword ? (confirmPassword === password ? 'is-ok' : 'is-error') : ''}`}>
+                {confirmPassword && confirmPassword === password
+                  ? t('signup.matchOk')
+                  : confirmPassword
+                    ? t('signup.matchError')
+                    : t('signup.matchHint')}
+              </div>
+            )}
+          />
+        </div>
+
+        <div className="signup-section">
+          <h2 className="signup-section__title">{t('signup.section.region')}</h2>
+          <div className="signup-grid signup-grid--two">
+            <DialCodeField form={form} />
+            <PhoneField form={form} />
+          </div>
+          <TimezoneField form={form} />
         </div>
 
         <TermsField form={form} />

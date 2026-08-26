@@ -81,13 +81,11 @@
     "switchToDark": "Beralih ke tema gelap",
     "light": "Terang",
     "dark": "Gelap",
-    "tagline": "Ruang kerja AI pribadi",
-    "notice": "Data Anda tetap berada di ruang kerja dan autentikasi tiruan bertahan setelah halaman dimuat ulang."
+    "tagline": "Ruang kerja AI pribadi"
   },
   "signin": {
     "title": "Selamat datang kembali",
     "subtitle": "Masuk untuk melanjutkan ke JT-Code",
-    "helpText": "Gunakan akun tiruan yang sama seperti yang Anda buat di halaman pendaftaran, atau masuk dengan pintasan sosial.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Menyambungkan…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Buat akun Anda",
     "subtitle": "Mulai perjalanan Anda dengan JT-Code",
-    "helpText": "Buat akun yang aman dengan kolom-kolom yang benar-benar digunakan JT-Code di seluruh aplikasi.",
     "firstNameLabel": "Nama depan",
     "lastNameLabel": "Nama belakang",
     "emailLabel": "Alamat email",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Atur ulang kata sandi Anda",
-    "resetDesc": "Masukkan alamat email Anda dan kami akan menyiapkan alur pengaturan ulang tiruan yang dapat Anda selesaikan langsung di sini.",
     "emailLabel": "Alamat email",
     "sendCode": "Kirim kode atur ulang",
     "sending": "Mengirim…",
     "backToSignIn": "Kembali ke halaman masuk",
     "checkTitle": "Periksa email Anda",
-    "checkDesc": "Kami mengirim pesan atur ulang tiruan ke <0>{{email}}</0>. Kode di bawah akan membuka langkah berikutnya.",
-    "checkDescPlain": "Kami mengirim pesan atur ulang tiruan ke {{email}}. Kode di bawah akan membuka langkah berikutnya.",
-    "mockResetCode": "Kode atur ulang tiruan",
     "useCodeNow": "Gunakan kode ini sekarang",
     "haveCode": "Saya sudah punya kode atur ulang",
     "newPasswordTitle": "Buat kata sandi baru",
@@ -206,10 +199,8 @@
     "redirecting": "Mengalihkan…"
   },
   "chat": {
-    "badge": "Agen coding bertenaga AI",
     "headline": "Apa yang kita bangun hari ini?",
     "welcome": "Halo! Saya JT-Code. Apa yang kita bangun hari ini?",
-    "subhead": "Tanyakan kepada JT-Code tentang kode, arsitektur, riset, dokumen, atau hal lainnya.",
     "composerPlaceholder": "Kirim pesan ke JT-Code…",
     "composerPlaceholderBusy": "Memproses...",
     "conversation": "Percakapan",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Kontak",
       "title": "Dapatkan bantuan dengan JT-Code",
-      "p1": "Rilis ini menggunakan runtime frontend tiruan, sehingga jalur dukungan tercepat adalah ruang kerja itu sendiri. Gunakan alur pengaturan ulang autentikasi, siklus keluar/masuk, atau segarkan halaman untuk memverifikasi persistensi data saat pengembangan.",
-      "p2": "Jika Anda menginginkan jalur dukungan sungguhan di kemudian hari, halaman ini sudah siap dan dapat dihubungkan ke sistem tiket atau pusat bantuan tanpa mengubah navigasi publik.",
       "backToSignIn": "Kembali ke halaman masuk",
       "createAccount": "Buat akun"
     },
     "privacy": {
       "eyebrow": "Kebijakan Privasi",
       "title": "Privasi JT-Code",
-      "p1": "JT-Code menyimpan status akun dan ruang kerja secara lokal dalam mode tiruan agar frontend dapat berjalan tanpa backend. Penyimpanan peramban digunakan untuk mempertahankan sesi, percakapan, file, dokumen, dan data contoh lainnya.",
-      "p2": "Saat mode API diaktifkan, bagian produk yang sama dapat beralih ke repositori berbasis transport tanpa mengubah komponen halaman.",
       "signIn": "Masuk",
       "readTerms": "Baca syarat"
     },
     "terms": {
       "eyebrow": "Ketentuan Layanan",
       "title": "Ketentuan JT-Code",
-      "p1": "Ruang kerja ini saat ini berjalan dalam mode tiruan. Dengan menggunakannya, Anda menyetujui bahwa data yang dimasukkan ke dalam aplikasi dapat disimpan secara lokal di peramban Anda untuk pengujian produk dan pengembangan.",
-      "p2": "Frontend dapat mensimulasikan autentikasi, penagihan, penyimpanan file, dan alur kerja konten sampai mode API terhubung.",
       "createAccount": "Buat akun",
       "contactSupport": "Hubungi dukungan"
     },

@@ -81,13 +81,11 @@
     "switchToDark": "Zum dunklen Design wechseln",
     "light": "Hell",
     "dark": "Dunkel",
-    "tagline": "Privater KI-Arbeitsbereich",
-    "notice": "Deine Daten bleiben im Arbeitsbereich, und Mock-Auth bleibt über Neuladen hinweg erhalten."
+    "tagline": "Privater KI-Arbeitsbereich"
   },
   "signin": {
     "title": "Willkommen zurück",
     "subtitle": "Melde dich an, um mit JT-Code fortzufahren",
-    "helpText": "Verwende denselben Mock-Account, den du auf der Registrierungsseite erstellt hast, oder melde dich mit einem Social-Shortcut an.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Verbindung wird hergestellt…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Erstelle dein Konto",
     "subtitle": "Starte deine Reise mit JT-Code",
-    "helpText": "Erstelle ein sicheres Konto mit den Feldern, die JT-Code in der App tatsächlich verwendet.",
     "firstNameLabel": "Vorname",
     "lastNameLabel": "Nachname",
     "emailLabel": "E-Mail-Adresse",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Passwort zurücksetzen",
-    "resetDesc": "Gib deine E-Mail-Adresse ein und wir bereiten einen Mock-Reset-Ablauf vor, den du direkt hier abschließen kannst.",
     "emailLabel": "E-Mail-Adresse",
     "sendCode": "Reset-Code senden",
     "sending": "Wird gesendet…",
     "backToSignIn": "Zurück zur Anmeldung",
     "checkTitle": "Überprüfe deine E-Mails",
-    "checkDesc": "Wir haben eine Mock-Reset-Nachricht an <0>{{email}}</0> gesendet. Der folgende Code schaltet den nächsten Schritt frei.",
-    "checkDescPlain": "Wir haben eine Mock-Reset-Nachricht an {{email}} gesendet. Der folgende Code schaltet den nächsten Schritt frei.",
-    "mockResetCode": "Mock-Reset-Code",
     "useCodeNow": "Diesen Code jetzt verwenden",
     "haveCode": "Ich habe bereits einen Reset-Code",
     "newPasswordTitle": "Neues Passwort erstellen",
@@ -206,10 +199,8 @@
     "redirecting": "Weiterleitung…"
   },
   "chat": {
-    "badge": "KI-gestützter Coding-Agent",
     "headline": "Was bauen wir heute?",
     "welcome": "Hallo! Ich bin JT-Code. Was bauen wir heute?",
-    "subhead": "Frage JT-Code zu Code, Architektur, Recherche, Dokumenten oder allem anderen.",
     "composerPlaceholder": "Nachricht an JT-Code…",
     "composerPlaceholderBusy": "Wird verarbeitet...",
     "conversation": "Unterhaltung",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Kontakt",
       "title": "Hilfe zu JT-Code erhalten",
-      "p1": "Diese Version nutzt eine Mock-Frontend-Laufzeitumgebung, daher ist der schnellste Support-Weg der Arbeitsbereich selbst. Nutze den Auth-Reset-Ablauf, den Abmelde-/Anmelde-Zyklus oder lade die Seite neu, um während der Entwicklung die Persistenz zu prüfen.",
-      "p2": "Wenn du später einen echten Support-Weg möchtest, ist diese Seite jetzt vorhanden und kann ohne Änderung der öffentlichen Navigation an eine Ticket- oder Helpcenter-Integration angebunden werden.",
       "backToSignIn": "Zurück zur Anmeldung",
       "createAccount": "Konto erstellen"
     },
     "privacy": {
       "eyebrow": "Datenschutzerklärung",
       "title": "JT-Code Datenschutz",
-      "p1": "JT-Code speichert Konto- und Arbeitsbereichsstatus im Mock-Modus lokal, damit das Frontend ohne Backend laufen kann. Der Browser-Speicher bewahrt Sitzungen, Unterhaltungen, Dateien, Dokumente und weitere Beispieldaten.",
-      "p2": "Wenn der API-Modus aktiviert ist, können dieselben Produktflächen zu transportbasierten Repositories wechseln, ohne die Seitenkomponenten zu ändern.",
       "signIn": "Anmelden",
       "readTerms": "Bedingungen lesen"
     },
     "terms": {
       "eyebrow": "Nutzungsbedingungen",
       "title": "JT-Code Bedingungen",
-      "p1": "Dieser Arbeitsbereich läuft derzeit im Mock-Modus. Durch die Nutzung stimmst du zu, dass in die App eingegebene Daten zu Produkttests und Entwicklungszwecken lokal in deinem Browser gespeichert werden können.",
-      "p2": "Das Frontend kann Authentifizierung, Abrechnung, Dateispeicherung und Inhalts-Workflows simulieren, bis der API-Modus verbunden ist.",
       "createAccount": "Konto erstellen",
       "contactSupport": "Support kontaktieren"
     },

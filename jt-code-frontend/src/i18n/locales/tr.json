@@ -81,13 +81,11 @@
     "switchToDark": "Koyu temaya geç",
     "light": "Açık",
     "dark": "Koyu",
-    "tagline": "Özel yapay zeka çalışma alanı",
-    "notice": "Verileriniz çalışma alanında kalır ve sahte kimlik doğrulama sayfa yenilemelerinde korunur."
+    "tagline": "Özel yapay zeka çalışma alanı"
   },
   "signin": {
     "title": "Tekrar hoş geldiniz",
     "subtitle": "JT-Code ile devam etmek için oturum açın",
-    "helpText": "Kayıt sayfasında oluşturduğunuz sahte hesabı kullanın veya sosyal bir kısayolla oturum açın.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Bağlanıyor…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Hesabınızı oluşturun",
     "subtitle": "Yolculuğunuza JT-Code ile başlayın",
-    "helpText": "JT-Code'un uygulama genelinde gerçekten kullandığı alanlarla güvenli bir hesap oluşturun.",
     "firstNameLabel": "Ad",
     "lastNameLabel": "Soyad",
     "emailLabel": "E-posta adresi",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Şifrenizi sıfırlayın",
-    "resetDesc": "E-posta adresinizi girin; sahte bir sıfırlama akışını tamamen burada tamamlayabilmeniz için hazırlayalım.",
     "emailLabel": "E-posta adresi",
     "sendCode": "Sıfırlama kodu gönder",
     "sending": "Gönderiliyor…",
     "backToSignIn": "Oturum açmaya dön",
     "checkTitle": "E-postanızı kontrol edin",
-    "checkDesc": "<0>{{email}}</0> adresine sahte bir sıfırlama mesajı gönderdik. Aşağıdaki kod bir sonraki adımı açacaktır.",
-    "checkDescPlain": "{{email}} adresine sahte bir sıfırlama mesajı gönderdik. Aşağıdaki kod bir sonraki adımı açacaktır.",
-    "mockResetCode": "Sahte sıfırlama kodu",
     "useCodeNow": "Bu kodu hemen kullan",
     "haveCode": "Zaten bir sıfırlama kodum var",
     "newPasswordTitle": "Yeni bir şifre oluşturun",
@@ -206,10 +199,8 @@
     "redirecting": "Yönlendiriliyor…"
   },
   "chat": {
-    "badge": "Yapay zeka destekli kodlama ajanı",
     "headline": "Bugün ne inşa edelim?",
     "welcome": "Merhaba! Ben JT-Code. Bugün ne inşa ediyoruz?",
-    "subhead": "JT-Code'a kod, mimari, araştırma, belgeler veya başka her konuda sorun.",
     "composerPlaceholder": "JT-Code'a mesaj gönder…",
     "composerPlaceholderBusy": "İşleniyor...",
     "conversation": "Konuşma",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "İletişim",
       "title": "JT-Code ile ilgili yardım alın",
-      "p1": "Bu sürüm sahte bir ön uç çalışma zamanı kullanır; bu nedenle destek almanın en hızlı yolu çalışma alanının kendisidir. Geliştirme sırasında kalıcılığı doğrulamak için kimlik doğrulama sıfırlama akışını, çıkış/giriş döngüsünü veya yenilemeyi kullanın.",
-      "p2": "İleride gerçek bir destek kanalı isterseniz bu sayfa artık hazır ve herkese açık gezinmeyi değiştirmeden bir talep sistemi ya da yardım merkezi entegrasyonuna bağlanabilir.",
       "backToSignIn": "Oturum açmaya dön",
       "createAccount": "Hesap oluştur"
     },
     "privacy": {
       "eyebrow": "Gizlilik Politikası",
       "title": "JT-Code Gizlilik",
-      "p1": "JT-Code, sahte modda ön ucun arka uç olmadan çalışabilmesi için hesap ve çalışma alanı durumunu yerel olarak depolar. Oturumların, konuşmaların, dosyaların, belgelerin ve diğer örnek verilerin korunması için tarayıcı deposu kullanılır.",
-      "p2": "API modu etkinleştirildiğinde, aynı ürün yüzeyleri sayfa bileşenlerini değiştirmeden aktarım destekli depolara geçebilir.",
       "signIn": "Oturum aç",
       "readTerms": "Şartları okuyun"
     },
     "terms": {
       "eyebrow": "Hizmet Şartları",
       "title": "JT-Code Şartları",
-      "p1": "Bu çalışma alanı şu anda sahte modda çalışıyor. Bunu kullanarak, uygulamaya girilen verilerin ürün testi ve geliştirme amacıyla tarayıcınızda yerel olarak depolanabileceğini kabul etmiş olursunuz.",
-      "p2": "API modu bağlanana kadar ön uç; kimlik doğrulama, faturalandırma, dosya depolama ve içerik iş akışlarını taklit edebilir.",
       "createAccount": "Hesap oluştur",
       "contactSupport": "Destek ekibiyle iletişime geçin"
     },

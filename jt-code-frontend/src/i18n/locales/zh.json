@@ -81,13 +81,11 @@
     "switchToDark": "切换到深色主题",
     "light": "浅色",
     "dark": "深色",
-    "tagline": "私密的 AI 工作区",
-    "notice": "您的数据保留在工作区内，模拟登录在刷新后依然保持。"
+    "tagline": "私密的 AI 工作区"
   },
   "signin": {
     "title": "欢迎回来",
     "subtitle": "登录以继续使用 JT-Code",
-    "helpText": "使用您在注册页面创建的同一个模拟账号，或通过社交快捷方式登录。",
     "google": "Google",
     "apple": "Apple",
     "connecting": "连接中…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "创建您的账号",
     "subtitle": "开启您的 JT-Code 之旅",
-    "helpText": "使用 JT-Code 在整个应用中实际用到的字段，创建一个安全账号。",
     "firstNameLabel": "名字",
     "lastNameLabel": "姓氏",
     "emailLabel": "电子邮箱地址",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "重置密码",
-    "resetDesc": "请输入您的电子邮箱地址，我们将准备一个模拟重置流程，您可以在此直接完成。",
     "emailLabel": "电子邮箱地址",
     "sendCode": "发送重置码",
     "sending": "发送中…",
     "backToSignIn": "返回登录",
     "checkTitle": "请查收您的邮箱",
-    "checkDesc": "我们已向 <0>{{email}}</0> 发送了一封模拟重置邮件。使用下方的重置码即可进入下一步。",
-    "checkDescPlain": "我们已向 {{email}} 发送了一封模拟重置邮件。使用下方的重置码即可进入下一步。",
-    "mockResetCode": "模拟重置码",
     "useCodeNow": "立即使用此重置码",
     "haveCode": "我已经有重置码",
     "newPasswordTitle": "设置新密码",
@@ -206,10 +199,8 @@
     "redirecting": "正在跳转…"
   },
   "chat": {
-    "badge": "AI 驱动的编程智能体",
     "headline": "今天我们来构建什么？",
     "welcome": "你好！我是 JT-Code。今天我们一起来做点什么？",
-    "subhead": "无论是代码、架构、调研、文档还是其他任何问题，都可以问 JT-Code。",
     "composerPlaceholder": "给 JT-Code 发消息…",
     "composerPlaceholderBusy": "处理中...",
     "conversation": "对话",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "联系我们",
       "title": "获取 JT-Code 帮助",
-      "p1": "本版本使用模拟的前端运行时，因此最快的支持渠道就是工作区本身。开发过程中，可以通过身份验证重置流程、退出/重新登录循环或刷新页面来验证数据持久性。",
-      "p2": "如果您日后需要正式的支持渠道，本页面已经就位，可以在不改动公开导航的情况下接入工单系统或帮助中心。",
       "backToSignIn": "返回登录",
       "createAccount": "创建账号"
     },
     "privacy": {
       "eyebrow": "隐私政策",
       "title": "JT-Code 隐私",
-      "p1": "在模拟模式下，JT-Code 将账户和工作区状态保存在本地，因此前端无需后端即可运行。浏览器存储用于保存会话、对话、文件、文档以及其他示例数据。",
-      "p2": "启用 API 模式后，相同的产品界面可以切换为基于传输层的存储实现，而无需更改页面组件。",
       "signIn": "登录",
       "readTerms": "阅读条款"
     },
     "terms": {
       "eyebrow": "服务条款",
       "title": "JT-Code 条款",
-      "p1": "本工作区目前以模拟模式运行。使用本产品即表示您同意：为进行产品测试和开发，输入应用中的数据可能会保存在您的浏览器本地。",
-      "p2": "在接入 API 模式之前，前端可能会模拟身份验证、账单、文件存储和内容工作流。",
       "createAccount": "创建账号",
       "contactSupport": "联系支持团队"
     },

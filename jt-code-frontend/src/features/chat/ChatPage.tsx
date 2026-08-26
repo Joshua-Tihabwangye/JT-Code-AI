@@ -6,7 +6,6 @@ import { ChatBackground } from '@/features/chat/ChatBackground';
 import { createChatRequest, createConversation, streamChatRequest } from '@/features/chat/api';
 import { useBillingStore } from '@/features/billing/store';
 import { useAuth } from '@/lib/supabase';
-import { Sparkles } from 'lucide-react';
 import type { ChatRequest } from '@/features/chat/types';
 
 interface LocalMessage {
@@ -177,19 +176,10 @@ export function ChatPage() {
         <section className="chat-landing-content">
         <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[520px] h-[360px] rounded-full bg-[radial-gradient(ellipse_at_center,var(--primary)_0%,transparent_70%)] opacity-[0.08] dark:opacity-[0.18] blur-3xl" />
 
-        <div className="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-sm text-secondary-foreground text-xs font-medium border border-border">
-          <Sparkles size={14} className="text-primary" />
-          {t('chat.badge')}
-        </div>
-
         <h1 className="chat-headline relative text-center my-6">
           {headline.displayed}
           {!headline.done && <span className="chat-cursor" />}
         </h1>
-
-        <p className="chat-subhead relative text-center text-muted-foreground mb-8">
-          {t('chat.subhead')}
-        </p>
 
         <div className="relative w-full max-w-[720px] flex flex-col items-center gap-4">
           <ChatComposer disabled={busy} onSubmit={send} placeholder={t('chat.composerPlaceholder')} />

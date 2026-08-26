@@ -81,13 +81,11 @@
     "switchToDark": "Badilisha kwenda mandhari ya giza",
     "light": "Mwanga",
     "dark": "Giza",
-    "tagline": "Eneo la kazi la AI binafsi",
-    "notice": "Data yako inabaki katika eneo la kazi na uthibitishaji wa majaribio unaendelea hata baada ya kuburudisha ukurasa."
+    "tagline": "Eneo la kazi la AI binafsi"
   },
   "signin": {
     "title": "Karibu tena",
     "subtitle": "Ingia ili kuendelea na JT-Code",
-    "helpText": "Tumia akaunti ya majaribio uliyoiunda kwenye ukurasa wa kujisajili, au ingia kwa njia ya kijamii.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Inaunganisha…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Fungua akaunti yako",
     "subtitle": "Anza safari yako na JT-Code",
-    "helpText": "Fungua akaunti salama kwa sehemu ambazo JT-Code hutumia kweli katika programu nzima.",
     "firstNameLabel": "Jina la kwanza",
     "lastNameLabel": "Jina la ukoo",
     "emailLabel": "Barua pepe",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Weka upya nenosiri lako",
-    "resetDesc": "Weka barua pepe yako nasi tutakuandalia mtiririko wa majaribio wa kuweka upya unaoweza kukamilisha hapa hapa.",
     "emailLabel": "Barua pepe",
     "sendCode": "Tuma msimbo wa kuweka upya",
     "sending": "Inatuma…",
     "backToSignIn": "Rudi kuingia",
     "checkTitle": "Angalia barua pepe yako",
-    "checkDesc": "Tumetuma ujumbe wa majaribio wa kuweka upya kwa <0>{{email}}</0>. Msimbo hapa chini utafungua hatua inayofuata.",
-    "checkDescPlain": "Tumetuma ujumbe wa majaribio wa kuweka upya kwa {{email}}. Msimbo hapa chini utafungua hatua inayofuata.",
-    "mockResetCode": "Msimbo wa majaribio wa kuweka upya",
     "useCodeNow": "Tumia msimbo huu sasa",
     "haveCode": "Nina msimbo wa kuweka upya tayari",
     "newPasswordTitle": "Unda nenosiri jipya",
@@ -206,10 +199,8 @@
     "redirecting": "Inaelekeza upya…"
   },
   "chat": {
-    "badge": "Wakala wa kuandika msimbo unaotumia AI",
     "headline": "Tujenge nini leo?",
     "welcome": "Habari! Mimi ni JT-Code. Tunajenga nini leo?",
-    "subhead": "Uliza JT-Code kuhusu msimbo, usanifu, utafiti, nyaraka au chochote kingine.",
     "composerPlaceholder": "Tuma ujumbe kwa JT-Code…",
     "composerPlaceholderBusy": "Inachakata...",
     "conversation": "Mazungumzo",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Mawasiliano",
       "title": "Pata msaada wa JT-Code",
-      "p1": "Toleo hili linatumia mfumo wa majaribio wa upande wa mbele, hivyo njia ya haraka zaidi ya kupata usaidizi ni eneo la kazi lenyewe. Tumia mtiririko wa kuweka upya uthibitishaji, mzunguko wa kutoka/kuingia, au pakia upya ukurasa ili kuthibitisha uendelevu wakati wa maendeleo.",
-      "p2": "Ukitaka njia halisi ya usaidizi baadaye, ukurasa huu upo sasa na unaweza kuunganishwa na mfumo wa tiketi au kituo cha msaada bila kubadilisha urambazaji wa umma.",
       "backToSignIn": "Rudi kuingia",
       "createAccount": "Fungua akaunti"
     },
     "privacy": {
       "eyebrow": "Sera ya Faragha",
       "title": "Faragha ya JT-Code",
-      "p1": "JT-Code huhifadhi hali ya akaunti na eneo la kazi ndani ya kifaa katika hali ya majaribio ili upande wa mbele uweze kufanya kazi bila seva ya nyuma. Hifadhi ya kivinjari hutumika kudumisha vipindi, mazungumzo, faili, nyaraka na data nyingine ya mfano.",
-      "p2": "Potapo wezeshwa hali ya API, sehemu zilezile za bidhaa zinaweza kubadilika kwenda hazina zinazotegemea mtandao bila kubadilisha vipengele vya ukurasa.",
       "signIn": "Ingia",
       "readTerms": "Soma masharti"
     },
     "terms": {
       "eyebrow": "Masharti ya Huduma",
       "title": "Masharti ya JT-Code",
-      "p1": "Eneo hili la kazi kwa sasa linafanya kazi katika hali ya majaribio. Kwa kulitumia, unakubali kuwa data iliyoingizwa kwenye programu inaweza kuhifadhiwa ndani ya kivinjari chako kwa ajili ya kupima bidhaa na maendeleo.",
-      "p2": "Upande wa mbele unaweza kuiga uthibitishaji, malipo, hifadhi ya faili na michakato ya maudhui hadi hali ya API iunganishwe.",
       "createAccount": "Fungua akaunti",
       "contactSupport": "Wasiliana na usaidizi"
     },

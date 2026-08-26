@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 import {
   MessageSquare,
   Image as ImageIcon,
@@ -10,15 +10,13 @@ import {
   PanelLeftClose,
   PanelLeft,
   Menu,
-  Globe,
-  ChevronDown,
 } from 'lucide-react';
-import { IconButton, Select, Button } from '@/shared/components';
+import { IconButton } from '@/shared/components';
 import { useAppStore } from '@/lib/appStore';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
-import { useLanguage } from '@/i18n/useLanguage';
+import { LanguageMenu } from '@/i18n/LanguageMenu';
 import { AccountMenu } from '@/app/layouts/AccountMenu';
 
 const publicNav = [
@@ -52,12 +50,10 @@ function NavItems({ items, collapsed, onNavigate }: { items: NavItem[]; collapse
 
 export function AppShell() {
   const { t } = useTranslation();
-  const { currentLanguage, setLanguage, languages } = useLanguage();
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const { resolvedTheme, toggleTheme } = useTheme();
-  const { isSignedIn, loading } = useAuth();
-  const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const closeDrawer = () => setMobileNavOpen(false);
@@ -78,28 +74,7 @@ export function AppShell() {
         </div>
 
         <div className="sidebar-language">
-          {collapsed ? (
-            <button
-              type="button"
-              className="sidebar-icon-button"
-              title={t('settings.language')}
-              aria-label={t('settings.language')}
-              onClick={toggleSidebar}
-            >
-              <Globe size={18} aria-hidden />
-            </button>
-          ) : (
-            <label className="language-select-row">
-              <Globe size={18} aria-hidden />
-              <Select
-                aria-label={t('settings.language')}
-                options={languages.map((l) => ({ value: l.code, label: l.englishName }))}
-                value={currentLanguage}
-                onChange={(e) => setLanguage(e.target.value)}
-              />
-              <ChevronDown size={14} aria-hidden />
-            </label>
-          )}
+          <LanguageMenu collapsed={collapsed} />
         </div>
 
         <nav className="nav-links compact" aria-label={t('nav.primary')}>
@@ -125,11 +100,6 @@ export function AppShell() {
       <main className="main-content">
         <header className="app-header">
           <span className="sr-only">JT-Code application</span>
-          {!loading && !isSignedIn && (
-            <Button variant="ghost" onClick={() => { void navigate('/sign-in'); }}>
-              {t('menu.signIn')}
-            </Button>
-          )}
         </header>
         <div className="page-scroll">
           <Outlet />

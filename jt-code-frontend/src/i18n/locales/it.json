@@ -81,13 +81,11 @@
     "switchToDark": "Passa al tema scuro",
     "light": "Chiaro",
     "dark": "Scuro",
-    "tagline": "Area di lavoro AI privata",
-    "notice": "I tuoi dati restano nell'area di lavoro e l'autenticazione mock persiste dopo il refresh."
+    "tagline": "Area di lavoro AI privata"
   },
   "signin": {
     "title": "Bentornato",
     "subtitle": "Accedi per continuare su JT-Code",
-    "helpText": "Usa lo stesso account mock creato nella pagina di registrazione, oppure accedi con un collegamento social.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Connessione in corso…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Crea il tuo account",
     "subtitle": "Inizia il tuo percorso con JT-Code",
-    "helpText": "Crea un account sicuro con i campi che JT-Code usa realmente nell'app.",
     "firstNameLabel": "Nome",
     "lastNameLabel": "Cognome",
     "emailLabel": "Indirizzo email",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Reimposta la password",
-    "resetDesc": "Inserisci il tuo indirizzo email e prepareremo un flusso di reimpostazione simulato che puoi completare qui.",
     "emailLabel": "Indirizzo email",
     "sendCode": "Invia codice di reimpostazione",
     "sending": "Invio in corso…",
     "backToSignIn": "Torna all'accesso",
     "checkTitle": "Controlla la tua email",
-    "checkDesc": "Abbiamo inviato un messaggio di reimpostazione simulato a <0>{{email}}</0>. Il codice qui sotto sbloccherà il passaggio successivo.",
-    "checkDescPlain": "Abbiamo inviato un messaggio di reimpostazione simulato a {{email}}. Il codice qui sotto sbloccherà il passaggio successivo.",
-    "mockResetCode": "Codice di reimpostazione simulato",
     "useCodeNow": "Usa subito questo codice",
     "haveCode": "Ho già un codice di reimpostazione",
     "newPasswordTitle": "Crea una nuova password",
@@ -206,10 +199,8 @@
     "redirecting": "Reindirizzamento…"
   },
   "chat": {
-    "badge": "Agente di coding basato sull'AI",
     "headline": "Cosa costruiamo oggi?",
     "welcome": "Ciao! Sono JT-Code. Cosa costruiamo oggi?",
-    "subhead": "Chiedi a JT-Code di codice, architettura, ricerche, documenti o qualsiasi altra cosa.",
     "composerPlaceholder": "Messaggio a JT-Code…",
     "composerPlaceholderBusy": "Elaborazione...",
     "conversation": "Conversazione",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Contatti",
       "title": "Ottieni assistenza per JT-Code",
-      "p1": "Questa versione usa un runtime frontend simulato, quindi il percorso più rapido per l'assistenza è l'area di lavoro stessa. Usa il flusso di reset dell'autenticazione, il ciclo esci/accedi o il refresh per verificare la persistenza durante lo sviluppo.",
-      "p2": "Se in futuro vorrai un vero canale di supporto, questa pagina è già pronta e può essere collegata a un sistema di ticket o a un help center senza modificare la navigazione pubblica.",
       "backToSignIn": "Torna all'accesso",
       "createAccount": "Crea account"
     },
     "privacy": {
       "eyebrow": "Informativa sulla privacy",
       "title": "Privacy di JT-Code",
-      "p1": "JT-Code salva localmente lo stato dell'account e dell'area di lavoro in modalità mock, così il frontend può funzionare senza backend. L'archiviazione del browser viene usata per conservare sessioni, conversazioni, file, documenti e altri dati di esempio.",
-      "p2": "Quando la modalità API è abilitata, le stesse superfici di prodotto possono passare a repository basati sul trasporto senza modificare i componenti delle pagine.",
       "signIn": "Accedi",
       "readTerms": "Leggi i termini"
     },
     "terms": {
       "eyebrow": "Termini di servizio",
       "title": "Termini di JT-Code",
-      "p1": "Quest'area di lavoro è attualmente in modalità mock. Utilizzandola, accetti che i dati inseriti nell'app possano essere salvati localmente nel tuo browser per test e sviluppo del prodotto.",
-      "p2": "Finché la modalità API non è collegata, il frontend può simulare autenticazione, fatturazione, archiviazione dei file e flussi di contenuti.",
       "createAccount": "Crea account",
       "contactSupport": "Contatta l'assistenza"
     },

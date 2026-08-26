@@ -81,13 +81,11 @@
     "switchToDark": "Cambiar a tema oscuro",
     "light": "Claro",
     "dark": "Oscuro",
-    "tagline": "Espacio de trabajo de IA privado",
-    "notice": "Tus datos permanecen en el espacio de trabajo y la autenticación simulada persiste entre recargas."
+    "tagline": "Espacio de trabajo de IA privado"
   },
   "signin": {
     "title": "Bienvenido de nuevo",
     "subtitle": "Inicia sesión para continuar en JT-Code",
-    "helpText": "Usa la misma cuenta simulada que creaste en la página de registro, o inicia sesión con un atajo social.",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Conectando…",
@@ -103,7 +101,6 @@
   "signup": {
     "title": "Crea tu cuenta",
     "subtitle": "Comienza tu camino con JT-Code",
-    "helpText": "Crea una cuenta segura con los campos que JT-Code realmente usa en la aplicación.",
     "firstNameLabel": "Nombre",
     "lastNameLabel": "Apellido",
     "emailLabel": "Correo electrónico",
@@ -154,15 +151,11 @@
   },
   "forgot": {
     "resetTitle": "Restablece tu contraseña",
-    "resetDesc": "Introduce tu dirección de correo y prepararemos un flujo de restablecimiento simulado que puedes completar aquí mismo.",
     "emailLabel": "Correo electrónico",
     "sendCode": "Enviar código de restablecimiento",
     "sending": "Enviando…",
     "backToSignIn": "Volver a iniciar sesión",
     "checkTitle": "Revisa tu correo",
-    "checkDesc": "Enviamos un mensaje de restablecimiento simulado a <0>{{email}}</0>. El código de abajo desbloqueará el siguiente paso.",
-    "checkDescPlain": "Enviamos un mensaje de restablecimiento simulado a {{email}}. El código de abajo desbloqueará el siguiente paso.",
-    "mockResetCode": "Código de restablecimiento simulado",
     "useCodeNow": "Usa este código ahora",
     "haveCode": "Ya tengo un código de restablecimiento",
     "newPasswordTitle": "Crea una nueva contraseña",
@@ -206,10 +199,8 @@
     "redirecting": "Redirigiendo…"
   },
   "chat": {
-    "badge": "Agente de programación con IA",
     "headline": "¿Qué construimos hoy?",
     "welcome": "¡Hola! Soy JT-Code. ¿Qué construimos hoy?",
-    "subhead": "Pregunta a JT-Code sobre código, arquitectura, investigación, documentos o cualquier otra cosa.",
     "composerPlaceholder": "Escribe a JT-Code…",
     "composerPlaceholderBusy": "Procesando...",
     "conversation": "Conversación",
@@ -425,24 +416,18 @@
     "contact": {
       "eyebrow": "Contacto",
       "title": "Obtén ayuda con JT-Code",
-      "p1": "Esta versión usa un entorno frontend simulado, así que la vía más rápida de soporte es el propio espacio de trabajo. Usa el flujo de restablecimiento de autenticación, el ciclo de cierre/inicio de sesión o recarga para verificar la persistencia durante el desarrollo.",
-      "p2": "Si quieres una ruta de soporte real más adelante, esta página ya está lista y puede conectarse a una integración de tickets o de centro de ayuda sin cambiar la navegación pública.",
       "backToSignIn": "Volver a iniciar sesión",
       "createAccount": "Crear cuenta"
     },
     "privacy": {
       "eyebrow": "Política de Privacidad",
       "title": "Privacidad de JT-Code",
-      "p1": "JT-Code almacena localmente el estado de la cuenta y del espacio de trabajo en modo simulado, de modo que el frontend puede funcionar sin backend. El almacenamiento del navegador se usa para conservar sesiones, conversaciones, archivos, documentos y otros datos de ejemplo.",
-      "p2": "Cuando el modo API está habilitado, esas mismas superficies del producto pueden cambiar a repositorios respaldados por transporte sin modificar los componentes de las páginas.",
       "signIn": "Iniciar sesión",
       "readTerms": "Leer los términos"
     },
     "terms": {
       "eyebrow": "Términos del Servicio",
       "title": "Términos de JT-Code",
-      "p1": "Este espacio de trabajo funciona actualmente en modo simulado. Al usarlo, aceptas que los datos introducidos en la aplicación pueden almacenarse localmente en tu navegador para pruebas y desarrollo del producto.",
-      "p2": "El frontend puede simular autenticación, facturación, almacenamiento de archivos y flujos de contenido hasta que el modo API esté conectado.",
       "createAccount": "Crear cuenta",
       "contactSupport": "Contactar con soporte"
     },

@@ -82,12 +82,13 @@
     "light": "Light",
     "dark": "Dark",
     "tagline": "Private AI workspace",
-    "notice": "Your data stays in the workspace and mock auth persists across refreshes."
+    "notice": "",
+    "back": "Back"
   },
   "signin": {
     "title": "Welcome back",
     "subtitle": "Sign in to continue to JT-Code",
-    "helpText": "Use the same mock account you created on the signup page, or sign in with a social shortcut.",
+    "helpText": "",
     "google": "Google",
     "apple": "Apple",
     "connecting": "Connecting…",
@@ -103,7 +104,12 @@
   "signup": {
     "title": "Create your account",
     "subtitle": "Start your journey with JT-Code",
-    "helpText": "Create a secure account with the fields JT-Code actually uses across the app.",
+    "helpText": "",
+    "section": {
+      "account": "Account",
+      "profile": "Profile",
+      "region": "Region"
+    },
     "firstNameLabel": "First name",
     "lastNameLabel": "Last name",
     "emailLabel": "Email address",
@@ -133,7 +139,7 @@
       "help": "You can override the default code if you're signing up for a different calling region."
     },
     "phone": {
-      "label": "Contact / phone number",
+      "label": "Phone contact",
       "defaultPlaceholder": "Enter phone number",
       "help": "Use the phone number format commonly used in {{country}}.",
       "yourCountry": "your country"
@@ -143,7 +149,7 @@
       "empty": "No timezone available",
       "help": "Suggested timezones are filtered by the selected country, but you can override them."
     },
-    "note": "The selected country updates phone validation and timezone suggestions automatically.",
+    "note": "",
     "termsPrefix": "I agree to the ",
     "termsLink": "Terms",
     "termsMiddle": " and ",
@@ -154,15 +160,15 @@
   },
   "forgot": {
     "resetTitle": "Reset your password",
-    "resetDesc": "Enter your email address and we’ll prepare a mock reset flow you can complete right here.",
+    "resetDesc": "Enter your email address and we’ll send a reset link you can complete right here.",
     "emailLabel": "Email address",
     "sendCode": "Send reset code",
     "sending": "Sending…",
     "backToSignIn": "Back to sign in",
     "checkTitle": "Check your email",
-    "checkDesc": "We sent a mock reset message to <0>{{email}}</0>. The code below will unlock the next step.",
-    "checkDescPlain": "We sent a mock reset message to {{email}}. The code below will unlock the next step.",
-    "mockResetCode": "Mock reset code",
+    "checkDesc": "We sent a reset message to <0>{{email}}</0>. The code below will unlock the next step.",
+    "checkDescPlain": "We sent a reset message to {{email}}. The code below will unlock the next step.",
+    "mockResetCode": "Reset code",
     "useCodeNow": "Use this code now",
     "haveCode": "I already have a reset code",
     "newPasswordTitle": "Create a new password",
@@ -206,10 +212,10 @@
     "redirecting": "Redirecting…"
   },
   "chat": {
-    "badge": "AI-powered coding agent",
+    "badge": "",
     "headline": "What should we build today?",
     "welcome": "Hello! I am JT-Code. What are we building today?",
-    "subhead": "Ask JT-Code about code, architecture, research, documents, or anything else.",
+    "subhead": "",
     "composerPlaceholder": "Message JT-Code…",
     "composerPlaceholderBusy": "Processing...",
     "conversation": "Conversation",
@@ -425,24 +431,24 @@
     "contact": {
       "eyebrow": "Contact",
       "title": "Get help with JT-Code",
-      "p1": "This release uses a mock frontend runtime, so the fastest path for support is the workspace itself. Use the auth reset flow, sign out/sign in cycle, or refresh to verify persistence while developing.",
-      "p2": "If you want a real support route later, this page is now in place and can be wired to a ticketing or help center integration without changing the public navigation.",
+      "p1": "",
+      "p2": "",
       "backToSignIn": "Back to sign in",
       "createAccount": "Create account"
     },
     "privacy": {
       "eyebrow": "Privacy Policy",
       "title": "JT-Code Privacy",
-      "p1": "JT-Code stores account and workspace state locally in mock mode so the frontend can run without a backend. Browser storage is used to preserve sessions, conversations, files, documents and other sample data.",
-      "p2": "When API mode is enabled, the same product surfaces can switch to transport-backed repositories without changing the page components.",
+      "p1": "",
+      "p2": "",
       "signIn": "Sign in",
       "readTerms": "Read terms"
     },
     "terms": {
       "eyebrow": "Terms of Service",
       "title": "JT-Code Terms",
-      "p1": "This workspace is currently running in mock mode. By using it, you agree that data entered into the app may be stored locally in your browser for product testing and development.",
-      "p2": "The frontend may simulate authentication, billing, file storage and content workflows until the API mode is connected.",
+      "p1": "",
+      "p2": "",
       "createAccount": "Create account",
       "contactSupport": "Contact support"
     },

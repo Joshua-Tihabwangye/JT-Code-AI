@@ -54,10 +54,6 @@ export function SignInForm({ onSignedIn }: Props) {
     <section className="signup-card auth-card">
       <SignInHeader />
 
-      <p className="signup-subtitle">
-        {t('signin.helpText')}
-      </p>
-
       <SocialAuthButtons
         onGoogle={() => void handleOAuth('google')}
         onApple={() => void handleOAuth('apple')}

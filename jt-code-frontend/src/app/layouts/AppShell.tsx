@@ -10,6 +10,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Menu,
+  Globe,
 } from 'lucide-react';
 import { IconButton, Select } from '@/shared/components';
 import { useAppStore } from '@/lib/appStore';
@@ -17,7 +18,7 @@ import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/i18n/useLanguage';
-import { AccountMenu } from './AccountMenu';
+import { AccountMenu } from '@/app/layouts/AccountMenu';
 
 const primaryNav = [
   { name: 'Chat', href: '/app/chat', icon: MessageSquare },
@@ -30,6 +31,14 @@ const accountNav = [
 ];
 
 type NavItem = { name: string; href: string; icon: typeof MessageSquare };
+
+function PrimaryNavItems({ isSignedIn }: { isSignedIn: boolean }) {
+  const items = isSignedIn
+    ? primaryNav
+    : primaryNav.filter((item) => item.name !== 'History');
+
+  return items.map((item) => ({ ...item, name: item.name }));
+}
 
 function NavSection({
   label,
@@ -90,18 +99,38 @@ export function AppShell() {
         </div>
 
         <div className="sidebar-language">
-          {!collapsed && <span className="nav-section-label">{t('settings.language')}</span>}
-          <Select
-            aria-label={t('settings.language')}
-            options={languages.map((l) => ({ value: l.code, label: `${l.nativeName} — ${l.englishName}` }))}
-            value={currentLanguage}
-            onChange={(e) => setLanguage(e.target.value)}
-          />
+          {collapsed ? (
+            <button
+              type="button"
+              className="sidebar-icon-button"
+              title={t('settings.language')}
+              aria-label={t('settings.language')}
+              onClick={toggleSidebar}
+            >
+              <Globe size={18} aria-hidden />
+            </button>
+          ) : (
+            <>
+              <span className="nav-section-label">{t('settings.language')}</span>
+              <Select
+                aria-label={t('settings.language')}
+                options={languages.map((l) => ({ value: l.code, label: `${l.nativeName} — ${l.englishName}` }))}
+                value={currentLanguage}
+                onChange={(e) => setLanguage(e.target.value)}
+              />
+            </>
+          )}
         </div>
 
         <nav className="nav-links compact">
-          <NavSection label={t('nav.primary')} items={primaryNav.map((i) => ({ ...i, name: t(`nav.${i.name.toLowerCase()}`) }))} collapsed={collapsed} onNavigate={closeDrawer} />
-          <NavSection label={t('nav.account')} items={accountNav.map((i) => ({ ...i, name: t(`nav.${i.name.toLowerCase()}`) }))} collapsed={collapsed} onNavigate={closeDrawer} />
+          <NavSection label={t('nav.primary')} items={PrimaryNavItems({ isSignedIn })} collapsed={collapsed} onNavigate={closeDrawer} />
+
+          <NavSection
+            label={t('nav.account')}
+            items={isSignedIn ? accountNav.map((i) => ({ ...i, name: t(`nav.${i.name.toLowerCase()}`) })) : []}
+            collapsed={collapsed}
+            onNavigate={closeDrawer}
+          />
         </nav>
 
         <div className="sidebar-footer compact">
@@ -110,7 +139,7 @@ export function AppShell() {
             {!collapsed && <span className="footer-label">{t('chrome.theme')}</span>}
           </button>
 
-          {isSignedIn && <AccountMenu collapsed={collapsed} />}
+          <AccountMenu collapsed={collapsed} />
 
           <button type="button" onClick={toggleSidebar} title={collapsed ? t('chrome.expandSidebar') : t('chrome.collapseSidebar')}>
             {collapsed ? <PanelLeft size={18} aria-hidden /> : <PanelLeftClose size={18} aria-hidden />}

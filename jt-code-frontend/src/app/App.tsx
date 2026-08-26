@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute, PublicRoute } from '@/auth/ProtectedRoute';
-import { AppPage } from '@/pages/AppPage';
+import { RequireAuth, PublicRoute } from '@/auth/ProtectedRoute';
+import { AppShell } from '@/app/layouts/AppShell';
 import { LandingPage } from '@/pages/LandingPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import SignInPage from '@/pages/SignInPage';
@@ -19,7 +19,7 @@ import { HistoryPage } from '@/features/history/HistoryPage';
 export function App() {
   return (
     <Routes>
-      {/* Public routes - redirect to app if signed in */}
+      {/* Public marketing routes - redirect to app if signed in */}
       <Route element={<PublicRoute />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/sign-in" element={<SignInPage />} />
@@ -31,16 +31,16 @@ export function App() {
         <Route path="/contact" element={<ContactPage />} />
       </Route>
 
-      {/* Protected routes - redirect to sign-in if not signed in */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/app" element={<AppPage />}>
-          <Route index element={<Navigate to="chat" replace />} />
-          <Route path="chat" element={<ChatPage />} />
-          <Route path="image" element={<ImagePlaygroundPage />} />
-          <Route path="history" element={<HistoryPage />} />
-          <Route path="billing" element={<BillingPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
+      {/* App shell is PUBLIC. The sidebar, chat landing page, theme, language,
+          collapse and account controls are available to guests. Only account-
+          specific features (history, billing, settings) are guarded. */}
+      <Route path="/app" element={<AppShell />}>
+        <Route index element={<Navigate to="chat" replace />} />
+        <Route path="chat" element={<ChatPage />} />
+        <Route path="image" element={<ImagePlaygroundPage />} />
+        <Route path="history" element={<RequireAuth><HistoryPage /></RequireAuth>} />
+        <Route path="billing" element={<RequireAuth><BillingPage /></RequireAuth>} />
+        <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
       </Route>
 
       {/* 404 */}

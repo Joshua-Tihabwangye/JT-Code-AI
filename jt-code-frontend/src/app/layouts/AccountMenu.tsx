@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Settings, LogOut, Keyboard, type LucideIcon } from 'lucide-react';
+import { Settings, LogOut, Keyboard, User as UserIcon, LogIn, UserPlus, type LucideIcon } from 'lucide-react';
 import { Avatar, Badge } from '@/shared/components';
 import { supabase, useAuth, useUser } from '@/lib/supabase';
 
@@ -84,7 +84,56 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
     void navigate('/sign-in');
   };
 
-  if (!isSignedIn || !user) return null;
+  // Public, unauthenticated state: a neutral person icon that opens a compact
+  // menu to sign in / create an account. No initials, no fabricated avatar.
+  if (!isSignedIn || !user) {
+    const guestItems: { label: string; icon: LucideIcon; onClick: () => void }[] = [
+      { label: t('menu.signIn'), icon: LogIn, onClick: closeAnd(() => navigate('/sign-in')) },
+      { label: t('createAccount'), icon: UserPlus, onClick: closeAnd(() => navigate('/sign-up')) },
+    ];
+
+    return (
+      <div className="account-menu-root">
+        <button
+          ref={buttonRef}
+          type="button"
+          className="account-row"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-controls={open ? menuId : undefined}
+          title={collapsed ? t('menu.signIn') : undefined}
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          <UserIcon size={18} className="text-muted-foreground" aria-hidden />
+          {!collapsed && <span className="footer-label">{t('menu.signIn')}</span>}
+        </button>
+
+        {open && (
+          <div
+            ref={menuRef}
+            id={menuId}
+            role="menu"
+            aria-label={t('menu.account')}
+            className={`account-popover ${collapsed ? 'collapsed' : ''}`}
+            onKeyDown={onMenuKeyDown}
+          >
+            {guestItems.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                role="menuitem"
+                className="account-popover-item"
+                onClick={item.onClick}
+              >
+                <item.icon size={16} aria-hidden />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const items: { label: string; icon: LucideIcon; onClick: () => void }[] = [
     { label: t('menu.settings'), icon: Settings, onClick: closeAnd(() => navigate('/app/settings')) },

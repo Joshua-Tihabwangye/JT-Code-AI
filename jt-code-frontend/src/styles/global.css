@@ -185,7 +185,27 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visib
   transition: width .2s ease, padding .2s ease;
 }
 html.dark .sidebar { background: rgba(5, 11, 20, 0.86); }
-.sidebar.collapsed { padding: 1rem .65rem; align-items: center; }
+ .sidebar.collapsed { padding: 1rem .65rem; align-items: center; }
+
+ /* Keep vertical rhythm: the language control must not touch the logo. */
+ .sidebar-language { margin-top: 1.25rem; width: 100%; }
+ .sidebar.collapsed .sidebar-language { margin-top: 1.25rem; }
+ .sidebar-icon-button {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 100%;
+   padding: .65rem;
+   border-radius: .5rem;
+   border: none;
+   background: transparent;
+   color: var(--muted-foreground);
+   cursor: pointer;
+   transition: all .15s ease;
+ }
+ .sidebar-icon-button:hover { background: var(--muted); color: var(--foreground); }
+ .sidebar.collapsed .sidebar-language .nav-section-label { display: none; }
+ .sidebar-language .nav-section-label { padding-top: 0; }
 
 /* Nav */
 .nav-links { display: flex; flex-direction: column; gap: .15rem; margin-top: .75rem; flex: 0 0 auto; }

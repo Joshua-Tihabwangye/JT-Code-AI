@@ -177,7 +177,10 @@ export const supabase = {
   rpc: () => noopChain,
 } as unknown as SupabaseClient;
 
+export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+
 interface AuthState {
+  status: AuthStatus;
   user: SupabaseUser | null;
   session: Session | null;
   loading: boolean;
@@ -186,6 +189,7 @@ interface AuthState {
 }
 
 const AuthContext = createContext<AuthState>({
+  status: 'loading',
   user: null,
   session: null,
   loading: true,
@@ -212,8 +216,9 @@ export function SupabaseProvider({ children }: PropsWithChildren) {
     return subscribeAuth(sync);
   }, []);
 
-  const value = useMemo(
+  const value = useMemo<AuthState>(
     () => ({
+      status: loading ? 'loading' : user ? 'authenticated' : 'unauthenticated',
       user,
       session,
       loading,

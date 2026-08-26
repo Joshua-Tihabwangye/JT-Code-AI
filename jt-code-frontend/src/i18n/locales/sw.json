@@ -221,7 +221,8 @@
     "errorBadge": "Hitilafu",
     "requestFailed": "Ombi limeshindikana.",
     "statusRunning": "Hali: {{status}}…",
-    "defaultPlan": "Bure"
+    "defaultPlan": "Bure",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "Ambatanisha",

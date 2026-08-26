@@ -221,7 +221,8 @@
     "errorBadge": "Kesalahan",
     "requestFailed": "Permintaan gagal.",
     "statusRunning": "Status: {{status}}…",
-    "defaultPlan": "Gratis"
+    "defaultPlan": "Gratis",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "Lampirkan",

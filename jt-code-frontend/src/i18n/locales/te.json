@@ -221,7 +221,8 @@
     "errorBadge": "లోపం",
     "requestFailed": "అభ్యర్థన విఫలమైంది.",
     "statusRunning": "స్థితి: {{status}}…",
-    "defaultPlan": "Free"
+    "defaultPlan": "Free",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "జోడించండి",

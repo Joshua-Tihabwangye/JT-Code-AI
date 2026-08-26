@@ -221,7 +221,8 @@
     "errorBadge": "ত্রুটি",
     "requestFailed": "অনুরোধটি ব্যর্থ হয়েছে।",
     "statusRunning": "স্ট্যাটাস: {{status}}…",
-    "defaultPlan": "ফ্রি"
+    "defaultPlan": "ফ্রি",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "সংযুক্ত করুন",

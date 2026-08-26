@@ -221,7 +221,8 @@
     "errorBadge": "Erreur",
     "requestFailed": "La requête a échoué.",
     "statusRunning": "Statut : {{status}}…",
-    "defaultPlan": "Gratuit"
+    "defaultPlan": "Gratuit",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "Joindre",

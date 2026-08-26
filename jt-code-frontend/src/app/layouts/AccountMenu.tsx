@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Settings, LogOut, Keyboard, User as UserIcon, LogIn, UserPlus, type LucideIcon } from 'lucide-react';
+import { Settings, LogOut, Keyboard, User as UserIcon, LogIn, type LucideIcon } from 'lucide-react';
 import { Avatar, Badge } from '@/shared/components';
 import { supabase, useAuth, useUser } from '@/lib/supabase';
 
@@ -89,7 +89,6 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
   if (!isSignedIn || !user) {
     const guestItems: { label: string; icon: LucideIcon; onClick: () => void }[] = [
       { label: t('menu.signIn'), icon: LogIn, onClick: closeAnd(() => navigate('/sign-in')) },
-      { label: t('createAccount'), icon: UserPlus, onClick: closeAnd(() => navigate('/sign-up')) },
     ];
 
     return (
@@ -156,7 +155,7 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
         title={collapsed ? displayName : undefined}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <Avatar src={avatarUrl} alt={displayName} size="sm" />
+        {avatarUrl ? <Avatar src={avatarUrl} alt={displayName} size="sm" /> : <UserIcon size={18} className="text-muted-foreground" aria-hidden />}
         {!collapsed && <span className="footer-label truncate">{displayName}</span>}
       </button>
 
@@ -170,7 +169,7 @@ export function AccountMenu({ collapsed }: AccountMenuProps) {
           onKeyDown={onMenuKeyDown}
         >
           <div className="account-popover-header">
-            <Avatar src={avatarUrl} alt={displayName} size="md" />
+            {avatarUrl ? <Avatar src={avatarUrl} alt={displayName} size="md" /> : <UserIcon size={18} className="text-muted-foreground" aria-hidden />}
             <div className="min-w-0">
               <div className="account-popover-name">{displayName}</div>
               <div className="account-popover-email">{email}</div>

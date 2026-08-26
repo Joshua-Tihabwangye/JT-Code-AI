@@ -221,7 +221,8 @@
     "errorBadge": "Hata",
     "requestFailed": "İstek başarısız oldu.",
     "statusRunning": "Durum: {{status}}…",
-    "defaultPlan": "Ücretsiz"
+    "defaultPlan": "Ücretsiz",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "Ekle",

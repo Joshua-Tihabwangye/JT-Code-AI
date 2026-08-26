@@ -221,7 +221,8 @@
     "errorBadge": "خرابی",
     "requestFailed": "درخواست ناکام ہو گئی۔",
     "statusRunning": "حالت: {{status}}…",
-    "defaultPlan": "مفت"
+    "defaultPlan": "مفت",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "منسلک کریں",

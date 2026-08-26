@@ -22,7 +22,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   }
 
   if (!isSignedIn) {
-    return <Navigate to="/sign-in" replace state={{ from: location.pathname }} />;
+    return <Navigate to={`/sign-in?next=${encodeURIComponent(location.pathname + location.search)}`} replace state={{ from: location.pathname }} />;
   }
 
   return <>{children}</>;

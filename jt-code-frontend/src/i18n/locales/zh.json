@@ -221,7 +221,8 @@
     "errorBadge": "错误",
     "requestFailed": "请求失败。",
     "statusRunning": "状态：{{status}}…",
-    "defaultPlan": "免费"
+    "defaultPlan": "免费",
+    "guestEphemeralReply": "Guest chats are temporary. Sign in to save conversations and use the full JT-Code assistant."
   },
   "composer": {
     "attach": "附件",
